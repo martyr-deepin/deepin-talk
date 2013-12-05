@@ -30,13 +30,13 @@ import os
 import datetime
 import logging
 import peewee as pw
-from playhouse.signals import Model
 
 from dtalk.utils.xmpp import split_jid, get_email
 from dtalk.utils.contextdecorator import contextmanager
 from dtalk.utils.xdg import get_jid_db
 from dtalk.utils import six
 from dtalk.models import signals
+from dtalk.models.db import Model
 
 logger = logging.getLogger('models.Model')
 

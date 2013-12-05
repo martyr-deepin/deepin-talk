@@ -24,9 +24,10 @@
 import logging
 logger = logging.getLogger("controls.models")
 
-from playhouse.signals import post_save, post_delete
+from dtalk.models.signals import post_save, post_delete
 from dtalk.models import Resource, Friend
 from dtalk.controls.base import AbstractWrapperModel        
+from dtalk.controls.qobject import postGui
 
 class FriendModel(AbstractWrapperModel):        
     dbs = (Resource, Friend)
@@ -43,23 +44,24 @@ class FriendModel(AbstractWrapperModel):
             else:    
                 resource = Resource.get_dummy_data()
             setattr(f, "resource", resource)                    
-                
         return friends
         
     def init_signals(self):    
-        post_save.connect(self.on_resource_post_save, sender=Resource)
-        post_delete.connect(self.on_resource_post_delete, sender=Resource)
-        post_save.connect(self.on_friend_post_save, sender=Friend)
-        post_delete.connect(self.on_friend_post_delete, sender=Friend)
+        post_save.connect(self.on_post_save, sender=Resource)
+        post_delete.connect(self.on_post_delete, sender=Resource)
+        post_save.connect(self.on_post_save, sender=Friend)
+        post_delete.connect(self.on_post_delete, sender=Friend)
         
-    def on_resource_post_save(self, sender, instance, created, *args, **kwargs):    
+    @postGui    
+    def on_post_save(self, sender, instance, created, *args, **kwargs):
+        if sender == Friend:
+            obj = self.wrapper_instance(instance)
+            if created:
+                self.append(obj)
+            else:    
+                self.replace(obj)
+                
+    @postGui            
+    def on_post_delete(self, sender, instance, *args, **kwargs):
         pass
     
-    def on_resource_post_delete(self, sender, instance, *args, **kwargs):
-        pass
-    
-    def on_friend_post_save(self, sender, instance, created, *args, **kwargs):    
-        pass
-    
-    def on_friend_post_delete(self, sender, instance, *args, **kwargs):
-        pass

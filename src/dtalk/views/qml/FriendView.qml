@@ -1,4 +1,5 @@
 import QtQuick 2.1
+import "js/roster.js" as Roster
 
 ListView {
 	delegate: friendsDelegate
@@ -35,7 +36,7 @@ ListView {
 						anchors.centerIn: parent
 						color: "#fff"
 						font.pixelSize: 12
-						text: model.instance.jid
+						text: Roster.getDisplayName(model.instance)
 					}
 					
 				}

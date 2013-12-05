@@ -99,7 +99,7 @@ class AbstractWrapperModel(QObjectListModel):
     other_fields = None         # ('key',)
     instanceRole = QtCore.Qt.UserRole + 1
     _roles = { instanceRole : "instance" }
-    
+        
     def __init__(self, parent=None):
         super(AbstractWrapperModel, self).__init__(parent)
         self._data = []
@@ -132,22 +132,6 @@ class AbstractWrapperModel(QObjectListModel):
     def init_wrappers(self):
         if self._data:
             self._data = list(map(self.wrapper_instance, self._data))
-    
-    def on_post_save(self, sender, instance, created, *args, **kwargs):
-        obj = self.wrapper_instance(instance)
-        if not self.verify(obj):
-            return 
-        if created:
-            self.append(obj)
-        else:    
-            self.replace(obj)
-        
-    def on_post_delete(self, sender, instance, *args, **kwargs):    
-        obj = self.wrapper_instance(instance)
-        try:
-            self.remove(obj)
-        except ValueError:    
-            pass
         
     def data(self, index, role):
         if not index.isValid() or index.row() > self.size:

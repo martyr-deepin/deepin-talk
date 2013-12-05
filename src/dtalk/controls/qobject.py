@@ -197,3 +197,26 @@ class QObjectListModel(QtCore.QAbstractListModel):
     
 def QPropertyObject():    
     return six.with_metaclass(QPropertyMeta, QtCore.QObject)
+
+
+class postGui(QtCore.QObject):
+    
+    throughThread = QtCore.pyqtSignal(object, object)    
+    
+    def __init__(self, func):
+        super(postGui, self).__init__()
+        self.throughThread.connect(self.onSignalReceived)
+        self._func = func
+        self._obj = None
+        
+    def __get__(self, obj, cls=None):    
+        self._obj = obj
+        return self.emitSignal
+        
+    def emitSignal(self, *args, **kwargs):
+        self.throughThread.emit(args, kwargs)
+        
+    def onSignalReceived(self, args, kwargs):
+        if self._obj is None:
+            return self._func(*args, **kwargs)
+        return self._func(self._obj, *args, **kwargs)
