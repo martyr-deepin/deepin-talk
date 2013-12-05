@@ -25,7 +25,7 @@ def split_jid(jid):
 
 def get_email(jid):
     try:
-        return jid.bare.as_utf8()
+        return jid.bare().as_utf8()
     except:
         return jid
     

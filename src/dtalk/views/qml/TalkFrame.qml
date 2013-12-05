@@ -4,13 +4,6 @@ import QtQuick.Controls.Styles 1.0
 
 Item {
     
-    Connections {
-        target: serverManager
-        onUserRosterReceived: {
-            friendView.model.initData()
-        }
-    }
-
 	UserBrief {
 		id: userBrief
 		width: parent.width

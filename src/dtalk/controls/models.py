@@ -33,10 +33,15 @@ class FriendModel(AbstractWrapperModel):
     dbs = (Resource, Friend)
     unique_obj = "id"
     other_fields = ("resource",)
+    init_signals_on_db_finished = False
+        
+    '''
+    load(): select data from the database of interest
+    init_signals: after the first call initData(), its initial
+    '''
     
     def load(self):
         friends = Friend.filter(subscription="both")
-        
         for f in friends:
             resources = sorted(f.resources, key=lambda item: item.priority, reverse=True)
             if len(resources) >= 1:

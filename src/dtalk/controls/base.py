@@ -75,6 +75,7 @@ def get_instance_dict(instance, result=None, key_profix="", other_fields=None, l
         else:
             result["%s%s" % (key_profix, key)] = value
     return result        
+
         
 def get_qobject_wrapper(instance, unique_obj, other_fields=None):    
     result = get_instance_dict(instance, other_fields=other_fields)
@@ -89,7 +90,6 @@ def get_qobject_wrapper(instance, unique_obj, other_fields=None):
         
         def __ne__(self, other):
             return not self == other
-        
     return WrapperQuery()    
 
 class AbstractWrapperModel(QObjectListModel):
@@ -97,24 +97,24 @@ class AbstractWrapperModel(QObjectListModel):
     dbs = None                  # ('db',)
     unique_obj = ""
     other_fields = None         # ('key',)
+    init_signals_on_db_finished = True
     instanceRole = QtCore.Qt.UserRole + 1
     _roles = { instanceRole : "instance" }
         
     def __init__(self, parent=None):
         super(AbstractWrapperModel, self).__init__(parent)
         self._data = []
-        self.init_wrappers()
-        self.init_signals()
         signals.db_init_finished.connect(self.on_db_init_finished)
         
     def load(self):    
         pass
     
     def on_db_init_finished(self, *args, **kwargs):
-        self.initData()
+        self.initData(self.init_signals_on_db_finished)
     
-    @QtCore.pyqtSlot()
-    def initData(self):
+    def initData(self, init_signals=True):
+        if init_signals:
+            self.init_signals()
         data = self.load()
         if data:
             instances = list(map(self.wrapper_instance, data))

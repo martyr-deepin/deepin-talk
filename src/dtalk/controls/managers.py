@@ -20,24 +20,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# from dtalk.controls.models import 
-
+import logging
 from PyQt5 import QtCore
-from dtalk.controls.qobject import QPropertyObject
+from dtalk.controls.qobject import QPropertyObject, postGui
 from dtalk.controls.models import FriendModel
 from dtalk.core.server import XMPPServer
 import dtalk.core.signals as serverSignals
+
+logger = logging.getLogger("dtalk.controls.managers")
 
 class ModelManager(QPropertyObject()):
     
     def __init__(self):
         super(ModelManager, self).__init__()
-        
+        serverSignals.user_roster_status_received.connect(self._init_friend_model_data)
         self.friendModel = FriendModel()
     
     @QtCore.pyqtSlot(str, result="QVariant")
     def getModel(self, modelType):
         return self.friendModel
+    
+    @postGui
+    def _init_friend_model_data(self, *args, **kwargs):
+        logger.info("-- init roster model......")
+        self.friendModel.initData()
     
     
 class ServerManager(QPropertyObject()):
@@ -58,6 +64,7 @@ class ServerManager(QPropertyObject()):
         self._server.login(jid, password)
         
     def on_user_login_successed(self, sender, jid, *args, **kwargs):    
+        logger.info("-- [{0}] user login successed".format(jid))
         self.userLoginSuccessed.emit()
         
     def on_user_roster_received(self, *args, **kwargs):    
