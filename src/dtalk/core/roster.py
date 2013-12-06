@@ -25,9 +25,14 @@ from pyxmpp2.interfaces import presence_stanza_handler, event_handler
 from pyxmpp2.roster import RosterReceivedEvent, RosterUpdatedEvent
 from pyxmpp2.presence import Presence, ACCEPT_RESPONSES, DENY_RESPONSES
 from pyxmpp2.jid import JID
+from pyxmpp2.iq import Iq
 from dtalk.models import Friend, Resource, FriendNotice
 from dtalk.conf import settings
 from dtalk.core import signals
+from dtalk.core.vcard import VCardPayload
+from dtalk.core.payload import VCardUpdatePayload
+from dtalk.utils.xmpp import get_email
+from dtalk.cache import avatarManager
 
 logger = logging.getLogger("dtalk.core.RosterMixin")
 
@@ -39,9 +44,17 @@ class RosterMixin(object):
     
     @event_handler(RosterReceivedEvent)
     def handle_roster_received(self, event):
+
         rosters = self.client.roster.values()
         Friend.create_or_update_roster(rosters)
         signals.user_roster_received.send(sender=self)
+        
+        # get friend vcard
+        for roster_item in rosters:
+            plain_jid = get_email(roster_item.jid)
+            if not avatarManager.has_avatar(plain_jid):
+                self.get_vcard(roster_item.jid)
+            
         if self.update_presence_flag:
             self.client.main_loop.delayed_call(2, self.delayed_update_presence)        
         return True    
@@ -56,10 +69,14 @@ class RosterMixin(object):
     def handle_presence_available(self, stanza):
         if stanza.stanza_type not in ("available", None):
             return False
+        
         if self.update_presence_flag:
             self._presences.append(stanza)        
         else:    
             Resource.update_status(stanza)
+            
+            # parse vcard temp update
+            self.parse_vcard_update(stanza)
         return True    
         
     @presence_stanza_handler("unavailable")    
@@ -69,6 +86,8 @@ class RosterMixin(object):
         
     def delayed_update_presence(self):    
         Resource.update_presences(self._presences)
+        for presence in self._presences:
+            self.parse_vcard_update(presence)
         del self._presences[:]
         self.update_presence_flag = False
         signals.user_roster_status_received.send(sender=self)
@@ -131,3 +150,36 @@ class RosterMixin(object):
         logging.info("{0!r} acknowledged our subscrption cancelation".format(stanza.from_jid))
         FriendNotice.record_from_stanza(stanza)
         return True
+    
+    def get_vcard(self, jid, callback=None):
+        if not callback:
+            callback = self.vcard_callback
+        q = Iq(to_jid=jid.bare(), stanza_type='get')
+        q.add_payload(VCardPayload())
+        self.stanza_processor.set_response_handlers(q, callback, callback)
+        self.send(q)        
+        
+    def vcard_callback(self, stanza):    
+        vcard = stanza.get_payload(VCardPayload)
+        if vcard is not None:
+            nickname = vcard.get_nickname()
+            avatar_data = vcard.get_avatar()            
+            jid = get_email(stanza.from_jid)
+            if nickname:
+                Friend.update_nickname(jid, nickname)
+            if avatar_data:    
+                avatarManager.save_avatar(jid, avatar_data)
+        
+    def parse_vcard_update(self, stanza):    
+        payload = stanza.get_payload(VCardUpdatePayload)
+        if payload is not None:
+            plain_jid = get_email(stanza.from_jid)
+            if payload.photo is not None:
+                if not avatarManager.check_avatar(plain_jid, payload.photo):            
+                    self.get_vcard(stanza.from_jid)
+        
+    def send_vcard_update_presence(self, photo_hash):
+        presence = self.settings[u"initial_presence"]
+        presence.add_payload(VCardUpdatePayload(photo_hash))
+        self.send(presence)
+        

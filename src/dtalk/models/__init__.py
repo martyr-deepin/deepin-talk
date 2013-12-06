@@ -67,14 +67,16 @@ def init_db(jid):
         
 def check_update_data(obj, data):
     change = False
+    change_fields = []
     for (key, new_value,) in six.iteritems(data):
         old_val = getattr(obj, key, None)
         if old_val != new_value:
             change = True
+            change_fields.append(key)
             setattr(obj, key, new_value)
 
     if change:
-        obj.save()
+        obj.save(update_fields=change_fields)
 
 class BaseModel(Model):
 
@@ -89,7 +91,7 @@ class Group(BaseModel):
 
 
 class Friend(BaseModel):
-    jid = pw.CharField()
+    jid = pw.CharField(unique=True, index=True)
     nickname = pw.CharField(null=True)
     remark = pw.CharField(null=True)
     subscription = pw.CharField(null=True)
@@ -121,6 +123,17 @@ class Friend(BaseModel):
                     cls.create(**data)
                 else:
                     check_update_data(obj, data)
+                    
+    @classmethod                
+    def update_nickname(cls, jid, nickname):
+        try:
+            obj = cls.get(jid=jid)
+        except cls.DoesNotExist:    
+            pass
+        else:
+            if obj.nickname != nickname:
+                obj.nickname = nickname
+                obj.save(update_fields=["nickname"])
 
 class Resource(BaseModel):
     friend = pw.ForeignKeyField(Friend, related_name='resources')
@@ -180,6 +193,10 @@ class Message(BaseModel):
 
     class Meta:
         db_table = 'dtalk_message'
+        indexes = (
+            # create a non-unique on from/to
+            (('from_friend', 'to_friend'), False),
+        )        
 
 class FriendNotice(BaseModel):
     TYPE_REQUEST = 1
@@ -215,7 +232,8 @@ class FriendNotice(BaseModel):
             cls.get(type=_type, jid=jid, readed=False)
         except cls.DoesNotExist:
             cls.create(type=_type, jid=jid)
-
+            
+    
 def create_tables():
     Group.create_table()
     Friend.create_table()

@@ -109,12 +109,19 @@ def get_qml(*subpath_elements):
 
 def get_jid_dir(jid):
     d =  get_config_path(get_md5(jid))
+    return makedirs(d)
+
+def makedirs(d):
     if not os.path.exists(d):
         os.makedirs(d)
     return d    
 
 def get_jid_db(jid):
     return os.path.join(get_jid_dir(jid), 'data.db')
+
+def get_avatar_dir(jid):
+    d = os.path.join(get_jid_dir(jid), 'avatar')
+    return makedirs(d)
 
 def _make_missing_dirs():
     """

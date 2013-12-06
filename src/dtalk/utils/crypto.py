@@ -25,3 +25,6 @@ import hashlib
 
 def get_md5(strings):
     return hashlib.md5(strings).hexdigest()    
+
+def sha1hash(data):
+    return hashlib.new('sha1', data).hexdigest()

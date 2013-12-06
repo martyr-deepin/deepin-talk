@@ -28,11 +28,13 @@ from dtalk.models.signals import post_save, post_delete
 from dtalk.models import Resource, Friend
 from dtalk.controls.base import AbstractWrapperModel        
 from dtalk.controls.qobject import postGui
+from dtalk.cache import avatarManager
+import dtalk.cache.signals as cache_signals
 
 class FriendModel(AbstractWrapperModel):        
     dbs = (Resource, Friend)
-    unique_obj = "id"
-    other_fields = ("resource",)
+    unique_field = "id"
+    other_fields = ("resource", "avatar")
     init_signals_on_db_finished = False
         
     '''
@@ -42,13 +44,6 @@ class FriendModel(AbstractWrapperModel):
     
     def load(self):
         friends = Friend.filter(subscription="both")
-        for f in friends:
-            resources = sorted(f.resources, key=lambda item: item.priority, reverse=True)
-            if len(resources) >= 1:
-                resource = resources[0]
-            else:    
-                resource = Resource.get_dummy_data()
-            setattr(f, "resource", resource)                    
         return friends
         
     def init_signals(self):    
@@ -56,17 +51,55 @@ class FriendModel(AbstractWrapperModel):
         post_delete.connect(self.on_post_delete, sender=Resource)
         post_save.connect(self.on_post_save, sender=Friend)
         post_delete.connect(self.on_post_delete, sender=Friend)
+        cache_signals.avatar_saved.connect(self.on_avatar_saved)
         
+    def update_changed(self, instance, update_fields):    
+        obj = self.get_obj_by_jid(instance.jid)
+        if not obj:
+            return
+        if update_fields and isinstance(update_fields, list):
+            for key in update_fields:            
+                setattr(obj, key, getattr(instance, key, None))
+                
     @postGui    
-    def on_post_save(self, sender, instance, created, *args, **kwargs):
+    def on_post_save(self, sender, instance, created, update_fields, *args, **kwargs):
         if sender == Friend:
-            obj = self.wrapper_instance(instance)
+            if not self.verify(instance):
+                return 
+
             if created:
+                obj = self.wrapper_instance(instance)                
                 self.append(obj)
             else:    
-                self.replace(obj)
+                self.update_changed(instance, update_fields)
                 
     @postGui            
     def on_post_delete(self, sender, instance, *args, **kwargs):
         pass
     
+    def verify(self, instance):
+        return instance.subscription == "both"
+    
+    def get_obj_by_jid(self, jid):
+        ret = None
+        for obj in self._data:
+            if obj.jid == jid:
+                ret = obj
+                break
+        return ret    
+    
+    def attach_attrs(self, instance):
+        resources = sorted(instance.resources, key=lambda item: item.priority, reverse=True)
+        if len(resources) >= 1:
+            resource = resources[0]
+        else:    
+            resource = Resource.get_dummy_data()
+        avatar = avatarManager.get_avatar(instance.jid)    
+        setattr(instance, "avatar", avatar)
+        setattr(instance, "resource", resource)                    
+    
+    @postGui
+    def on_avatar_saved(self, sender, jid, path, *args, **kwargs):
+        ret = self.get_obj_by_jid(jid)
+        if ret:
+            ret.avatar = path

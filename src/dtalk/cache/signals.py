@@ -20,17 +20,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-from functools import partial
-from dtalk.utils import xdg
-# from dtalk.utils import pyini
-from dtalk.conf.ini import NotifyIni
+from dtalk.dispatch import Signal
 
-user_settings_file = xdg.get_config_path("settings.ini", check_exists=True)
-settings = NotifyIni(os.path.join(xdg.get_parent_dir(__file__), "default_settings.ini"))
-if user_settings_file:
-    settings.read(filename=user_settings_file)
-settings.write = partial(settings.save, filename=user_settings_file)
-
-DEBUG = True
-OWNER_JID = None
+avatar_saved = Signal(providing_args=["jid", "path"])

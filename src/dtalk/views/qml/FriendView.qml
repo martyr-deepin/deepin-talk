@@ -21,7 +21,7 @@ ListView {
 					id: faceImage
 					width: 40; height: 40
 					anchors.verticalCenter: parent.verticalCenter
-					source: "image/face.jpg"
+					source: model.instance.avatar
 				}
 				
 				Rectangle {

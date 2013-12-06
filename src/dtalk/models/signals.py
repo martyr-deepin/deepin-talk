@@ -22,8 +22,8 @@
 
 from dtalk.dispatch import Signal
 
-pre_save = Signal(providing_args=["instance", "created"])
-post_save = Signal(providing_args=["instance", "created"])
+pre_save = Signal(providing_args=["instance", "created", "update_fields"])
+post_save = Signal(providing_args=["instance", "created", "update_fields"])
 pre_delete = Signal(providing_args=["instance"])
 post_delete = Signal(providing_args=["instance"])
 pre_init = Signal(providing_args=["instance"])

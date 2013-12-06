@@ -36,11 +36,12 @@ from pyxmpp2.mainloop.threads import ThreadPool
 from dtalk.core.roster import RosterMixin
 from dtalk.models import init_db
 from dtalk.core import signals
+import dtalk.conf
 
 logger = logging.getLogger(__name__)
 # logging.basicConfig(level = logging.DEBUG) # change to 'DEBUG' to see more
-logging.basicConfig(level = logging.INFO) # change to 'DEBUG' to see more
-# logging.basicConfig(filename="/home/evilbeast/myapp.log", level = logging.DEBUG) # change to 'DEBUG' to see more
+# logging.basicConfig(level = logging.INFO) # change to 'DEBUG' to see more
+logging.basicConfig(filename="/home/evilbeast/myap.log", level = logging.DEBUG) # change to 'DEBUG' to see more
 
 class XMPPServer(RosterMixin, EventHandler, XMPPFeatureHandler):
     
@@ -55,20 +56,21 @@ class XMPPServer(RosterMixin, EventHandler, XMPPFeatureHandler):
         
     def init_server(self, jid, password):    
         self.my_jid = JID(jid)
-        settings = XMPPSettings({
+        self.settings = XMPPSettings({
                 "tls_verify_peer": False,
                 "starttls": True,
                 "poll_interval": 10,
                 "password" : password,
         })
 
-        self.main_loop = ThreadPool(settings)
-        self.client = Client(self.my_jid, [self,], settings, main_loop=self.main_loop)
+        self.main_loop = ThreadPool(self.settings)
+        self.client = Client(self.my_jid, [self,], self.settings, main_loop=self.main_loop)
         self.is_authored = False
         
         
     def login(self, jid, password):    
         self.plain_jid = jid        
+        dtalk.conf.OWNER_JID = jid
         init_db(self.plain_jid)        
         self.init_server(jid, password)
 

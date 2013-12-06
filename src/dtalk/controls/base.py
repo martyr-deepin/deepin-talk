@@ -77,16 +77,16 @@ def get_instance_dict(instance, result=None, key_profix="", other_fields=None, l
     return result        
 
         
-def get_qobject_wrapper(instance, unique_obj, other_fields=None):    
+def get_qobject_wrapper(instance, unique_field, other_fields=None):    
     result = get_instance_dict(instance, other_fields=other_fields)
     class WrapperQuery(six.with_metaclass(QPropertyMeta, QtCore.QObject)):
         __qtprops__ = result
         
         def __eq__(self, other):
-            has = hasattr(self, unique_obj) and hasattr(other, unique_obj)
+            has = hasattr(self, unique_field) and hasattr(other, unique_field)
             if not has:
                 return False
-            return getattr(self, unique_obj) == getattr(other, unique_obj)
+            return getattr(self, unique_field) == getattr(other, unique_field)
         
         def __ne__(self, other):
             return not self == other
@@ -95,7 +95,7 @@ def get_qobject_wrapper(instance, unique_obj, other_fields=None):
 class AbstractWrapperModel(QObjectListModel):
     
     dbs = None                  # ('db',)
-    unique_obj = ""
+    unique_field = ""
     other_fields = None         # ('key',)
     init_signals_on_db_finished = True
     instanceRole = QtCore.Qt.UserRole + 1
@@ -124,7 +124,8 @@ class AbstractWrapperModel(QObjectListModel):
         return True
     
     def wrapper_instance(self, instance):
-        return get_qobject_wrapper(instance, self.unique_obj, self.other_fields)
+        self.attach_attrs(instance)
+        return get_qobject_wrapper(instance, self.unique_field, self.other_fields)
     
     def init_signals(self):
         pass
@@ -144,3 +145,7 @@ class AbstractWrapperModel(QObjectListModel):
         if role == self.instanceRole:
             return item
         return QtCore.QVariant()        
+    
+    def attach_attrs(self, instance):
+        pass
+    
