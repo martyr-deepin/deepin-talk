@@ -15,25 +15,6 @@ Item {
 		root.state = root.state == "columnMode" ? "rowMode" : "columnMode"
 	}
 	
-	/* onWidthChanged: { */
-	/* 	if (displayMode == 0) { */
-	/* 		var ratio = 0.8 */
-	/* 		var obj = statusText */
-	/* 	} else { */
-	/* 		var ratio = 0.6 */
-	/* 		var obj = statusText1 */
-	/* 	} */
-		
-	/* 	var _messageWidth = Math.round(root.width * ratio)		 */
-	/* 	print(obj.contentWidth, _messageWidth) */
-	/* 	/\* if (obj.contentWidth < _messageWidth) { *\/ */
-	/* 	/\* 	obj.width = obj.contentWidth *\/ */
-	/* 	/\* } else if ( obj.contentWidth > _messageWidth ){ *\/ */
-	/* 	/\* 	obj.width = _messageWidth *\/ */
-	/* 	/\* } *\/ */
-		
-	/* } */
-	
 	state: "columnMode"
 	
 	MouseArea {

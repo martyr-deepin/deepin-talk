@@ -59,11 +59,14 @@ def disable_auto_commit(*args, **kwargs):
 def init_db(jid):        
     f = get_jid_db(jid)
     database.init(f)
+    created = False
     if not os.path.exists(f):
         logger.info("-- initial {0!r} database".format(jid))
         database.connect()
         create_tables()
-    signals.db_init_finished.send(sender=database)    
+        Friend.create_self(jid)
+        created = True
+    signals.db_init_finished.send(sender=database, created=created)    
         
 def check_update_data(obj, data):
     change = False
@@ -102,6 +105,21 @@ class Friend(BaseModel):
     class Meta:
         db_table = 'dtalk_friend'
 
+        
+    @classmethod     
+    def create_self(cls, jid):
+        try:
+            cls.get(jid=jid, isSelf=True)
+        except cls.DoesNotExist:    
+            cls.create(jid=jid, isSelf=True)
+
+    @classmethod    
+    def get_self(cls):
+        try:        
+            obj = cls.get(isSelf=True)
+        except cls.DoesNotExist:    
+            obj = None
+        return obj    
 
     @classmethod
     def create_or_update_roster(cls, roster):
@@ -186,8 +204,8 @@ class Resource(BaseModel):
                 obj.delete_instance()
 
 class Message(BaseModel):
-    from_friend = pw.ForeignKeyField(Friend, related_name='messages')
-    to_friend = pw.ForeignKeyField(Friend)
+    fromFriend = pw.ForeignKeyField(Friend, related_name='messages')
+    toFriend = pw.ForeignKeyField(Friend)
     body = pw.TextField()
     created = pw.DateTimeField(default=datetime.datetime.now)
 
@@ -195,7 +213,7 @@ class Message(BaseModel):
         db_table = 'dtalk_message'
         indexes = (
             # create a non-unique on from/to
-            (('from_friend', 'to_friend'), False),
+            (('fromFriend', 'toFriend'), False),
         )        
 
 class FriendNotice(BaseModel):

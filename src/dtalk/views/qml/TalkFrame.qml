@@ -1,14 +1,29 @@
 import QtQuick 2.1
 import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
+import "js/roster.js" as Roster
+
 
 Item {
+    id: root
     
 	UserBrief {
 		id: userBrief
 		width: parent.width
 		anchors.horizontalCenter: parent.horizontalCenter
 	}
+    
+        
+    Connections {
+        target: serverManager
+        onUserLoginSuccessed: {
+            print("end")
+            var friendModel = modelManager.getModel("friend")
+            var ownerObj = friendModel.getSelf()
+            userBrief.faceSource = ownerObj.avatar
+            userBrief.username = Roster.getDisplayName(ownerObj)
+        }
+    }
 	
 	Rectangle {
 		id: splitRect

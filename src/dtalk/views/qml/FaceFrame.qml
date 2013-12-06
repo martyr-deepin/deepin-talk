@@ -1,5 +1,6 @@
 import QtQuick 2.1
 
+
 Item {
 	id: root
 	property alias text: name.text

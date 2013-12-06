@@ -49,22 +49,26 @@ class AvatarManager(object):
     def has_avatar(self, jid):
         return self.get_avatar(jid) != self.default_avatar
     
-    def get_avatar(self, jid, sha1hash=None):
+    def get_avatars(self, jid):
         jid_md5 = crypto.get_md5(jid)
+        avatar_files = filter(lambda p: p.startswith(jid_md5), os.listdir(self.avatar_dir))
+        full_path_files = [ os.path.join(self.avatar_dir, f) for f in avatar_files ]
+        return sorted(full_path_files, key=lambda item: os.path.getmtime(item), reverse=True)
+    
+    def get_avatar(self, jid, sha1hash=None):
+
         if sha1hash:
+            jid_md5 = crypto.get_md5(jid)
             path = os.path.join(self.avatar_dir, "%s_%s" % (jid_md5, sha1hash))            
             if os.path.exists(path):
                 return path
             return self.default_avatar
         else:    
-            avatar_files = filter(lambda p: p.startswith(jid_md5), os.listdir(self.avatar_dir))
-            if len(avatar_files) == 0:
+            avatars = self.get_avatars(jid)
+            if len(avatars) == 0:
                 return self.default_avatar
-            if len(avatar_files) == 1:
-                return os.path.join(self.avatar_dir, avatar_files[0])
             else:
-                results = sorted(avatar_files, key=lambda item: os.path.getctime(os.path.join(self.avatar_dir, item)))
-                return os.path.join(self.avatar_dir, results[-1])
+                return avatars[0]
             
     def avatar_filepath(self, jid, sha1hash, need_hash=False):
         return os.path.join(self.avatar_dir, self.format_filename(jid, sha1hash, need_hash=need_hash))
@@ -83,9 +87,16 @@ class AvatarManager(object):
         return get_avatar_dir(owner_jid)
 
     def save_avatar(self, jid, base64data):
+        before_avatar = self.get_avatar(jid)
+        if before_avatar != self.default_avatar:
+            os.remove(before_avatar)
+            
         image_data = self.base64decode(base64data)
         path = self.avatar_filepath(jid, image_data, need_hash=True)
         if os.path.exists(path):
+            os.utime(path, None)
+            logger.debug("{0} avatar have updated".format(jid))    
+            avatar_saved.send(sender=self, jid=jid, path=path)    
             return 
         with open(path, 'wb') as fp:
             fp.write(image_data)
@@ -95,7 +106,14 @@ class AvatarManager(object):
     def check_avatar(self, jid, sha1hash, need_hash=False):    
         path = self.avatar_filepath(jid, sha1hash, need_hash=need_hash)
         if os.path.exists(path):
+            avatars = self.get_avatars(jid)
+            print avatars
+            if len(avatars) >= 1:
+                if path != avatars[0]:                
+                    os.utime(path, None)
+                    logger.debug("{0} avatar have updated".format(jid))    
+                    avatar_saved.send(sender=self, jid=jid, path=path)    
             return True
         return False
-    
+            
 avatarManager = AvatarManager()

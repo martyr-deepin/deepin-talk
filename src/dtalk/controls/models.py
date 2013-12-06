@@ -24,6 +24,8 @@
 import logging
 logger = logging.getLogger("controls.models")
 
+from PyQt5 import QtCore
+
 from dtalk.models.signals import post_save, post_delete
 from dtalk.models import Resource, Friend
 from dtalk.controls.base import AbstractWrapperModel        
@@ -36,6 +38,7 @@ class FriendModel(AbstractWrapperModel):
     unique_field = "id"
     other_fields = ("resource", "avatar")
     init_signals_on_db_finished = False
+    ownerObj = None
         
     '''
     load(): select data from the database of interest
@@ -43,7 +46,11 @@ class FriendModel(AbstractWrapperModel):
     '''
     
     def load(self):
-        friends = Friend.filter(subscription="both")
+        friends = Friend.filter(subscription="both", isSelf=False)
+        if self.ownerObj is None:
+            obj = Friend.get_self()
+            if obj:
+                self.ownerObj = self.wrapper_instance(obj)
         return friends
         
     def init_signals(self):    
@@ -59,6 +66,7 @@ class FriendModel(AbstractWrapperModel):
             return
         if update_fields and isinstance(update_fields, list):
             for key in update_fields:            
+                print "key"
                 setattr(obj, key, getattr(instance, key, None))
                 
     @postGui    
@@ -78,7 +86,7 @@ class FriendModel(AbstractWrapperModel):
         pass
     
     def verify(self, instance):
-        return instance.subscription == "both"
+        return instance.subscription == "both" or instance.isSelf == True
     
     def get_obj_by_jid(self, jid):
         ret = None
@@ -86,7 +94,10 @@ class FriendModel(AbstractWrapperModel):
             if obj.jid == jid:
                 ret = obj
                 break
-        return ret    
+        if ret is None:    
+            if self.ownerObj and self.ownerObj.jid == jid:
+                return self.ownerObj
+        return ret
     
     def attach_attrs(self, instance):
         resources = sorted(instance.resources, key=lambda item: item.priority, reverse=True)
@@ -103,3 +114,8 @@ class FriendModel(AbstractWrapperModel):
         ret = self.get_obj_by_jid(jid)
         if ret:
             ret.avatar = path
+            
+    @QtCore.pyqtSlot(result="QVariant")
+    def getSelf(self):        
+        return self.ownerObj
+    

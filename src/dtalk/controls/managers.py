@@ -26,14 +26,18 @@ from dtalk.controls.qobject import QPropertyObject, postGui
 from dtalk.controls.models import FriendModel
 from dtalk.core.server import XMPPServer
 import dtalk.core.signals as serverSignals
+import dtalk.models.signals as dbSignals
 
 logger = logging.getLogger("dtalk.controls.managers")
 
 class ModelManager(QPropertyObject()):
     
+    dbInitFinished = QtCore.pyqtSignal()
+    
     def __init__(self):
         super(ModelManager, self).__init__()
         serverSignals.user_roster_status_received.connect(self._init_friend_model_data)
+        dbSignals.db_init_finished.connect(self.on_db_init_finished)
         self.friendModel = FriendModel()
     
     @QtCore.pyqtSlot(str, result="QVariant")
@@ -44,10 +48,12 @@ class ModelManager(QPropertyObject()):
     def _init_friend_model_data(self, *args, **kwargs):
         logger.info("-- init roster model......")
         self.friendModel.initData()
+        
+    def on_db_init_finished(self, *args, **kwargs):    
+        self.dbInitFinished.emit()
     
     
 class ServerManager(QPropertyObject()):
-    
     userLoginSuccessed = QtCore.pyqtSignal()
     userRosterReceived = QtCore.pyqtSignal()
     userRosterStatusReceived = QtCore.pyqtSignal()

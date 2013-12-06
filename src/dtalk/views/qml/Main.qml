@@ -9,7 +9,6 @@ MainPanel {
             loginFrame.visible = false
             loginFrame.isLogging = false
         }
-        
     }
 	
 	Item {

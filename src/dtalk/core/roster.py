@@ -21,11 +21,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+from pyxmpp2.iq import Iq
+from pyxmpp2.jid import JID
 from pyxmpp2.interfaces import presence_stanza_handler, event_handler
 from pyxmpp2.roster import RosterReceivedEvent, RosterUpdatedEvent
 from pyxmpp2.presence import Presence, ACCEPT_RESPONSES, DENY_RESPONSES
-from pyxmpp2.jid import JID
-from pyxmpp2.iq import Iq
+from pyxmpp2.streamevents import AuthorizedEvent
+
 from dtalk.models import Friend, Resource, FriendNotice
 from dtalk.conf import settings
 from dtalk.core import signals
@@ -183,3 +185,7 @@ class RosterMixin(object):
         presence.add_payload(VCardUpdatePayload(photo_hash))
         self.send(presence)
         
+    @event_handler(AuthorizedEvent)
+    def get_self_avatar(self, event):
+        if not avatarManager.has_avatar(self.plain_jid):
+                self.get_vcard(self.owner_jid)

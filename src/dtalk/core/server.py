@@ -33,6 +33,8 @@ from pyxmpp2.streamevents import AuthorizedEvent, DisconnectedEvent
 from pyxmpp2 import exceptions
 from pyxmpp2.mainloop.threads import ThreadPool        
 
+
+from dtalk.models import Friend
 from dtalk.core.roster import RosterMixin
 from dtalk.models import init_db
 from dtalk.core import signals
