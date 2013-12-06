@@ -8,6 +8,14 @@ MainPanel {
         onUserLoginSuccessed: {
             loginFrame.visible = false
             loginFrame.isLogging = false
+            talkframeLoader.sourceComponent = talkframeComponent
+        }
+    }
+    
+    Component {
+        id: talkframeComponent
+        
+        TalkFrame {
         }
     }
 	
@@ -37,11 +45,16 @@ MainPanel {
 				anchors.fill: parent
 			}
             
-			TalkFrame {
-                id: talkFrame
-                visible: !loginFrame.visible
+            Loader {
+                id: talkframeLoader
 				anchors.fill: parent
-			}
+            }
+            
+			/* TalkFrame { */
+            /*     id: talkFrame */
+            /*     visible: !loginFrame.visible */
+			/* 	anchors.fill: parent */
+			/* } */
 		}
 
 	}

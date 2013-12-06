@@ -94,9 +94,6 @@ class AvatarManager(object):
         image_data = self.base64decode(base64data)
         path = self.avatar_filepath(jid, image_data, need_hash=True)
         if os.path.exists(path):
-            os.utime(path, None)
-            logger.debug("{0} avatar have updated".format(jid))    
-            avatar_saved.send(sender=self, jid=jid, path=path)    
             return 
         with open(path, 'wb') as fp:
             fp.write(image_data)
@@ -106,13 +103,6 @@ class AvatarManager(object):
     def check_avatar(self, jid, sha1hash, need_hash=False):    
         path = self.avatar_filepath(jid, sha1hash, need_hash=need_hash)
         if os.path.exists(path):
-            avatars = self.get_avatars(jid)
-            print avatars
-            if len(avatars) >= 1:
-                if path != avatars[0]:                
-                    os.utime(path, None)
-                    logger.debug("{0} avatar have updated".format(jid))    
-                    avatar_saved.send(sender=self, jid=jid, path=path)    
             return True
         return False
             

@@ -10,21 +10,11 @@ Item {
 	UserBrief {
 		id: userBrief
 		width: parent.width
+        faceSource: Roster.ownerObj.avatar
+        username: Roster.getDisplayName(Roster.ownerObj)
 		anchors.horizontalCenter: parent.horizontalCenter
 	}
     
-        
-    Connections {
-        target: serverManager
-        onUserLoginSuccessed: {
-            print("end")
-            var friendModel = modelManager.getModel("friend")
-            var ownerObj = friendModel.getSelf()
-            userBrief.faceSource = ownerObj.avatar
-            userBrief.username = Roster.getDisplayName(ownerObj)
-        }
-    }
-	
 	Rectangle {
 		id: splitRect
 		width: parent.width; height: 3

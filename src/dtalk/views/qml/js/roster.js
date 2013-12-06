@@ -8,3 +8,5 @@ function getDisplayName(instance) {
 		return instance.jid
 	}
 }
+
+var ownerObj = modelManager.getModel("friend").getSelf()

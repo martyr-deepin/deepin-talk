@@ -3,8 +3,8 @@ import QtQuick 2.1
 Item {
 	id: root
 	height: 176
-	property string username: "小邪兽"
-	property url faceSource: "image/face.jpg"
+	property string username
+	property url faceSource
 	property url statusSource: "image/login/online.png"
 	property string statusMessage: "这个家伙很懒，什么都没留下!什么都没留下!什么都没留下!什么都没留下!"
 	property int displayMode: 0
