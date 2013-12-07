@@ -28,7 +28,7 @@ ShadowPanel {
 		
 		Image {
 			id: rightImg
-			source: "image/arrow_down.png"
+			source: "image/arrow.png"
 			anchors.verticalCenter: parent.verticalCenter
 		}
 		

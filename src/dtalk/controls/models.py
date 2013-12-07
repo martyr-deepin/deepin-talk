@@ -24,20 +24,36 @@
 import logging
 logger = logging.getLogger("controls.models")
 
-from PyQt5 import QtCore
-
 from dtalk.models.signals import post_save, post_delete
-from dtalk.models import Resource, Friend
+from dtalk.models import Resource, Friend, Group
 from dtalk.controls.base import AbstractWrapperModel        
 from dtalk.controls.qobject import postGui
 from dtalk.cache import avatarManager
 import dtalk.cache.signals as cache_signals
+import dtalk.core.signals as server_signals
+
+
+class GroupModel(AbstractWrapperModel):    
+    other_fields = ("friendModel",)
+    
+    def initial(self, *args, **kwargs):
+        server_signals.user_roster_status_received.connect(self._on_roster_received)
+        
+    @postGui    
+    def _on_roster_received(self, *args, **kwargs):    
+        if self.db_is_created:
+            self.initData()    
+    
+    def load(self):
+        return Group.select()
+    
+    def attach_attrs(self, instance):
+        friend_model = FriendModel(group_id=instance.id)
+        setattr(instance, "friendModel", friend_model)
+
 
 class FriendModel(AbstractWrapperModel):        
-    dbs = (Resource, Friend)
-    unique_field = "id"
     other_fields = ("resource", "avatar")
-    init_signals_on_db_finished = False
     ownerObj = None
         
     '''
@@ -45,12 +61,16 @@ class FriendModel(AbstractWrapperModel):
     init_signals: after the first call initData(), its initial
     '''
     
+    def initial(self, group_id=None, *args, **kwargs):
+        self.group_id = group_id
+        self.initData()    
+        self.init_signals()
+    
     def load(self):
-        friends = Friend.filter(subscription="both", isSelf=False)
-        if self.ownerObj is None:
-            obj = Friend.get_self()
-            if obj:
-                self.ownerObj = self.wrapper_instance(obj)
+        kwargs = dict(subscription="both", isSelf=False)
+        if self.group_id is not None:
+            kwargs["group"] = self.group_id
+        friends = Friend.filter(**kwargs)
         return friends
         
     def init_signals(self):    
@@ -66,7 +86,6 @@ class FriendModel(AbstractWrapperModel):
             return
         if update_fields and isinstance(update_fields, list):
             for key in update_fields:            
-                print "key"
                 setattr(obj, key, getattr(instance, key, None))
                 
     @postGui    
@@ -86,7 +105,7 @@ class FriendModel(AbstractWrapperModel):
         pass
     
     def verify(self, instance):
-        return instance.subscription == "both" or instance.isSelf == True
+        return instance.subscription == "both" and instance.isSelf == True and self.group_id == instance.group.id
     
     def get_obj_by_jid(self, jid):
         ret = None
@@ -94,9 +113,6 @@ class FriendModel(AbstractWrapperModel):
             if obj.jid == jid:
                 ret = obj
                 break
-        if ret is None:    
-            if self.ownerObj and self.ownerObj.jid == jid:
-                return self.ownerObj
         return ret
     
     def attach_attrs(self, instance):
@@ -114,8 +130,4 @@ class FriendModel(AbstractWrapperModel):
         ret = self.get_obj_by_jid(jid)
         if ret:
             ret.avatar = path
-            
-    @QtCore.pyqtSlot(result="QVariant")
-    def getSelf(self):        
-        return self.ownerObj
     

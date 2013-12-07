@@ -23,10 +23,9 @@
 import copy
 from PyQt5 import QtCore
 from dtalk.utils import six
-from dtalk.controls.qobject import QObjectListModel, QPropertyMeta
+from dtalk.controls.qobject import QObjectListModel, QPropertyMeta, postGui
 from dtalk.models import BaseModel
 from dtalk.models import signals
-
 
 def string_title(name):
     names = name.split("_")
@@ -93,42 +92,39 @@ def get_qobject_wrapper(instance, unique_field, other_fields=None):
     return WrapperQuery()    
 
 class AbstractWrapperModel(QObjectListModel):
-    
-    dbs = None                  # ('db',)
-    unique_field = ""
+    unique_field = "id"
     other_fields = None         # ('key',)
-    init_signals_on_db_finished = True
     instanceRole = QtCore.Qt.UserRole + 1
     _roles = { instanceRole : "instance" }
         
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, *args, **kwargs):
         super(AbstractWrapperModel, self).__init__(parent)
+        self.db_is_created = False        
         self._data = []
-        signals.db_init_finished.connect(self.on_db_init_finished)
-        
+        signals.db_init_finished.connect(self.on_db_init_finished, dispatch_uid=id(self))        
+        self.initial(*args, **kwargs)
+
     def load(self):    
         pass
     
-    def on_db_init_finished(self, *args, **kwargs):
-        self.initData(self.init_signals_on_db_finished)
-    
-    def initData(self, init_signals=True):
-        if init_signals:
+    def initial(self):
+        pass
+
+    def on_db_init_finished(self, created, *args, **kwargs):
+        self.db_is_created = created        
+        if not created:
+            self.initData()
             self.init_signals()
+
+    def initData(self, init_signals=True):
         data = self.load()
         if data:
             instances = list(map(self.wrapper_instance, data))
             self.setAll(instances)
     
-    def verify(self, obj):
-        return True
-    
     def wrapper_instance(self, instance):
         self.attach_attrs(instance)
         return get_qobject_wrapper(instance, self.unique_field, self.other_fields)
-    
-    def init_signals(self):
-        pass
     
     def init_wrappers(self):
         if self._data:
@@ -147,5 +143,8 @@ class AbstractWrapperModel(QObjectListModel):
         return QtCore.QVariant()        
     
     def attach_attrs(self, instance):
+        pass
+    
+    def init_signals(self):
         pass
     

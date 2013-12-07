@@ -22,7 +22,7 @@ Item {
                     id: jid
 					anchors.horizontalCenter: parent.horizontalCenter
 					leftImage: "image/person.png"
-					rightImage: "image/arrow_down.png"
+					rightImage: "image/arrow.png"
                     text: "houshao55@gmail.com"
 				}
 				

@@ -10,8 +10,8 @@ Item {
 	UserBrief {
 		id: userBrief
 		width: parent.width
-        faceSource: Roster.ownerObj.avatar
-        username: Roster.getDisplayName(Roster.ownerObj)
+        /* faceSource: Roster.ownerObj.avatar */
+        /* username: Roster.getDisplayName(Roster.ownerObj) */
 		anchors.horizontalCenter: parent.horizontalCenter
 	}
     
@@ -27,30 +27,30 @@ Item {
 		}		
 		z: 100
 	}
-    
-	FriendView { 
-        id: friendView
+	
+	TabView {
 		width: parent.width
 		anchors.top: userBrief.bottom
 		anchors.bottom: controlPanel.top
-        
-        Component.onCompleted: {
-            var _model = modelManager.getModel("friend")            
-            friendView.model = _model
+        Tab { 
+            title: "friend" ; 
+            ScrollWidget {
+                ListView {
+                    anchors.leftMargin: 10
+                    anchors.fill: parent
+                    delegate: GroupDelegate {}
+                    model: modelManager.getModel("friend")
+                    interactive: true
+                    clip: true
+                }
+            }
         }
+        Tab { title: "group" ; Item {}}
+        Tab { title: "recent" ; Item {}}
+        Tab { title: "search" ; Item {}}
+		frameVisible: false
+		style: tabViewStyle
 	}
-	
-	/* TabView {  */
-	/* 	width: parent.width */
-	/* 	anchors.top: userBrief.bottom */
-	/* 	anchors.bottom: controlPanel.top */
-    /*     Tab { title: "friend" ; FriendView { id: friendView } } */
-    /*     Tab { title: "group" ; Item {}} */
-    /*     Tab { title: "recent" ; Item {}} */
-    /*     Tab { title: "search" ; Item {}} */
-	/* 	frameVisible: false */
-	/* 	style: tabViewStyle */
-	/* } */
 	
 	ControlPanel {
 		id: controlPanel

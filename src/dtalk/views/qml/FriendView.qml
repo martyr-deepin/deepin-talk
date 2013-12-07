@@ -1,27 +1,30 @@
 import QtQuick 2.1
+import QtQuick.Controls 1.0
+import QtQuick.Controls.Styles 1.0
 import "js/roster.js" as Roster
 
+
 ListView {
+    id: listview
+    anchors.fill: parent
 	delegate: friendsDelegate
 	clip: true
-    
     
 	property Component friendsDelegate: Component {
 		Item {
 			id: wrapper
 			width: wrapper.ListView.view.width; height: 58
-
 			
 			Row {
 				anchors.fill: parent
 				spacing: 40
 				anchors.margins: 40				
-				
+                
 				RoundImageButton {
 					id: faceImage
 					width: 40; height: 40
 					anchors.verticalCenter: parent.verticalCenter
-					source: model.instance.avatar
+					source: instance.avatar
 				}
 				
 				Rectangle {
@@ -36,7 +39,7 @@ ListView {
 						anchors.centerIn: parent
 						color: "#fff"
 						font.pixelSize: 12
-						text: Roster.getDisplayName(model.instance)
+						text: Roster.getDisplayName(instance)
 					}
 					
 				}
@@ -44,4 +47,4 @@ ListView {
 		}
 		
 	}
-}
+}    
