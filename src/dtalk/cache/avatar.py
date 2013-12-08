@@ -34,7 +34,7 @@ logger = logging.getLogger("dtalk.cache.avatar")
 class AvatarManager(object):
     
     def __init__(self):
-        self.default_avatar = get_qml("image", "face.jpg")
+        self.default_avatar = get_qml("images", "face.jpg")
     
     @classmethod
     def base64encode(cls, path):

@@ -1,4 +1,5 @@
 import QtQuick 2.1
+import "../Widgets"
 
 ShadowPanel {
 	width: 260; height: 42
@@ -14,7 +15,7 @@ ShadowPanel {
 		
 		Image {
 			id: leftImg
-			source: "image/person.png"
+			source: "../images/person.png"
 			anchors.verticalCenter: parent.verticalCenter
 		}
 		
@@ -28,7 +29,7 @@ ShadowPanel {
 		
 		Image {
 			id: rightImg
-			source: "image/arrow.png"
+			source: "../images/arrow.png"
 			anchors.verticalCenter: parent.verticalCenter
 		}
 		

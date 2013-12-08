@@ -21,11 +21,11 @@ Item {
 				id: check
 				anchors.centerIn: parent
 				anchors.horizontalCenterOffset: 2
-				source: "image/check.png"
+				source: "images/check.png"
 			}
 		}
 		
-		LazyText {
+		DText {
 			id: label
 			anchors.verticalCenter: parent.verticalCenter
 		}

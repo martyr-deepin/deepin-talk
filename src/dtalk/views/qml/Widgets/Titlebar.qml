@@ -4,7 +4,7 @@ Item {
 	id: titlebar
 	
 	function get_image (name) {
-		return "image/button/" + name + ".png"
+		return "images/button/" + name + ".png"
 	}
 	
 	Row {

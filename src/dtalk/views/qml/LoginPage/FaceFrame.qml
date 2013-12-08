@@ -1,5 +1,5 @@
 import QtQuick 2.1
-
+import "../Widgets"
 
 Item {
 	id: root
@@ -16,7 +16,7 @@ Item {
 		
 		RoundImageButton {
 			id: face
-			source: "image/face.jpg"
+			source: "../images/face.jpg"
 			width: faceWidth; height: faceHeight
 			borderWidth: 4
 			radius: width/2

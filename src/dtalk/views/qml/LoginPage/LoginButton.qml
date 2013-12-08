@@ -1,4 +1,5 @@
 import QtQuick 2.1
+import "../Widgets"
 
 Item {
 	id: container
@@ -10,7 +11,7 @@ Item {
 	Image {
 		id: img
 		anchors.centerIn: parent
-		source: "image/login.png"
+		source: "../images/login.png"
 		opacity: 0.5
 		antialiasing: true
 		smooth: true

@@ -43,7 +43,7 @@ Item {
 			
 			Image {
 				anchors.fill: parent
-				source: "image/bg.png"
+				source: "../images/bg.png"
 			}
 			
 			/* Rectangle { */

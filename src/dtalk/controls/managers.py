@@ -22,8 +22,8 @@
 
 import logging
 from PyQt5 import QtCore
-from dtalk.controls.qobject import QPropertyObject, postGui
-from dtalk.controls.models import FriendModel, GroupModel
+from dtalk.controls.qobject import QPropertyObject
+from dtalk.controls.models import GroupModel
 from dtalk.core.server import XMPPServer
 import dtalk.core.signals as serverSignals
 import dtalk.models.signals as dbSignals

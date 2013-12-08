@@ -1,5 +1,6 @@
 import QtQuick 2.1
 import QtQuick.Window 2.1
+import "../Widgets"
 
 Item {
 	width: status.width + down.width + statusRow.spacing
@@ -12,12 +13,12 @@ Item {
 		
 		Image {
 			id: status
-			source: "image/login/online.png"
+			source: "../images/status/online.png"
 			anchors.verticalCenter: parent.verticalCenter
 		}
 		Image {
 			id: down
-			source: "image/login/status_arrow_down.png"
+			source: "../images/status/status_arrow_down.png"
 			anchors.verticalCenter: parent.verticalCenter
 		}
 	
@@ -38,10 +39,10 @@ Item {
 	
 	ListModel {
 		id: statusModel
-		ListElement { type: 0; icon: "image/login/online.png"; label: "在线" }
-		ListElement { type: 1; icon: "image/login/hide.png"; label: "隐身" }
-		ListElement { type: 2; icon: "image/login/busy.png"; label: "忙碌" }
-		ListElement { type: 3; icon: "image/login/leave.png"; label: "离开" }
+		ListElement { type: 0; icon: "../images/status/online.png"; label: "在线" }
+		ListElement { type: 1; icon: "../images/status/hide.png"; label: "隐身" }
+		ListElement { type: 2; icon: "../images/status/busy.png"; label: "忙碌" }
+		ListElement { type: 3; icon: "../images/status/leave.png"; label: "离开" }
 	}
 	
 	Component {

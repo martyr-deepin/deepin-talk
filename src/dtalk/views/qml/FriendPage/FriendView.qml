@@ -1,7 +1,8 @@
 import QtQuick 2.1
 import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
-import "js/roster.js" as Roster
+import "../scripts/roster.js" as Roster
+import "../Widgets"
 
 
 ListView {

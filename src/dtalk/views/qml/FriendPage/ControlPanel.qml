@@ -10,7 +10,7 @@ Item {
 	}
 	
 	Image {
-		source: "image/logo.png"
+		source: "../images/logo.png"
 		anchors.verticalCenter: parent.verticalCenter
 		anchors.left: parent.left
 		anchors.leftMargin: 10		
@@ -22,11 +22,11 @@ Item {
 		anchors.rightMargin: 10		
 		spacing: 10
 		Image {
-			source: "image/setting.png"
+			source: "../images/setting.png"
 		}
 		
 		Image {
-			source: "image/message.png"
+			source: "../images/message.png"
 		}
 	}
 }

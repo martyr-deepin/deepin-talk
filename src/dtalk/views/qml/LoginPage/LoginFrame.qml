@@ -1,5 +1,6 @@
 import QtQuick 2.1
 import QtQuick.Layouts 1.0
+import "../Widgets"
 
 Item {
     id: container
@@ -21,16 +22,16 @@ Item {
 				LoginInput {
                     id: jid
 					anchors.horizontalCenter: parent.horizontalCenter
-					leftImage: "image/person.png"
-					rightImage: "image/arrow.png"
+					leftImage: "../images/person.png"
+					rightImage: "../images/arrow.png"
                     text: "houshao55@gmail.com"
 				}
 				
 				LoginInput {
                     id: passwd
 					anchors.horizontalCenter: parent.horizontalCenter
-					leftImage: "image/passwd.png"
-					rightImage: "image/keyboard.png"
+					leftImage: "../images/passwd.png"
+					rightImage: "../images/keyboard.png"
 					echoMode: TextInput.Password
 				}
 				
@@ -38,8 +39,8 @@ Item {
 					anchors.horizontalCenter: parent.horizontalCenter
 					spacing: 35
 					LoginStatus { height: 30 }
-					CheckButton { text: "记住密码" }
-					CheckButton { text: "自动登录" }
+					CheckBox { text: "记住密码" }
+					CheckBox { text: "自动登录" }
 				}
 		
 			}
@@ -55,10 +56,4 @@ Item {
                 }
 			}
 	}
-	
-	/* Row { */
-	/* 	anchors.bottom: parent.bottom */
-	/* 	LazyText { text: "注册帐号" } */
-	/* 	LazyText { text: "忘记密码" } */
-	/* } */
 }

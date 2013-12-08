@@ -1,11 +1,13 @@
 import QtQuick 2.1
+import "../Widgets"
+import "../scripts/common.js" as Common
 
 Item {
 	id: root
 	height: 176
 	property string username: "小邪兽"
-	property url faceSource: "image/face.jpg"
-	property url statusSource: "image/login/online.png"
+	property url faceSource: "../images/face.jpg"
+	property url statusSource: "../images/status/online.png"
 	property string statusMessage: "这个家伙很懒，什么都没留下!什么都没留下!什么都没留下!什么都没留下!"
 	property int displayMode: 0
 	property real messageWidth: displayMode == 0 ? root.width * 0.8 : root.width * 0.6
@@ -54,8 +56,8 @@ Item {
 	
 	Image {
 		anchors.fill: parent
-		anchors.topMargin: 0 - titlebar.height
-		source: "image/mask.png"
+		anchors.topMargin: 0 - Common.titlebarHeight
+		source: "../images/mask.png"
 	}	
 	
 	Rectangle {
