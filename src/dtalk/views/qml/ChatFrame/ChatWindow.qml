@@ -1,5 +1,7 @@
 import QtQuick 2.1
 import QtGraphicalEffects 1.0
+import QtQuick.Controls 1.0
+import QtQuick.Controls.Styles 1.0
 import "../Widgets"
 import "../scripts/common.js" as Common
 
@@ -30,22 +32,54 @@ DWindow {
             anchors.top: linearBack.bottom
 		}
         
-        Headerbar { width: parent.width }
+        Headerbar { width: parent.width; z: 100 }
         
         ScrollWidget {
             width: parent.width
             anchors.top: sepeator.bottom
             anchors.bottom: messageBox.top
             ListView {
+                id: messageView
                 anchors.fill: parent
+			    delegate: MessageDelegate {}
+			    model: messageModel
+			    interactive: false
+			    clip: true
             }
         }
         
-        Rectangle {
+        DTextArea {
             id: messageBox
             width: parent.width; height: 120
             anchors.bottom: parent.bottom
-            color: "green"
-        }
+            /* textFormat: TextEdit.RichText */
+			property int tempType: 0
+            focus: true
+            
+            
+            Keys.onPressed: {
+                if ((event.key == Qt.Key_Return) && (event.modifiers & Qt.ControlModifier)) {
+                    if (messageBox.text != "") {
+                        messageModel.sendMessage(messageBox.text)                        
+					    /* messageView.positionViewAtIndex(messageView.count - 1, ListView.Contain) */
+                        event.accepted = true
+                    }
+                }
+            }            
+            
+            Rectangle { 
+                anchors.top: parent.top; 
+                width: parent.width; height: 1
+                color: Qt.rgba(0.3, 0.3, 0.3, 0.6)
+            }
+            
+            Rectangle {
+                anchors.fill: parent
+                color: Qt.rgba(0.9, 0.9, 0.9, 0.5)
+                radius: 5
+                z: -100
+            }
+        }        
+        
     }
 }

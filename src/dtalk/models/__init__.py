@@ -203,18 +203,46 @@ class Resource(BaseModel):
             else:
                 obj.delete_instance()
 
-class Message(BaseModel):
-    fromFriend = pw.ForeignKeyField(Friend, related_name='messages')
-    toFriend = pw.ForeignKeyField(Friend)
+class ReceivedMessage(BaseModel):        
+    TYPE = "received"
+    friend = pw.ForeignKeyField(Friend, related_name="sends")
     body = pw.TextField()
+    readed = pw.BooleanField(default=False)
     created = pw.DateTimeField(default=datetime.datetime.now)
-
+    
     class Meta:
-        db_table = 'dtalk_message'
-        indexes = (
-            # create a non-unique on from/to
-            (('fromFriend', 'toFriend'), False),
-        )        
+        db_table = "dtalk_received_message"
+        
+    @classmethod    
+    def received_message_from_stanza(cls, stanza):
+        jid = get_email(stanza.from_jid)
+        try:
+            obj = Friend.get(jid=jid)
+        except Friend.DoesNotExist:    
+            logger.info("-- have a message received but [{0}] not in your roster".format(jid))
+            return None
+        else:    
+            cls.create(friend=obj, body=stanza.body)
+    
+class SendedMessage(BaseModel):
+    TYPE = "sended"
+    friend = pw.ForeignKeyField(Friend, related_name="receives")
+    body = pw.TextField()
+    successed = pw.BooleanField(default=False)
+    created = pw.DateTimeField(default=datetime.datetime.now)
+    
+    class Meta:
+        db_table = "dtalk_sended_message"
+    
+    @classmethod    
+    def send_message(cls, jid, body):    
+        try:
+            obj = Friend.get(jid=jid)
+        except Friend.DoesNotExist:    
+            logger.warning("-- {0} not in SendedMessage table".format(jid))
+            raise cls.DoesNotExist
+        else:    
+            return cls.create(friend=obj, body=body)
 
 class FriendNotice(BaseModel):
     TYPE_REQUEST = 1
@@ -256,6 +284,7 @@ def create_tables():
     Group.create_table()
     Friend.create_table()
     Resource.create_table()
-    Message.create_table()
+    ReceivedMessage.create_table()
+    SendedMessage.create_table()
     FriendNotice.create_table()
     

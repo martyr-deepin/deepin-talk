@@ -22,7 +22,7 @@
 
 
 import logging
-logger = logging.getLogger("controls.models")
+logger = logging.getLogger("dtalk.controls.models")
 
 from dtalk.models.signals import post_save, post_delete
 from dtalk.models import Resource, Friend, Group

@@ -15,6 +15,13 @@ ListView {
 		Item {
 			id: wrapper
 			width: wrapper.ListView.view.width; height: 58
+            
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    controlManager.openChat(instance.jid)
+                }
+            }
 			
 			Row {
 				anchors.fill: parent

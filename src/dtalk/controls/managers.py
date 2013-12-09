@@ -24,9 +24,11 @@ import logging
 from PyQt5 import QtCore
 from dtalk.controls.qobject import QPropertyObject
 from dtalk.controls.models import GroupModel
+from dtalk.views.chat import ChatWindow
 from dtalk.core.server import XMPPServer
 import dtalk.core.signals as serverSignals
 import dtalk.models.signals as dbSignals
+from dtalk.controls.message import MessageModel
 
 logger = logging.getLogger("dtalk.controls.managers")
 
@@ -72,3 +74,22 @@ class ServerManager(QPropertyObject()):
         
     def on_user_friends_status_received(self, *args, **kwargs):    
         self.userRosterStatusReceived.emit()
+        
+class ControlManager(QPropertyObject()):        
+    
+    def __init__(self):
+        super(ControlManager, self).__init__()
+        self.chatWindowManager = dict()
+    
+    @QtCore.pyqtSlot(str)
+    def openChat(self, jid):
+        if jid not in self.chatWindowManager:
+            self.chatWindowManager[jid] = ChatWindow(model=self.createModel(jid))
+            self.chatWindowManager[jid].show()
+        else:    
+            self.chatWindowManager[jid].raise_()
+            
+    def createModel(self, jid):        
+        return MessageModel(to_jid=jid)
+
+            

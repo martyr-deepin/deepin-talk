@@ -23,14 +23,16 @@
 import logging
 from pyxmpp2.iq import Iq
 from pyxmpp2.jid import JID
-from pyxmpp2.interfaces import presence_stanza_handler, event_handler
+from pyxmpp2.message import Message
+from pyxmpp2.interfaces import presence_stanza_handler, event_handler, message_stanza_handler
 from pyxmpp2.roster import RosterReceivedEvent, RosterUpdatedEvent
 from pyxmpp2.presence import Presence, ACCEPT_RESPONSES, DENY_RESPONSES
 from pyxmpp2.streamevents import AuthorizedEvent
 
-from dtalk.models import Friend, Resource, FriendNotice
+from dtalk.models import Friend, Resource, FriendNotice, ReceivedMessage, SendedMessage
 from dtalk.conf import settings
 from dtalk.core import signals
+from dtalk.models import signals as db_signals
 from dtalk.core.vcard import VCardPayload
 from dtalk.core.payload import VCardUpdatePayload
 from dtalk.utils.xmpp import get_email
@@ -43,6 +45,8 @@ class RosterMixin(object):
     def __init__(self):
         self._presences = []
         self.update_presence_flag = True
+        db_signals.post_save.connect(self.on_message_sened, sender=SendedMessage)
+                
     
     @event_handler(RosterReceivedEvent)
     def handle_roster_received(self, event):
@@ -189,3 +193,23 @@ class RosterMixin(object):
     def get_self_avatar(self, event):
         if not avatarManager.has_avatar(self.plain_jid):
                 self.get_vcard(self.owner_jid)
+
+                
+    #  massages
+    @message_stanza_handler()
+    def message_received(self, stanza):
+        if stanza.stanza_type != 'chat':
+            return True
+        if not stanza.body:
+            logger.info("%s message: %s", stanza.from_jid, stanza.serialize())
+            return True
+        ReceivedMessage.received_message_from_stanza(stanza)
+        return True
+        
+    def send_message(self, jid, message, message_type="chat", thread=None):    
+        message = Message(to_jid=JID(jid), body=message, stanza_type=message_type,
+                          thread=thread)
+        self.send(message)
+        
+    def on_message_sened(self, sender, instance, created, *args, **kwargs):    
+        self.send_message(instance.friend.jid, instance.body)

@@ -24,7 +24,7 @@ import logging
 from collections import defaultdict
 
 from pyxmpp2.jid import JID
-from pyxmpp2.message import Message
+
 from pyxmpp2.client import Client
 from pyxmpp2.settings import XMPPSettings
 from pyxmpp2.interfaces import EventHandler, event_handler, QUIT
@@ -90,10 +90,6 @@ class XMPPServer(RosterMixin, EventHandler, XMPPFeatureHandler):
         self.client.run(timeout=2)        
         self.main_loop.stop(join=True)
         
-    def send_message(self, target_jid, message, message_type="chat", thread=None):    
-        message = Message(to_jid=JID(target_jid), body=message, stanza_type=message_type,
-                          thread=thread)
-        self.client.stream.send(message)
         
     send = property(lambda self: self.client.stream.send)
     owner_jid = property(lambda self: self.client.jid)

@@ -40,39 +40,30 @@ if os.name == 'posix':
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-from PyQt5 import QtWidgets, QtGui, QtQuick
+from PyQt5 import QtWidgets
 from dtalk.utils.xdg import get_qml
-from dtalk.controls.managers import ModelManager, ServerManager
+from dtalk.controls.managers import ModelManager, ServerManager, ControlManager
+from dtalk.views.base import BaseView
 
-class Panel(QtQuick.QQuickView):
+
+class Panel(BaseView):
     
     hideOtherWindow = QtCore.pyqtSignal()
     
     def __init__(self):
         super(Panel, self).__init__()
-        self.setResizeMode(QtQuick.QQuickView.SizeRootObjectToView)
-        surface_format = QtGui.QSurfaceFormat()
-        surface_format.setAlphaBufferSize(8)
+        self.setMinimumSize(QtCore.QSize(336, 780))        
         QtWidgets.qApp.focusWindowChanged.connect(self.onFocusWindowChanged)
-        self.setColor(QtGui.QColor(0, 0, 0, 0))
-        self.setFormat(surface_format)
-        self.setFlags(QtCore.Qt.FramelessWindowHint)
-        self.set_all_contexts()
-        self.setSource(QtCore.QUrl.fromLocalFile(get_qml('Main.qml')))
         
-    def set_all_contexts(self):    
-        self.root_context = self.rootContext()        
         self.modelManager = ModelManager()
         self.serverManager = ServerManager()
-        self.root_context.setContextProperty("modelManager", self.modelManager)
-        self.root_context.setContextProperty("serverManager", self.serverManager)
-        self.root_context.setContextProperty("windowView", self)        
+        self.controlManager = ControlManager()
+        self.setContextProperty("modelManager", self.modelManager)
+        self.setContextProperty("controlManager", self.controlManager)
+        self.setContextProperty("serverManager", self.serverManager)
+        self.setSource(QtCore.QUrl.fromLocalFile(get_qml('Main.qml')))
         
     def onFocusWindowChanged(self, focusWindow):    
         if focusWindow.__class__.__name__ != "QQuickWindow":
             self.hideOtherWindow.emit()
     
-    @QtCore.pyqtSlot(result="QVariant")
-    def getCursorPos(self):
-        return QtGui.QCursor.pos()
-        
