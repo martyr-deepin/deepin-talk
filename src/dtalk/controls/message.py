@@ -41,11 +41,11 @@ class MessageModel(AbstractWrapperModel):
         post_save.connect(self.on_received_message, sender=ReceivedMessage)        
         post_save.connect(self.on_sended_message, sender=SendedMessage)
         
-    @postGui    
+    @postGui(inclass=True)    
     def on_received_message(self, sender, instance, created, update_fields, *args, **kwargs):    
         self.appendMessage(instance)
     
-    @postGui
+    @postGui(inclass=True)
     def on_sended_message(self, sender, instance, created, update_fields, *args, **kwargs):    
         self.appendMessage(instance)
     

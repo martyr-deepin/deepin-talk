@@ -203,20 +203,23 @@ class postGui(QtCore.QObject):
     
     throughThread = QtCore.pyqtSignal(object, object)    
     
-    def __init__(self, func):
+    def __init__(self, inclass=True):
         super(postGui, self).__init__()
         self.throughThread.connect(self.onSignalReceived)
+        self.inclass = inclass
+        
+    def __call__(self, func):
         self._func = func
-        self._obj = None
+        def objCall(*args, **kwargs):
+            self.emitSignal(args, kwargs)
+        return objCall
         
-    def __get__(self, obj, cls=None):    
-        self._obj = obj
-        return self.emitSignal
-        
-    def emitSignal(self, *args, **kwargs):
+    def emitSignal(self, args, kwargs):
         self.throughThread.emit(args, kwargs)
-        
+                
     def onSignalReceived(self, args, kwargs):
-        if self._obj is None:
-            return self._func(*args, **kwargs)
-        return self._func(self._obj, *args, **kwargs)
+        if self.inclass:
+            obj, args = args[0], args[1:]
+            self._func(obj, *args, **kwargs)
+        else:    
+            self._func(*args, **kwargs)

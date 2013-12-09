@@ -39,7 +39,7 @@ class GroupModel(AbstractWrapperModel):
     def initial(self, *args, **kwargs):
         server_signals.user_roster_status_received.connect(self._on_roster_received)
         
-    @postGui    
+    @postGui(inclass=True)    
     def _on_roster_received(self, *args, **kwargs):    
         if self.db_is_created:
             self.initData()    
@@ -62,6 +62,7 @@ class FriendModel(AbstractWrapperModel):
     '''
     
     def initial(self, group_id=None, *args, **kwargs):
+        print id(self), "#####"
         self.group_id = group_id
         self.initData()    
         self.init_signals()
@@ -74,11 +75,11 @@ class FriendModel(AbstractWrapperModel):
         return friends
         
     def init_signals(self):    
-        post_save.connect(self.on_post_save, sender=Resource)
-        post_delete.connect(self.on_post_delete, sender=Resource)
-        post_save.connect(self.on_post_save, sender=Friend)
-        post_delete.connect(self.on_post_delete, sender=Friend)
-        cache_signals.avatar_saved.connect(self.on_avatar_saved)
+        post_save.connect(self.on_post_save, sender=Resource, dispatch_uid=str(id(self)))
+        post_delete.connect(self.on_post_delete, sender=Resource, dispatch_uid=str(id(self)))
+        post_save.connect(self.on_post_save, sender=Friend, dispatch_uid=str(id(self)))
+        post_delete.connect(self.on_post_delete, sender=Friend, dispatch_uid=str(id(self)))
+        cache_signals.avatar_saved.connect(self.on_avatar_saved, dispatch_uid=str(id(self)))
         
     def update_changed(self, instance, update_fields):    
         obj = self.get_obj_by_jid(instance.jid)
@@ -88,24 +89,24 @@ class FriendModel(AbstractWrapperModel):
             for key in update_fields:            
                 setattr(obj, key, getattr(instance, key, None))
                 
-    @postGui    
+    @postGui(inclass=True)    
     def on_post_save(self, sender, instance, created, update_fields, *args, **kwargs):
         if sender == Friend:
+            print self.group_id, instance.group.id
             if not self.verify(instance):
                 return 
-
             if created:
                 obj = self.wrapper_instance(instance)                
                 self.append(obj)
             else:    
                 self.update_changed(instance, update_fields)
                 
-    @postGui            
+    @postGui(inclass=True)            
     def on_post_delete(self, sender, instance, *args, **kwargs):
         pass
     
     def verify(self, instance):
-        return instance.subscription == "both" and instance.isSelf == True and self.group_id == instance.group.id
+        return instance.subscription == "both" and instance.isSelf == False and self.group_id == instance.group.id
     
     def get_obj_by_jid(self, jid):
         ret = None
@@ -125,7 +126,7 @@ class FriendModel(AbstractWrapperModel):
         setattr(instance, "avatar", avatar)
         setattr(instance, "resource", resource)                    
     
-    @postGui
+    @postGui(inclass=True)
     def on_avatar_saved(self, sender, jid, path, *args, **kwargs):
         ret = self.get_obj_by_jid(jid)
         if ret:

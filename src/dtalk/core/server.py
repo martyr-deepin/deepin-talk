@@ -41,8 +41,8 @@ from dtalk.core import signals
 import dtalk.conf
 
 logger = logging.getLogger(__name__)
-# logging.basicConfig(level = logging.DEBUG) # change to 'DEBUG' to see more
-logging.basicConfig(level = logging.INFO) # change to 'DEBUG' to see more
+logging.basicConfig(level = logging.DEBUG) # change to 'DEBUG' to see more
+# logging.basicConfig(level = logging.INFO) # change to 'DEBUG' to see more
 # logging.basicConfig(filename="/home/evilbeast/myap.log", level = logging.DEBUG) # change to 'DEBUG' to see more
 
 class XMPPServer(RosterMixin, EventHandler, XMPPFeatureHandler):

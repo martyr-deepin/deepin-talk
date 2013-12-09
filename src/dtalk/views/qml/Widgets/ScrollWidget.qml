@@ -7,6 +7,7 @@ ScrollView {
     /* flickableItem.interactive: true */
     
     style: ScrollViewStyle {
+        handleOverlap: 0        
         handle: Item {
             implicitWidth: 14
             implicitHeight: 26
