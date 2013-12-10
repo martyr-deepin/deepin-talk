@@ -31,12 +31,5 @@ class ChatWindow(BaseView):
         super(ChatWindow, self).__init__(parent)
         self.setMinimumSize(QtCore.QSize(600, 620))        
         self.model = model
+        self.setContextProperty("messageModel", self.model)
         self.setSource(QtCore.QUrl.fromLocalFile(get_qml('ChatFrame','ChatWindow.qml')))
-        
-    @QtCore.pyqtSlot(result=str)    
-    def getJid(self):
-        return self.jid
-    
-    @QtCore.pyqtSlot(result="QVariant")
-    def getModel(self):
-        return self.model
