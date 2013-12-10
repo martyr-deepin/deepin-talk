@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+import functools
 from PyQt5 import QtCore
 from dtalk.utils import six
                 
@@ -210,6 +210,8 @@ class postGui(QtCore.QObject):
         
     def __call__(self, func):
         self._func = func
+        
+        @functools.wraps(func)
         def objCall(*args, **kwargs):
             self.emitSignal(args, kwargs)
         return objCall

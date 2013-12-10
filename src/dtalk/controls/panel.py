@@ -42,7 +42,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 from PyQt5 import QtWidgets
 from dtalk.utils.xdg import get_qml
-from dtalk.controls.managers import ModelManager, ServerManager, ControlManager
+from dtalk.controls.managers import modelManager, serverManager, controlManager
 from dtalk.views.base import BaseView
 
 
@@ -55,12 +55,9 @@ class Panel(BaseView):
         self.setMinimumSize(QtCore.QSize(336, 780))        
         QtWidgets.qApp.focusWindowChanged.connect(self.onFocusWindowChanged)
         
-        self.modelManager = ModelManager()
-        self.serverManager = ServerManager()
-        self.controlManager = ControlManager()
-        self.setContextProperty("modelManager", self.modelManager)
-        self.setContextProperty("controlManager", self.controlManager)
-        self.setContextProperty("serverManager", self.serverManager)
+        self.setContextProperty("modelManager", modelManager)
+        self.setContextProperty("controlManager", controlManager)
+        self.setContextProperty("serverManager", serverManager)
         self.setSource(QtCore.QUrl.fromLocalFile(get_qml('Main.qml')))
         
     def onFocusWindowChanged(self, focusWindow):    

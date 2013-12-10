@@ -39,7 +39,7 @@ class GroupModel(AbstractWrapperModel):
     def initial(self, *args, **kwargs):
         server_signals.user_roster_status_received.connect(self._on_roster_received)
         
-    @postGui(inclass=True)    
+    @postGui()    
     def _on_roster_received(self, *args, **kwargs):    
         if self.db_is_created:
             self.initData()    
@@ -50,7 +50,7 @@ class GroupModel(AbstractWrapperModel):
     def attach_attrs(self, instance):
         friend_model = FriendModel(group_id=instance.id)
         setattr(instance, "friendModel", friend_model)
-
+        
 
 class FriendModel(AbstractWrapperModel):        
     other_fields = ("resource", "avatar")
@@ -89,7 +89,7 @@ class FriendModel(AbstractWrapperModel):
             for key in update_fields:            
                 setattr(obj, key, getattr(instance, key, None))
                 
-    @postGui(inclass=True)    
+    @postGui()    
     def on_post_save(self, sender, instance, created, update_fields, *args, **kwargs):
         if sender == Friend:
             print self.group_id, instance.group.id
@@ -101,7 +101,7 @@ class FriendModel(AbstractWrapperModel):
             else:    
                 self.update_changed(instance, update_fields)
                 
-    @postGui(inclass=True)            
+    @postGui()            
     def on_post_delete(self, sender, instance, *args, **kwargs):
         pass
     
@@ -126,9 +126,8 @@ class FriendModel(AbstractWrapperModel):
         setattr(instance, "avatar", avatar)
         setattr(instance, "resource", resource)                    
     
-    @postGui(inclass=True)
+    @postGui()
     def on_avatar_saved(self, sender, jid, path, *args, **kwargs):
         ret = self.get_obj_by_jid(jid)
         if ret:
             ret.avatar = path
-    

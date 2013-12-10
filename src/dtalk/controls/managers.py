@@ -92,4 +92,6 @@ class ControlManager(QPropertyObject()):
     def createModel(self, jid):        
         return MessageModel(to_jid=jid)
 
-            
+serverManager = ServerManager()    
+modelManager = ModelManager()
+controlManager = ControlManager()

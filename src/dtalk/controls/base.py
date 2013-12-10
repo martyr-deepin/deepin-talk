@@ -23,7 +23,7 @@
 import copy
 from PyQt5 import QtCore
 from dtalk.utils import six
-from dtalk.controls.qobject import QObjectListModel, QPropertyMeta, postGui
+from dtalk.controls.qobject import QObjectListModel, QPropertyMeta
 from dtalk.models import BaseModel
 from dtalk.models import signals
 

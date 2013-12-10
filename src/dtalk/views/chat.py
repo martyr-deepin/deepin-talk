@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore
 from dtalk.views.base import BaseView
 from dtalk.utils.xdg import get_qml
 
@@ -30,5 +30,13 @@ class ChatWindow(BaseView):
     def __init__(self, model, parent=None):
         super(ChatWindow, self).__init__(parent)
         self.setMinimumSize(QtCore.QSize(600, 620))        
-        self.setContextProperty("messageModel", model)        
+        self.model = model
         self.setSource(QtCore.QUrl.fromLocalFile(get_qml('ChatFrame','ChatWindow.qml')))
+        
+    @QtCore.pyqtSlot(result=str)    
+    def getJid(self):
+        return self.jid
+    
+    @QtCore.pyqtSlot(result="QVariant")
+    def getModel(self):
+        return self.model

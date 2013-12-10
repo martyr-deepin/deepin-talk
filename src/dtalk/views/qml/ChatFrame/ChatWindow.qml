@@ -42,7 +42,7 @@ DWindow {
                 id: messageView
                 anchors.fill: parent
 			    delegate: MessageDelegate {}
-			    model: messageModel
+			    model: windowView.getModel()
 			    interactive: false
 			    clip: true
             }
@@ -60,8 +60,9 @@ DWindow {
             Keys.onPressed: {
                 if ((event.key == Qt.Key_Return) && (event.modifiers & Qt.ControlModifier)) {
                     if (messageBox.text != "") {
-                        messageModel.sendMessage(messageBox.text)                        
-					    /* messageView.positionViewAtIndex(messageView.count - 1, ListView.Contain) */
+                        var model = windowView.getModel()
+                        model.postMessage(messageBox.text)
+                        messageBox.text = ""
                         event.accepted = true
                     }
                 }

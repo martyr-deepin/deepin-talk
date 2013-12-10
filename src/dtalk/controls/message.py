@@ -41,11 +41,11 @@ class MessageModel(AbstractWrapperModel):
         post_save.connect(self.on_received_message, sender=ReceivedMessage)        
         post_save.connect(self.on_sended_message, sender=SendedMessage)
         
-    @postGui(inclass=True)    
+    @postGui()    
     def on_received_message(self, sender, instance, created, update_fields, *args, **kwargs):    
         self.appendMessage(instance)
     
-    @postGui(inclass=True)
+    @postGui()
     def on_sended_message(self, sender, instance, created, update_fields, *args, **kwargs):    
         self.appendMessage(instance)
     
@@ -67,8 +67,6 @@ class MessageModel(AbstractWrapperModel):
         setattr(instance, "type", instance.TYPE)    
         
     @QtCore.pyqtSlot(str)
-    def sendMessage(self, body):
-        SendedMessage.send_message(self.to_jid, body)
-        
-        
+    def postMessage(self, body):
+        SendedMessage.send_message(self.to_jid, body)        
     
