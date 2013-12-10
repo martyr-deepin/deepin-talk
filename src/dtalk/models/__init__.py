@@ -228,7 +228,7 @@ class SendedMessage(BaseModel):
     TYPE = "sended"
     friend = pw.ForeignKeyField(Friend, related_name="receives")
     body = pw.TextField()
-    successed = pw.BooleanField(default=False)
+    successed = pw.BooleanField(default=True)
     created = pw.DateTimeField(default=datetime.datetime.now)
     
     class Meta:

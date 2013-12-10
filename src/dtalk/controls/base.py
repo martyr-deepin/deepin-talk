@@ -122,9 +122,10 @@ class AbstractWrapperModel(QObjectListModel):
             instances = list(map(self.wrapper_instance, data))
             self.setAll(instances)
     
-    def wrapper_instance(self, instance):
-        self.attach_attrs(instance)
-        return get_qobject_wrapper(instance, self.unique_field, self.other_fields)
+    @classmethod        
+    def wrapper_instance(cls, instance):
+        cls.attach_attrs(instance)
+        return get_qobject_wrapper(instance, cls.unique_field, cls.other_fields)
     
     def init_wrappers(self):
         if self._data:
@@ -142,7 +143,8 @@ class AbstractWrapperModel(QObjectListModel):
             return item
         return QtCore.QVariant()        
     
-    def attach_attrs(self, instance):
+    @classmethod
+    def attach_attrs(cls, instance):
         pass
     
     def init_signals(self):

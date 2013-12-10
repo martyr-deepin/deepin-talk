@@ -23,12 +23,13 @@
 import logging
 from PyQt5 import QtCore
 from dtalk.controls.qobject import QPropertyObject
-from dtalk.controls.models import GroupModel
+from dtalk.controls.models import GroupModel, MessageModel
 from dtalk.views.chat import ChatWindow
 from dtalk.core.server import XMPPServer
 import dtalk.core.signals as serverSignals
 import dtalk.models.signals as dbSignals
-from dtalk.controls.message import MessageModel
+from dtalk.models import ReceivedMessage
+from dtalk.controls.qobject import postGui
 
 logger = logging.getLogger("dtalk.controls.managers")
 
@@ -80,6 +81,8 @@ class ControlManager(QPropertyObject()):
     def __init__(self):
         super(ControlManager, self).__init__()
         self.chatWindowManager = dict()
+        dbSignals.post_save.connect(self.on_received_message, sender=ReceivedMessage)        
+        
     
     @QtCore.pyqtSlot(str)
     def openChat(self, jid):
@@ -91,6 +94,13 @@ class ControlManager(QPropertyObject()):
             
     def createModel(self, jid):        
         return MessageModel(to_jid=jid)
+    
+    @postGui()
+    def on_received_message(self, sender, instance, created, update_fields, *args, **kwargs):
+        if created:
+            jid = instance.friend.jid
+            if jid in self.chatWindowManager:
+                self.chatWindowManager[jid].model.appendMessage(instance, received=True)
 
 serverManager = ServerManager()    
 modelManager = ModelManager()

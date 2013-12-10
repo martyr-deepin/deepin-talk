@@ -40,7 +40,7 @@ if os.name == 'posix':
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from dtalk.utils.xdg import get_qml
 from dtalk.controls.managers import modelManager, serverManager, controlManager
 from dtalk.views.base import BaseView
@@ -59,8 +59,16 @@ class Panel(BaseView):
         self.setContextProperty("controlManager", controlManager)
         self.setContextProperty("serverManager", serverManager)
         self.setSource(QtCore.QUrl.fromLocalFile(get_qml('Main.qml')))
+        self.initTray()
         
     def onFocusWindowChanged(self, focusWindow):    
         if focusWindow.__class__.__name__ != "QQuickWindow":
             self.hideOtherWindow.emit()
-    
+            
+    def initTray(self):        
+        self.trayIcon = QtWidgets.QSystemTrayIcon(self)
+        icon = QtGui.QIcon(get_qml("images", "logo.png"))
+        self.trayIcon.setIcon(icon)
+        self.trayIcon.show()
+
+        

@@ -24,8 +24,10 @@
 import logging
 logger = logging.getLogger("dtalk.controls.models")
 
+from PyQt5 import QtCore
+
 from dtalk.models.signals import post_save, post_delete
-from dtalk.models import Resource, Friend, Group
+from dtalk.models import Resource, Friend, Group, SendedMessage
 from dtalk.controls.base import AbstractWrapperModel        
 from dtalk.controls.qobject import postGui
 from dtalk.cache import avatarManager
@@ -47,7 +49,8 @@ class GroupModel(AbstractWrapperModel):
     def load(self):
         return Group.select()
     
-    def attach_attrs(self, instance):
+    @classmethod
+    def attach_attrs(cls, instance):
         friend_model = FriendModel(group_id=instance.id)
         setattr(instance, "friendModel", friend_model)
         
@@ -116,7 +119,8 @@ class FriendModel(AbstractWrapperModel):
                 break
         return ret
     
-    def attach_attrs(self, instance):
+    @classmethod
+    def attach_attrs(cls, instance):
         resources = sorted(instance.resources, key=lambda item: item.priority, reverse=True)
         if len(resources) >= 1:
             resource = resources[0]
@@ -131,3 +135,47 @@ class FriendModel(AbstractWrapperModel):
         ret = self.get_obj_by_jid(jid)
         if ret:
             ret.avatar = path
+
+            
+class MessageModel(AbstractWrapperModel):
+    other_fields = ("type", "successed", "readed")
+    
+    def initial(self, to_jid):
+        self.to_jid = to_jid
+        self.init_signals()
+        
+    def init_signals(self):    
+        post_save.connect(self.on_sended_message, sender=SendedMessage)
+    
+    @postGui()
+    def on_sended_message(self, sender, instance, created, update_fields, *args, **kwargs):    
+        if created:
+            self.appendMessage(instance)
+    
+    def appendMessage(self, instance, received=False):
+        if not self.verify(instance):
+            return
+        obj = self.wrapper_instance(instance)
+        self.append(obj)
+        
+        if received:
+            if hasattr(instance, "readed"):
+                if instance.readed != True:
+                    instance.readed = True
+                    instance.save(update_fields=["readed"])
+        
+    def verify(self, instance):    
+        return instance.friend.jid == self.to_jid
+    
+    @classmethod
+    def attach_attrs(cls, instance):
+        if isinstance(instance, SendedMessage):
+            setattr(instance, "readed", True)
+        else:    
+            setattr(instance, "successed", True)
+        setattr(instance, "type", instance.TYPE)    
+        
+    @QtCore.pyqtSlot(str)
+    def postMessage(self, body):
+        SendedMessage.send_message(self.to_jid, body)        
+            
