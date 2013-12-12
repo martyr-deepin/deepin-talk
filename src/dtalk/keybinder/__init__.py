@@ -31,6 +31,13 @@ WEAKREF_TYPES = (weakref.ReferenceType, saferef.BoundMethodWeakref)
 
 
 class KeyBinder(threading.Thread, QtCore.QObject):
+    '''
+    >>> keybinder = KeyBinder()
+    >>> keybinder.bind("Ctrl+Alt+F", callback)
+    
+    # use lambda
+    >>> keybinder.bind("Ctrl+Alt+F", lambda : doSome..., weak=False)
+    '''    
     
     keyRelease = QtCore.pyqtSignal(object)    
     mouseMoved = QtCore.pyqtSignal(int, int)
