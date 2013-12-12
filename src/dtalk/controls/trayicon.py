@@ -35,7 +35,7 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
         self.activated.connect(self.onTrayIconActivated)
         cSignal.blink_trayicon.connect(self.blinking_trayicon)
         cSignal.still_trayicon.connect(self.stilled_trayicon)
-        keyBinder.backend.mouseMoved.connect(self.on_global_mouse_moved)
+        keyBinder.mouseMoved.connect(self.on_global_mouse_moved)
         self.timer = QtCore.QTimer()
         self.timer.setInterval(200)
         self.timer.setSingleShot(True)

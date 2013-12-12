@@ -23,20 +23,25 @@
 import threading
 import weakref
 
+from PyQt5 import QtCore
 from dtalk.dispatch import saferef
 from dtalk.keybinder.xutils import XlibBackend
 
 WEAKREF_TYPES = (weakref.ReferenceType, saferef.BoundMethodWeakref)
 
 
-class KeyBinder(threading.Thread):
+class KeyBinder(threading.Thread, QtCore.QObject):
+    
+    keyRelease = QtCore.pyqtSignal(object)    
+    mouseMoved = QtCore.pyqtSignal(int, int)
     
     def __init__(self):
-        super(KeyBinder, self).__init__()
+        threading.Thread.__init__(self)
+        QtCore.QObject.__init__(self)
         self.lock = threading.Lock()
         self.setDaemon(True)
-        self.backend = XlibBackend(self.check_key_event)
-        self.backend.keyRelease.connect(self.on_key_release_event)
+        self.backend = XlibBackend(self)
+        self.keyRelease.connect(self.on_key_release_event)
         self.receivers = {}
         
     def bind(self, key, receiver, weak=True):    

@@ -20,17 +20,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5 import QtCore
-
-class BaseBackend(QtCore.QObject):
+class BaseBackend(object):
     
-    keyRelease = QtCore.pyqtSignal(object)    
-    mouseMoved = QtCore.pyqtSignal(int, int)
-    
-    def __init__(self, check_key_event, *args, **kwargs):
-        super(BaseBackend, self).__init__()
-        self.check_key_event = check_key_event
+    def __init__(self, keybinder, *args, **kwargs):
+        self.keybinder = keybinder
         self.initial(*args, **kwargs)
+        
+    check_key_event = property(lambda self: self.keybinder.check_key_event)    
         
     def initial(self, *args, **kwargs):    
         pass
@@ -42,7 +38,8 @@ class BaseBackend(QtCore.QObject):
         raise NotImplementedError
     
     def emitKeyRelease(self, identifier):
-        self.keyRelease.emit(identifier)
+        self.keybinder.keyRelease.emit(identifier)
         
     def emitMouseMoved(self, x, y):    
-        self.mouseMoved.emit(x, y)
+        self.keybinder.mouseMoved.emit(x, y)
+
