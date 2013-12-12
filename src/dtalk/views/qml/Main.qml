@@ -2,6 +2,7 @@ import QtQuick 2.1
 import "Widgets"
 import "LoginPage"
 import "FriendPage"
+import "Notify"
 
 DWindow {
 	id: root
@@ -34,5 +35,8 @@ DWindow {
 		    anchors.fill: parent
         }
         
+        NotifyBox {}
     }
+    
+
 }

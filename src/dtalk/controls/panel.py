@@ -40,11 +40,12 @@ if os.name == 'posix':
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets
 from dtalk.utils.xdg import get_qml
 from dtalk.controls.managers import modelManager, serverManager, controlManager
 from dtalk.views.base import BaseView
-
+from dtalk.controls.trayicon import TrayIcon
+from dtalk.keybinder import keyBinder
 
 class Panel(BaseView):
     
@@ -55,20 +56,22 @@ class Panel(BaseView):
         self.setMinimumSize(QtCore.QSize(336, 780))        
         QtWidgets.qApp.focusWindowChanged.connect(self.onFocusWindowChanged)
         
+        self.initTray()        
         self.setContextProperty("modelManager", modelManager)
         self.setContextProperty("controlManager", controlManager)
         self.setContextProperty("serverManager", serverManager)
+        self.setContextProperty("trayIcon", self.trayIcon)
         self.setSource(QtCore.QUrl.fromLocalFile(get_qml('Main.qml')))
-        self.initTray()
+
+        self.initKeybinder()
         
     def onFocusWindowChanged(self, focusWindow):    
         if focusWindow.__class__.__name__ != "QQuickWindow":
             self.hideOtherWindow.emit()
             
     def initTray(self):        
-        self.trayIcon = QtWidgets.QSystemTrayIcon(self)
-        icon = QtGui.QIcon(get_qml("images", "logo.png"))
-        self.trayIcon.setIcon(icon)
+        self.trayIcon = TrayIcon(get_qml("images", "logo.png"), self)
         self.trayIcon.show()
 
-        
+    def initKeybinder(self):    
+        keyBinder.start()

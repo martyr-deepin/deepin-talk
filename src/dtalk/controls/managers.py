@@ -30,6 +30,7 @@ import dtalk.core.signals as serverSignals
 import dtalk.models.signals as dbSignals
 from dtalk.models import ReceivedMessage
 from dtalk.controls.qobject import postGui
+from dtalk.controls.notify import NotifyModel
 
 logger = logging.getLogger("dtalk.controls.managers")
 
@@ -81,6 +82,7 @@ class ControlManager(QPropertyObject()):
     def __init__(self):
         super(ControlManager, self).__init__()
         self.chatWindowManager = dict()
+        self.notifyModel = NotifyModel()
         dbSignals.post_save.connect(self.on_received_message, sender=ReceivedMessage)        
         
     
@@ -101,6 +103,13 @@ class ControlManager(QPropertyObject()):
             jid = instance.friend.jid
             if jid in self.chatWindowManager:
                 self.chatWindowManager[jid].model.appendMessage(instance, received=True)
+            else:    
+                self.notifyModel.appendMessage(instance)
+                
+    @QtCore.pyqtSlot(result="QVariant")            
+    def getNotifyModel(self):
+        return self.notifyModel
+    
 
 serverManager = ServerManager()    
 modelManager = ModelManager()

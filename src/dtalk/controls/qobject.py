@@ -195,6 +195,10 @@ class QObjectListModel(QtCore.QAbstractListModel):
         """ Enables the [] operator """
         return self._data[index]
     
+    @QtCore.pyqtSlot(result=int)
+    def total(self):
+        return self.size
+    
 def QPropertyObject():    
     return six.with_metaclass(QPropertyMeta, QtCore.QObject)
 
