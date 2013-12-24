@@ -7,47 +7,52 @@ Window {
     width: container.width; height: container.height
     x: trayIcon.getPos().x - width / 2
     y: trayIcon.getPos().y - height
-    /* visible: trayIcon.hovered || mouseArea.containsMouse */
+    visible: (trayIcon.hovered || mouseArea.containsMouse) && notifyView.model.count > 0
     flags: Qt.FramelessWindowHint | Qt.Popup
 	color: "transparent"
     
-    Connections {
-        target: trayIcon
-        onHoverStatusChanged: {
-            if (notifyView.model.total() == 0) {
-                if (win.visible) {
-                    win.visible = false
-                }
-                return
-            }
-            var hovered = trayIcon.hovered
-            if (hovered || mouseArea.containsMouse) {
-                if (!win.visible) {
-                    win.visible = true
-                }
-            } else {
-                if (win.visible) {
-                    win.visible = false
-                }
-            }
-        }
-    }
-    
-    RectWithCorner {
+    DRectangle {
         id: container
-        cornerHeight: 10
-        cornerWidth: 12
-        rectWidth: 200
-        rectHeight: notifyView.contentHeight + container.blurWidth * 2 + container.cornerHeight + container.borderMargin * 2 + 16
+        width: 230 + container.blurWidth * 2
+        borderMargin: 12
+        rectRadius: 3
+        height: Math.min(notifyView.model.count * notifyView.itemHeight + container.blurWidth * 2 + title.height + borderMargin*2, 240)
+        
+        Item {
+            id: title
+            width: parent.width
+            height: 18
+            
+            Row {
+                anchors.fill: parent
+                spacing: 6
+                
+                Text {
+                    text: "消息"
+                    font.pixelSize: 12
+                    color: "#ffffff"
+                }
+                
+                Text {
+                    text: "(" + notifyView.model.count + ")"
+                    font.pixelSize: 12
+                    color: Qt.rgba(1, 1, 1, 0.4)
+                }
+            }            
+        }
         
         ScrollWidget {
-            anchors.fill: parent
+            anchors.top: title.bottom
+            anchors.bottom: parent.bottom
+            width: parent.width
             ListView {
                 id: notifyView
+                property int itemHeight: 30
                 anchors.fill: parent
                 clip: true
                 delegate: NotifyDelegate {}
                 model: controlManager.getNotifyModel()
+                focus: true
             }
         }
     }
@@ -56,5 +61,10 @@ Window {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
+        propagateComposedEvents: true
+
+        onClicked: {
+            mouse.accepted = false
+        }
     }
 }

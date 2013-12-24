@@ -16,7 +16,7 @@ Item {
 		
 		RoundImageButton {
 			id: face
-			source: "../images/face.jpg"
+			source: "qrc:/images/common/face.jpg"
 			width: faceWidth; height: faceHeight
 			borderWidth: 4
 			radius: width/2

@@ -1,10 +1,10 @@
-import QtQuick 2.0
+import QtQuick 2.1
 
 Item {
 	id: titlebar
 	
-	function get_image (name) {
-		return "images/button/" + name + ".png"
+	function getImage (name) {
+		return "qrc:/images/button/" + name + ".png"
 	}
 	
 	Row {
@@ -14,27 +14,30 @@ Item {
 		anchors.rightMargin: 5
 				
 		ImageButton {
-			normal_image: get_image("window_menu_normal")
-			hover_image: get_image("window_menu_hover")
-			press_image: get_image("window_menu_press")
+			normalImage: getImage("window_menu_normal")
+			hoverImage: getImage("window_menu_hover")
+			pressImage: getImage("window_menu_press")
 		}
 		
 		ImageButton {
-			normal_image: get_image("window_min_normal")
-			hover_image: get_image("window_min_hover")
-			press_image: get_image("window_min_press")
+			normalImage: getImage("window_min_normal")
+			hoverImage: getImage("window_min_hover")
+			pressImage: getImage("window_min_press")
 		}
 		
 		ImageButton {
-			normal_image: get_image("window_max_normal")
-			hover_image: get_image("window_max_hover")
-			press_image: get_image("window_max_press")
+			normalImage: getImage("window_max_normal")
+			hoverImage: getImage("window_max_hover")
+			pressImage: getImage("window_max_press")
 		}
 		
 		ImageButton {
-			normal_image: get_image("window_close_normal")
-			hover_image: get_image("window_close_hover")
-			press_image: get_image("window_close_press")
+			normalImage: getImage("window_close_normal")
+			hoverImage: getImage("window_close_hover")
+			pressImage: getImage("window_close_press")
+            onClicked: {
+                windowView.closeWindow()
+            }
 		}
 		
 	}

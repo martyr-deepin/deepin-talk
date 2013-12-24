@@ -1,30 +1,30 @@
-import QtQuick 2.0
+import QtQuick 2.1
 
 
 Item {
-	id: button
+	id: root
 	
-	property string normal_image
-	property string hover_image
-	property string press_image
-	
+	width: image.width;	height: image.height    
+	property string normalImage
+	property string hoverImage
+	property string pressImage
 	signal clicked
-	
-	width: image.width;	height: image.height
-	
+    
 	Image {
 		id: image
-		source: normal_image
+		source: normalImage
 	}
 	
 	MouseArea {
 		id: mouseArea
-		anchors.fill: parent
+		anchors.fill: root
 		hoverEnabled: true
-		onEntered: { image.source = hover_image }
-		onExited: { image.source = normal_image }
-		onPressed: { image.source = press_image }
-		onReleased: { image.source= mouseArea.containsMouse ? hover_image : normal_image}
-		onClicked: button.clicked()
+		onEntered: { image.source = hoverImage }
+		onExited: { image.source = normalImage }
+		onPressed: { image.source = pressImage }
+		onReleased: { image.source= mouseArea.containsMouse ? hoverImage : normalImage}
+		onClicked: {
+            root.clicked()
+        }
 	}
 }

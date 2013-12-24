@@ -1,0 +1,78 @@
+QPushButton#themeButton {
+    background-image: url(:/images/button/window_theme_normal.png);
+    background-color: transparent;
+    border: none;
+    width: 26; height: 22;
+    outline: none;
+}
+
+QPushButton#themeButton:hover {
+   background-image: url(:/images/button/window_theme_hover.png);
+}
+
+QPushButton#themeButton:pressed {
+   background-image: url(:/images/button/window_theme_press.png);
+}
+
+
+QPushButton#menuButton {
+    background-image: url(:/images/button/window_menu_normal.png);
+    background-color: transparent;
+    border: none;
+    width: 26; height: 22;
+    outline: none;
+}
+
+QPushButton#menuButton:hover {
+   background-image: url(:/images/button/window_menu_hover.png);
+}
+
+QPushButton#menuButton:pressed {
+   background-image: url(:/images/button/window_menu_press.png);
+}
+
+
+QPushButton#minButton {
+    background-image: url(:/images/button/window_min_normal.png);
+    background-color: transparent;
+    border: none;
+    width: 26; height: 22;
+    outline: none;
+}
+
+QPushButton#minButton:hover {
+   background-image: url(:/images/button/window_min_hover.png);
+}
+
+QPushButton#minButton:pressed {
+   background-image: url(:/images/button/window_min_press.png);
+}
+
+QPushButton#closeButton {
+    background-image: url(:/images/button/window_close_normal.png);
+    background-color: transparent;
+    border: none;
+    width: 26; height: 22;
+    outline: none;
+}
+
+QPushButton#closeButton:hover {
+   background-image: url(:/images/button/window_close_hover.png);
+}
+
+QPushButton#closeButton:pressed {
+   background-image: url(:/images/button/window_close_press.png);
+}
+
+
+QLabel#mask {
+	background: qlineargradient(x1:0, y1:1, x2:1, y2:1,
+								stop: 0.0 rgba(230, 230, 230, 0.3),
+								stop: 0.3 rgba(230, 230, 230, 0.2),
+								stop: 0.6 rgba(230, 230, 230, 0.02),
+								stop: 1.0 rgba(230, 230, 230, 0.0));
+	border-bottom-width: 1px;
+	border-bottom-color: rgba(230, 230, 230, 230);
+	border-bottom-style: solid
+}
+

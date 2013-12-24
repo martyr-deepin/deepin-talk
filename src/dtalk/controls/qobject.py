@@ -72,16 +72,19 @@ class QObjectListModel(QtCore.QAbstractListModel):
         return self._roles
     
     def rowCount(self, parent=QtCore.QModelIndex()):
-        return self.size
+        return self.size()
     
     def setAll(self, data):
+        oldSize = self.size()
         self.beginResetModel()
         self._data = data
         self.endResetModel()
-        self.dataChanged.emit(self.index(0), self.index(self.size-1), [])
+        self.dataChanged.emit(self.index(0), self.index(self.size()-1), [])
+        if self.size() != oldSize:
+            self.countChanged.emit()
         
     def data(self, index, role):
-        if not index.isValid() or index.row() > self.size:
+        if not index.isValid() or index.row() > self.size():
             return QtCore.QVariant()
         try:
             item = self._data[index.row()]
@@ -96,9 +99,10 @@ class QObjectListModel(QtCore.QAbstractListModel):
     def append(self, objs):
         if not isinstance(objs, list):
             objs = [ objs ]
-        self.beginInsertRows(QtCore.QModelIndex(), self.size, self.size+len(objs)-1)    
+        self.beginInsertRows(QtCore.QModelIndex(), self.size(), self.size()+len(objs)-1)    
         self._data.extend(objs)
         self.endInsertRows()
+        self.countChanged.emit()
         
     def insert(self, i, objs):    
         if not isinstance(objs, list):
@@ -107,6 +111,7 @@ class QObjectListModel(QtCore.QAbstractListModel):
         for obj in reversed(objs):
             self._data.insert(i, obj)
         self.endInsertRows()    
+        self.countChanged.emit()
         
     def replace(self, obj, i=None):    
         if i is None:
@@ -133,6 +138,7 @@ class QObjectListModel(QtCore.QAbstractListModel):
         for cpt in range(count):
             self._data.pop(i)
         self.endRemoveRows()
+        self.countChanged.emit()
         
     def remove(self, obj):
         if not self.contains(obj):
@@ -143,14 +149,16 @@ class QObjectListModel(QtCore.QAbstractListModel):
         self.beginRemoveRows(QtCore.QModelIndex(), i, i)
         obj = self._data.pop(i)
         self.endRemoveRows()
+        self.countChanged.emit()
         return obj
     
     def clear(self):
         if not self._data:
             return
-        self.beginRemoveRows(QtCore.QModelIndex(), 0, self.size - 1)
+        self.beginRemoveRows(QtCore.QModelIndex(), 0, self.size() - 1)
         self._data = []
         self.endRemoveRows()
+        self.countChanged.emit()
 
     def contains(self, obj):
         return obj in self._data
@@ -158,7 +166,7 @@ class QObjectListModel(QtCore.QAbstractListModel):
     def indexOf(self, matchObj, fromIndex=0, positive=True):    
         index = self._data[fromIndex:].index(matchObj) + fromIndex
         if positive and index < 0:
-            index += self.size
+            index += self.size()
         return index
     
     def lastIndexOf(self, matchObj, fromIndex=-1, positive=True):
@@ -166,16 +174,15 @@ class QObjectListModel(QtCore.QAbstractListModel):
         r.reverse()
         index = - r[-fromIndex - 1:].index(matchObj) + fromIndex
         if positive and index < 0:
-            index += self.size
+            index += self.size()
         return index
     
-    @property    
     def size(self):
         return len(self._data)
     
     @QtCore.pyqtSlot(result=bool)
     def isEmpty(self):
-        return self.size == 0
+        return self.size() == 0
     
     @QtCore.pyqtSlot(int, result="QVariant")
     def get(self, i):
@@ -186,18 +193,17 @@ class QObjectListModel(QtCore.QAbstractListModel):
         return iter(self._data)
 
     def __len__(self):
-        return self.size
+        return self.size()
 
     def __nonzero__(self):
-        return self.size > 0
+        return self.size() > 0
 
     def __getitem__(self, index):
         """ Enables the [] operator """
         return self._data[index]
     
-    @QtCore.pyqtSlot(result=int)
-    def total(self):
-        return self.size
+    countChanged = QtCore.pyqtSignal()
+    count = QtCore.pyqtProperty(int, size, notify=countChanged)
     
 def QPropertyObject():    
     return six.with_metaclass(QPropertyMeta, QtCore.QObject)
@@ -229,3 +235,5 @@ class postGui(QtCore.QObject):
             self._func(obj, *args, **kwargs)
         else:    
             self._func(*args, **kwargs)
+            
+            

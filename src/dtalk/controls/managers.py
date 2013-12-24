@@ -21,16 +21,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 from dtalk.controls.qobject import QPropertyObject
 from dtalk.controls.models import GroupModel, MessageModel
-from dtalk.views.chat import ChatWindow
+from dtalk.views.chatWindow import ChatWindow
 from dtalk.core.server import XMPPServer
 import dtalk.core.signals as serverSignals
 import dtalk.models.signals as dbSignals
+import dtalk.views.signals as viewSignals
 from dtalk.models import ReceivedMessage
 from dtalk.controls.qobject import postGui
 from dtalk.controls.notify import NotifyModel
+# from dtalk.controls.chat import ChatApp
+
 
 logger = logging.getLogger("dtalk.controls.managers")
 
@@ -77,6 +80,7 @@ class ServerManager(QPropertyObject()):
     def on_user_friends_status_received(self, *args, **kwargs):    
         self.userRosterStatusReceived.emit()
         
+        
 class ControlManager(QPropertyObject()):        
     
     def __init__(self):
@@ -89,10 +93,12 @@ class ControlManager(QPropertyObject()):
     @QtCore.pyqtSlot(str)
     def openChat(self, jid):
         if jid not in self.chatWindowManager:
-            self.chatWindowManager[jid] = ChatWindow(model=self.createModel(jid))
-            self.chatWindowManager[jid].show()
+            w = ChatWindow(model=self.createModel(jid), jid=jid)
+            w.requestClose.connect(self.onChatWindowClose)
+            self.chatWindowManager[jid] = w
+            w.show()
         else:    
-            self.chatWindowManager[jid].raise_()
+            self.chatWindowManager[jid]().raise_()
             
     def createModel(self, jid):        
         return MessageModel(to_jid=jid)
@@ -102,7 +108,8 @@ class ControlManager(QPropertyObject()):
         if created:
             jid = instance.friend.jid
             if jid in self.chatWindowManager:
-                self.chatWindowManager[jid].model.appendMessage(instance, received=True)
+                w = self.chatWindowManager[jid]
+                w.model.appendMessage(instance, received=True)
             else:    
                 self.notifyModel.appendMessage(instance)
                 
@@ -110,7 +117,18 @@ class ControlManager(QPropertyObject()):
     def getNotifyModel(self):
         return self.notifyModel
     
-
+    def onChatWindowClose(self):
+        w = self.sender()
+        jid = w.jid
+        self.chatWindowManager.pop(jid)        
+        w.requestClose.disconnect(self.onChatWindowClose)
+        w.hide()
+        del w.model
+        del w.jid
+        w.close()
+        # w.deleteLater()        
+        # QtCore.QCoreApplication.sendPostedEvents(w, QtCore.QEvent.DeferredDelete)        
+        
 serverManager = ServerManager()    
 modelManager = ModelManager()
 controlManager = ControlManager()

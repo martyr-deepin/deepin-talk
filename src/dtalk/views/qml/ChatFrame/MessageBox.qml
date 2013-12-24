@@ -23,7 +23,7 @@ Item {
 		anchors.leftMargin: container.type == "received" ? 0 : 10
 		Column {
 			Image { 
-				source: "images/person.png"; smooth: true; 
+				source: "qrc:/images/common/person.png"; smooth: true; 
 				anchors.horizontalCenter: parent.horizontalCenter
 				width: 50; height: 50
 				}

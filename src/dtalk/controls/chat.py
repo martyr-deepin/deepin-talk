@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011 ~ 2013 Deepin, Inc.
-#               2011 ~ 2013 Hou ShaoHui
+# Copyright (C) 2011 ~ 2014 Deepin, Inc.
+#               2011 ~ 2014 Hou ShaoHui
 # 
 # Author:     Hou ShaoHui <houshao55@gmail.com>
 # Maintainer: Hou ShaoHui <houshao55@gmail.com>
@@ -20,17 +20,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import multiprocessing as mp
 from PyQt5 import QtWidgets
-import dtalk.views.resources_rc
-from dtalk.controls.panel import Panel
-from multiprocessing import freeze_support        
+from dtalk.views.chat import ChatWindow
 
-if __name__ == "__main__":        
-    freeze_support()
-    import sys
-    from dtalk.gui.utils import loadStyleSheet
-    app = QtWidgets.QApplication(sys.argv)
-    loadStyleSheet()
-    win = Panel()
-    win.show()
-    sys.exit(app.exec_())
+class ChatApp(mp.Process):
+    
+    def __init__(self, model, jid):
+        super(ChatApp, self).__init__()
+        
+        self.win = ChatWindow(model, jid)
+        
+    def run(self):    
+        app = QtWidgets.QApplication([])
+        self.win.show()
+        app.exec_()

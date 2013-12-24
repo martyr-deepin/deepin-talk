@@ -21,7 +21,7 @@ Item {
 				id: check
 				anchors.centerIn: parent
 				anchors.horizontalCenterOffset: 2
-				source: "images/check.png"
+				source: "qrc:/images/common/check.png"
 			}
 		}
 		

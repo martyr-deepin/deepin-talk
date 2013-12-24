@@ -16,6 +16,11 @@ DShadow {
 			DragArea {
 				anchors.fill: parent
 				window: windowView
+                propagateComposedEvents: true
+
+                onClicked: {
+                    mouse.accepted = false
+                }
 			}
 		}
 		

@@ -46,6 +46,8 @@ from dtalk.controls.managers import modelManager, serverManager, controlManager
 from dtalk.views.base import BaseView
 from dtalk.controls.trayicon import TrayIcon
 from dtalk.keybinder import keyBinder
+# from dtalk.views.chatWindow import ChatWindow
+
 
 class Panel(BaseView):
     
@@ -62,6 +64,8 @@ class Panel(BaseView):
         self.setContextProperty("serverManager", serverManager)
         self.setContextProperty("trayIcon", self.trayIcon)
         self.setSource(QtCore.QUrl.fromLocalFile(get_qml('Main.qml')))
+        # self.chat = ChatWindow(None, None)
+        # self.chat.show()
 
         self.initKeybinder()
         
@@ -70,8 +74,14 @@ class Panel(BaseView):
             self.hideOtherWindow.emit()
             
     def initTray(self):        
-        self.trayIcon = TrayIcon(get_qml("images", "logo.png"), self)
+        self.trayIcon = TrayIcon(self)
         self.trayIcon.show()
 
     def initKeybinder(self):    
         keyBinder.start()
+        
+    @QtCore.pyqtSlot()    
+    def closeWindow(self):
+        pass
+    
+        

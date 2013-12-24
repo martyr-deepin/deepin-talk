@@ -7,6 +7,8 @@ ShadowPanel {
 	property alias rightImage: rightImg.source
 	property alias echoMode: input.echoMode
     property alias text: input.text
+    property var textInput: input
+    signal returnPressed
 	
 	Row {
 		anchors.margins: 10
@@ -15,7 +17,7 @@ ShadowPanel {
 		
 		Image {
 			id: leftImg
-			source: "../images/person.png"
+			source: "qrc:/images/common/person.png"
 			anchors.verticalCenter: parent.verticalCenter
 		}
 		
@@ -25,11 +27,13 @@ ShadowPanel {
 			anchors.verticalCenter: parent.verticalCenter
 			verticalAlignment: Qt.AlignCenter
 			clip: true
+            focus: true
+            Keys.onReturnPressed: returnPressed()
 		}
 		
 		Image {
 			id: rightImg
-			source: "../images/arrow.png"
+			source: "qrc:/images/common/arrow.png"
 			anchors.verticalCenter: parent.verticalCenter
 		}
 		

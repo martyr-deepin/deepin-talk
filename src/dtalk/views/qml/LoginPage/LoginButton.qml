@@ -11,7 +11,7 @@ Item {
 	Image {
 		id: img
 		anchors.centerIn: parent
-		source: "../images/login.png"
+		source: "qrc:/images/common/login.png"
 		opacity: 0.5
 		antialiasing: true
 		smooth: true

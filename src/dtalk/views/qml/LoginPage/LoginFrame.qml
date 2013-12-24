@@ -22,17 +22,25 @@ Item {
 				LoginInput {
                     id: jid
 					anchors.horizontalCenter: parent.horizontalCenter
-					leftImage: "../images/person.png"
-					rightImage: "../images/arrow.png"
+					leftImage: "qrc:/images/common/person.png"
+					rightImage: "qrc:/images/common/arrow.png"
                     text: "houshao55@gmail.com"
+                    KeyNavigation.tab: passwd.textInput
 				}
 				
 				LoginInput {
                     id: passwd
 					anchors.horizontalCenter: parent.horizontalCenter
-					leftImage: "../images/passwd.png"
-					rightImage: "../images/keyboard.png"
+					leftImage: "qrc:/images/common/passwd.png"
+					rightImage: "qrc:/images/common/keyboard.png"
 					echoMode: TextInput.Password
+                    onReturnPressed: {
+                        if (jid.text != "" & passwd.text != ""){
+                            serverManager.login(jid.text, passwd.text)
+                            loginButton.isLogging = true
+                        }
+                        
+                    }
 				}
 				
 				Row {

@@ -17,7 +17,7 @@ Component {
                 spacing: 10
                 Image { 
                     id: arrow
-                    source: "../images/arrow.png" 
+                    source: "qrc:/images/common/arrow.png" 
                     anchors.verticalCenter: parent.verticalCenter
                     rotation: wrapper.expend ? 0 : -90
                 }

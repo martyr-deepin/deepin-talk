@@ -13,12 +13,12 @@ Item {
 		
 		Image {
 			id: status
-			source: "../images/status/online.png"
+			source: "qrc:/images/status/online.png"
 			anchors.verticalCenter: parent.verticalCenter
 		}
 		Image {
 			id: down
-			source: "../images/status/status_arrow_down.png"
+			source: "qrc:/images/status/status_arrow_down.png"
 			anchors.verticalCenter: parent.verticalCenter
 		}
 	
@@ -39,10 +39,10 @@ Item {
 	
 	ListModel {
 		id: statusModel
-		ListElement { type: 0; icon: "../images/status/online.png"; label: "在线" }
-		ListElement { type: 1; icon: "../images/status/hide.png"; label: "隐身" }
-		ListElement { type: 2; icon: "../images/status/busy.png"; label: "忙碌" }
-		ListElement { type: 3; icon: "../images/status/leave.png"; label: "离开" }
+		ListElement { type: 0; icon: "qrc:/images/status/online.png"; label: "在线" }
+		ListElement { type: 1; icon: "qrc:/images/status/hide.png"; label: "隐身" }
+		ListElement { type: 2; icon: "qrc:/images/status/busy.png"; label: "忙碌" }
+		ListElement { type: 3; icon: "qrc:/images/status/leave.png"; label: "离开" }
 	}
 	
 	Component {

@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.1
 import QtGraphicalEffects 1.0
 
 Item {
@@ -43,7 +43,7 @@ Item {
 			
 			Image {
 				anchors.fill: parent
-				source: "../images/bg.png"
+				source: "qrc:/images/common/bg.png"
 			}
 			
 			/* Rectangle { */

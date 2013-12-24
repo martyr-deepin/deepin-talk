@@ -23,13 +23,23 @@
 from PyQt5 import QtCore
 from dtalk.views.base import BaseView
 from dtalk.utils.xdg import get_qml
+from dtalk.views.signals import window_close
 
 
 class ChatWindow(BaseView):
     
-    def __init__(self, model, parent=None):
+    def __init__(self, model, jid, parent=None):
         super(ChatWindow, self).__init__(parent)
         self.setMinimumSize(QtCore.QSize(600, 620))        
         self.model = model
+        self.jid = jid
         self.setContextProperty("messageModel", self.model)
         self.setSource(QtCore.QUrl.fromLocalFile(get_qml('ChatFrame','ChatWindow.qml')))
+        
+    @QtCore.pyqtSlot()    
+    def closeWindow(self):
+        self.engine().clearComponentCache()
+        self.engine().trimComponentCache()
+        self.setContextProperty("messageModel", None)
+        self.setContextProperty("windowView", None)
+        window_close.send(jid=self.jid, sender=None)

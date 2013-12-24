@@ -35,7 +35,6 @@ class BaseView(QtQuick.QQuickView):
         self.root_context = self.rootContext()        
         self.setContextProperty("windowView", self)        
         
-        
     setContextProperty = property(lambda self: self.root_context.setContextProperty)    
     
     @QtCore.pyqtSlot(result="QVariant")

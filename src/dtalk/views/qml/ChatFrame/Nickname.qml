@@ -8,7 +8,7 @@ Item {
 	
 	Image { 
 		id: onlineStatus
-		source: "images/status.png"
+		source: "qrc:/images/status/online.png"
 		anchors.left: container.left
 		anchors.verticalCenter: container.verticalCenter
 	}

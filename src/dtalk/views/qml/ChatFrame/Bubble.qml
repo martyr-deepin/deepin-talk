@@ -11,7 +11,7 @@ Item {
 	
 	
 	BorderImage {
-		source: container.type == "received" ? "images/message_comming.png" : "images/message_reply.png"		
+		source: container.type == "received" ? "qrc:/images/chat/message_comming.png" : "qrc:/images/chat/message_reply.png"		
 		border { left: 18;  right: 18; top: 27; bottom: 18}		
 		horizontalTileMode: BorderImage.Stretch	
 		verticalTileMode: BorderImage.Stretch

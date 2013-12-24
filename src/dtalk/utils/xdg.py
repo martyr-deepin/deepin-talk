@@ -107,6 +107,10 @@ def get_last_dir():
 def get_qml(*subpath_elements):
     return os.path.join(program_dir, "dtalk", "views", "qml", *subpath_elements)
 
+def get_qss(*subpath_elements):
+    return os.path.join(program_dir, "dtalk", "views", "qss", *subpath_elements)
+
+
 def get_jid_dir(jid):
     d =  get_config_path(get_md5(jid))
     return makedirs(d)

@@ -29,21 +29,29 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
     _hoveredNty = QtCore.pyqtSignal()
     hoverStatusChanged = QtCore.pyqtSignal(bool)
     
-    def __init__(self, iconPath, parent=None):
-        super(TrayIcon, self).__init__(QtGui.QIcon(iconPath), parent)
+    def __init__(self, parent=None):
+        self.defaultIcon = QtGui.QIcon(":/images/common/logo.png")        
+        super(TrayIcon, self).__init__(self.defaultIcon, parent)
+        self.transparentIcon = QtGui.QIcon(":/images/common/transparent.png")
+        self.blinkIcon = None
+        self.currentIcon = self.defaultIcon
         self._hovered = False
         self.activated.connect(self.onTrayIconActivated)
+        
         cSignal.blink_trayicon.connect(self.blinking_trayicon)
         cSignal.still_trayicon.connect(self.stilled_trayicon)
         keyBinder.mouseMoved.connect(self.on_global_mouse_moved)
-        self.timer = QtCore.QTimer()
-        self.timer.setInterval(200)
-        self.timer.setSingleShot(True)
-        self.timer.timeout.connect(self.on_timer_timeout)
         
+        self.hoverTimer = QtCore.QTimer()
+        self.hoverTimer.setInterval(200)
+        self.hoverTimer.setSingleShot(True)
+        self.hoverTimer.timeout.connect(self.on_timer_timeout)
+        self.blinkTimer = QtCore.QTimer()
+        self.blinkTimer.setInterval(400)
+        self.blinkTimer.setSingleShot(False)
+        self.blinkTimer.timeout.connect(self.on_blink_timer_timeout)
         
     def onTrayIconActivated(self, reason):    
-        print reason
         if reason in (QtWidgets.QSystemTrayIcon.Context, QtWidgets.QSystemTrayIcon.Trigger):
             pass
         
@@ -62,10 +70,23 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
         print event
 
     def blinking_trayicon(self, sender, icon, *args, **kwargs):
-        pass
+        self.blinkIcon = QtGui.QIcon(icon)
+        self.blinkTimer.start(400)
+        self.currentIcon = self.blinkIcon
     
     def stilled_trayicon(self, *args, **kwargs):
-        pass
+        self.blinkTimer.stop()
+        self.currentIcon = self.defaultIcon
+        self.setIcon(self.defaultIcon)
+    
+    def on_blink_timer_timeout(self):
+        if self.currentIcon != self.transparentIcon:
+            self.currentIcon = self.transparentIcon
+            self.setIcon(self.transparentIcon)
+        else:    
+            if self.blinkIcon is not None:
+                self.currentIcon = self.blinkIcon
+                self.setIcon(self.blinkIcon)
     
     def set_hovered(self, value):
         if self._hovered != value:
@@ -78,14 +99,11 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
     
     def on_global_mouse_moved(self, x, y):
         rect = self.getNormalGeometry()
-        width = rect.x() + rect.width()
-        height = rect.y() + rect.height()
-        if rect.x() <= x <= width and \
-                rect.y() <= y <= height:
-            self.timer.stop()            
+        if rect.contains(x, y):
+            self.hoverTimer.stop()            
             self.set_hovered(True)
         else:    
-            self.timer.start()
+            self.hoverTimer.start()
             
     def on_timer_timeout(self):        
         self.set_hovered(False)

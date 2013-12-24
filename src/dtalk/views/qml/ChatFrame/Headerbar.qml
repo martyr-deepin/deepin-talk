@@ -33,13 +33,13 @@ Rectangle {
 		anchors.top: info.bottom
 		anchors.topMargin: 10
 		
-		DButton { source: "images/file.png"; anchors.verticalCenter: parent.verticalCenter }
-		DButton { source: "images/image.png"; anchors.verticalCenter: parent.verticalCenter } 
-		DButton { source: "images/block.png"; anchors.verticalCenter: parent.verticalCenter } 
-		RoundImageButton { source: "../images/face.jpg"; anchors.verticalCenter: parent.verticalCenter } 
-		DButton { source: "images/image.png"; anchors.verticalCenter: parent.verticalCenter } 
-		DButton { source: "images/timer.png"; anchors.verticalCenter: parent.verticalCenter } 
-		DButton { source: "images/shot.png"; anchors.verticalCenter: parent.verticalCenter } 
+		DButton { source: "qrc:/images/chat/file.png"; anchors.verticalCenter: parent.verticalCenter }
+		DButton { source: "qrc:/images/chat/image.png"; anchors.verticalCenter: parent.verticalCenter } 
+		DButton { source: "qrc:/images/chat/block.png"; anchors.verticalCenter: parent.verticalCenter } 
+		RoundImageButton { source: "qrc:/images/common/face.jpg"; anchors.verticalCenter: parent.verticalCenter } 
+		DButton { source: "qrc:/images/chat/image.png"; anchors.verticalCenter: parent.verticalCenter } 
+		DButton { source: "qrc:/images/chat/timer.png"; anchors.verticalCenter: parent.verticalCenter } 
+		DButton { source: "qrc:/images/chat/shot.png"; anchors.verticalCenter: parent.verticalCenter } 
 		
 	}
 }

@@ -16,7 +16,7 @@ Item {
 
 	
 	function getTabImage(name) {
-		return "image/tab/" + name + ".png"
+		return "qrc:/images/" + name + ".png"
 	}
 
     function setVisibles() {

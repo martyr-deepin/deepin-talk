@@ -60,7 +60,7 @@ Item {
 	}
 	
 	function getTabImage(name) {
-		return "../images/tab/" + name + ".png"
+		return "qrc:/images/common/" + name + ".png"
 	}
 	
     property Component tabViewStyle: TabViewStyle {
