@@ -33,4 +33,3 @@ if user_settings_file:
 settings.write = partial(settings.save, filename=user_settings_file)
 
 DEBUG = True
-OWNER_JID = None

@@ -17,6 +17,10 @@ DWindow {
                 loginFrame.isLogging = false
                 talkframeLoader.sourceComponent = talkframeComponent
             }
+            onUserLoginFailed: {
+                loginFrame.isLogging = false
+                loginFrame.showErrorTip(serverManager.loginFailedReason)
+            }
         }
         
         Component {
@@ -24,7 +28,6 @@ DWindow {
             TalkFrame { }
         }
 	    
-        
 	    LoginFrame {
             id: loginFrame
 		    anchors.fill: parent

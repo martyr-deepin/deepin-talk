@@ -64,4 +64,7 @@ class ChatWindow(DGraphicsWindow):
         self.requestClose.emit()
         
         
+    def setContextProperty(self, *args):        
+        pass
+    
 

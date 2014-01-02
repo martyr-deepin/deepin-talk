@@ -5,8 +5,8 @@ Rectangle {
     id: rect
     default property alias content: container.children    
     
-    width: rectWidth
-    height: rectHeight
+    width: 200
+    height: 200
     color: Qt.rgba(0, 0, 0, 0)
 
     property int borderMargin: 5    
@@ -15,25 +15,28 @@ Rectangle {
     property color blurColor: Qt.rgba(0, 0, 0, 1)
     property color borderColor: Qt.rgba(1, 1, 1, 0.15)
 
-    property int blurRadius: 16
-    property int blurWidth: 10
+    property int blurWidth: 2
     property int borderWidth: 2
-    property int rectRadius: 4
-    property int rectWidth: 200
-    property int rectHeight: 200
+    property int rectRadius: 10
     property rect contentRect
+    property bool isHalf: true
     property real widthMargin: adjustWidthMargin()
     property real heightMargin: adjustHeightMargin()
 
-    property string cornerDirection: "down"
-    property int cornerPos: rectWidth / 2
-    property int cornerWidth: 24
-    property int cornerHeight: 12
+    property var cornerDirection: Qt.LeftEdge
+    property string shadowDirection: "left"
+    property int cornerPos: 20
+    property int cornerWidth: 8
+    property int cornerHeight: 10
+    property alias painter: canvas
 	onCornerDirectionChanged: canvas.requestPaint()
+    onWidthChanged: canvas.requestPaint()
+    onHeightChanged: canvas.requestPaint()
+    onVisibleChanged: canvas.requestPaint()
     
     function adjustHeightMargin() {
         var tempHeight = blurWidth * 2 + borderMargin  * 2 
-        if (cornerDirection == "down" || cornerDirection == "up" ) {
+        if (cornerDirection == Qt.BottomEdge || cornerDirection == Qt.TopEdge ) {
             return tempHeight + cornerHeight 
         } else {
             return  tempHeight
@@ -42,21 +45,17 @@ Rectangle {
     
     function adjustWidthMargin() {
         var tempWidth = blurWidth * 2 + borderMargin  * 2 
-        if (cornerDirection == "left" || cornerDirection == "right" ) {
+        if (cornerDirection == Qt.LeftEdge || cornerDirection == Qt.RightEdge ) {
             return tempWidth + cornerHeight 
         } else {
             return  tempWidth
         }
     }
-    
 
     Canvas {
         id: canvas
-        width: rectWidth
-        height: rectHeight
-        
-        onWidthChanged: requestPaint()        
-        onHeightChanged: requestPaint()
+        width: rect.width
+        height: rect.height
         
         onPaint: {
             var ctx = getContext("2d")
@@ -66,13 +65,13 @@ Rectangle {
 
             ctx.beginPath();
 
-            if (cornerDirection == "down") {
+            if (cornerDirection == Qt.BottomEdge) {
                 var x = blurWidth
                 var y = blurWidth
-                var w = rectWidth - 2 * blurWidth
-                var h = rectHeight - 2 * blurWidth - cornerHeight
+                var w = rect.width - 2 * blurWidth
+                var h = rect.height - 2 * blurWidth - cornerHeight
+                
                 rect.contentRect = Qt.rect(x, y, w, h)
-
                 ctx.moveTo(x + rectRadius, y);                 // top side
                 ctx.lineTo(x + w - rectRadius, y);
                 // draw top right corner
@@ -97,11 +96,12 @@ Rectangle {
                 ctx.lineTo(x,y+rectRadius);                 // left side
                 // draw top left corner
                 ctx.arcTo(x,y,x+rectRadius,y,rectRadius);
-            } else if (cornerDirection == "up") {
+                
+            } else if (cornerDirection == Qt.TopEdge) {
                 var x = blurWidth
                 var y = blurWidth + cornerHeight
-                var w = rectWidth - 2 * blurWidth
-                var h = rectHeight - 2 * blurWidth - cornerHeight
+                var w = rect.width - 2 * blurWidth
+                var h = rect.height - 2 * blurWidth - cornerHeight
                 rect.contentRect = Qt.rect(x, y, w, h)
 
                 ctx.moveTo(x + rectRadius, y);                 // top side
@@ -130,11 +130,11 @@ Rectangle {
                 ctx.lineTo(x,y+rectRadius);                 // left side
                 // draw top left corner
                 ctx.arcTo(x,y,x+rectRadius,y,rectRadius);
-            } else if (cornerDirection == "left") {
+            } else if (cornerDirection == Qt.LeftEdge) {
                 var x = blurWidth + cornerHeight
                 var y = blurWidth
-                var w = rectWidth - 2 * blurWidth - cornerHeight
-                var h = rectHeight - 2 * blurWidth
+                var w = rect.width - 2 * blurWidth - cornerHeight
+                var h = rect.height - 2 * blurWidth
                 rect.contentRect = Qt.rect(x, y, w, h)
 
                 ctx.moveTo(x + rectRadius, y);                 // top side
@@ -157,17 +157,24 @@ Rectangle {
                     cornerPos = y + h - rectRadius - cornerWidth / 2
                 }
                 ctx.lineTo(x, cornerPos + cornerWidth / 2) /* corner */
-                ctx.lineTo(x - cornerHeight, cornerPos)
+                if (isHalf) {
+                    ctx.lineTo(x - cornerHeight, cornerPos - cornerWidth / 2)
+                    
+                } else {
+                    ctx.lineTo(x - cornerHeight, cornerPos)
+                }
+                
+                
                 ctx.lineTo(x, cornerPos - cornerWidth / 2)
 
                 ctx.lineTo(x,y+rectRadius);                 // left side
                 // draw top left corner
                 ctx.arcTo(x,y,x+rectRadius,y,rectRadius);
-            } else if (cornerDirection == "right") {
+            } else if (cornerDirection == Qt.RightEdge) {
                 var x = blurWidth
                 var y = blurWidth
-                var w = rectWidth - 2 * blurWidth - cornerHeight
-                var h = rectHeight - 2 * blurWidth
+                var w = rect.width - 2 * blurWidth - cornerHeight
+                var h = rect.height - 2 * blurWidth
                 rect.contentRect = Qt.rect(x, y, w, h)
 
                 ctx.moveTo(x + rectRadius, y);                 // top side
@@ -183,8 +190,14 @@ Rectangle {
                     cornerPos = y + h - rectRadius - cornerWidth / 2
                 }
                 ctx.lineTo(x + w, cornerPos - cornerWidth / 2) /* corner */
-                ctx.lineTo(x + w + cornerHeight, cornerPos)
+                if (isHalf) {
+                    ctx.lineTo(x + w + cornerHeight, cornerPos - cornerWidth / 2)
+                    
+                } else {
+                    ctx.lineTo(x + w + cornerHeight, cornerPos)
+                }
                 ctx.lineTo(x + w, cornerPos + cornerWidth / 2)
+                
 
                 ctx.lineTo(x+w,y+h-rectRadius);    // right side
                 // draw bottom right corner
@@ -200,29 +213,29 @@ Rectangle {
             }
 
             ctx.closePath();
+            /* ctx.lineWidth = borderWidth */
+            /* ctx.strokeStyle = borderColor */
+            /* ctx.stroke() */
 
-            ctx.lineWidth = borderWidth
-            ctx.strokeStyle = borderColor
-            ctx.stroke()
-
-            /* var gradient = ctx.createLinearGradient(rectWidth / 2, 0, rectWidth / 2, rectHeight); */
+            /* var gradient = ctx.createLinearGradient(rect.width / 2, 0, rect.width / 2, rect.height); */
             /* gradient.addColorStop(0.0, Qt.rgba(0, 0, 0, 0.55)); */
             /* gradient.addColorStop(1.0, Qt.rgba(0, 0, 0, 0.65)); */
             ctx.fillStyle = fillColor
             ctx.fill()
-
             ctx.restore()
         }
     }
 
-    Glow {
+
+    DropShadow {
         anchors.fill: canvas
-        visible: rect.withBlur
-        radius: blurRadius
+        horizontalOffset: shadowDirection == "left" ? -1 : 1
+        verticalOffset: 1
+        radius: 3.0
         samples: 16
-        color: rect.blurColor
+        color: Qt.rgba(0.0, 0.0, 0.0, 1.0)
         source: canvas
-    }
+    }    
     
     Item {
         id: container

@@ -12,7 +12,7 @@ Rectangle {
     property int borderMargin: 5    
     property bool withBlur: true
     property color fillColor: Qt.rgba(0, 0, 0, 0.7)
-    property color blurColor: Qt.rgba(0, 0, 0, 1)
+    property color blurColor: Qt.rgba(0, 0, 0, 0.5)
     property color borderColor: Qt.rgba(1, 1, 1, 0.15)
 
     property int blurRadius: 16
@@ -30,6 +30,8 @@ Rectangle {
     property int cornerWidth: 24
     property int cornerHeight: 12
 	onCornerDirectionChanged: canvas.requestPaint()
+    onCornerPosChanged: canvas.requestPaint()
+    property alias painter: canvas
     
     function adjustHeightMargin() {
         var tempHeight = blurWidth * 2 + borderMargin  * 2 
@@ -106,12 +108,12 @@ Rectangle {
 
                 ctx.moveTo(x + rectRadius, y);                 // top side
 
-                if (cornerPos < x + rectRadius + cornerWidth / 2) {
-                    cornerPos = x + rectRadius + cornerWidth / 2
-                }
-                if (cornerPos > x + w - rectRadius - cornerWidth / 2) {
-                    cornerPos = x + w - rectRadius - cornerWidth / 2
-                }
+                /* if (cornerPos < x + rectRadius + cornerWidth / 2) { */
+                /*     cornerPos = x + rectRadius + cornerWidth / 2 */
+                /* } */
+                /* if (cornerPos > x + w - rectRadius - cornerWidth / 2) { */
+                /*     cornerPos = x + w - rectRadius - cornerWidth / 2 */
+                /* } */
                 ctx.lineTo(cornerPos - cornerWidth / 2, y) /* corner */
                 ctx.lineTo(cornerPos, y - cornerHeight)
                 ctx.lineTo(cornerPos + cornerWidth / 2, y)
@@ -214,15 +216,16 @@ Rectangle {
             ctx.restore()
         }
     }
-
-    Glow {
+    
+    DropShadow {
         anchors.fill: canvas
-        visible: rect.withBlur
+        horizontalOffset: 0
+        verticalOffset: 8
         radius: blurRadius
         samples: 16
         color: rect.blurColor
         source: canvas
-    }
+    }    
     
     Item {
         id: container

@@ -42,7 +42,9 @@ Item {
 		onExited: container.state = ""
 		onReleased: { container.state = mouseArea.containsMouse ? "hovered" : ""}
 		onClicked: {
-			container.clicked()
+            if (!busyIndicator.on) {
+			    container.clicked()                
+            }
 		}
 	}
 }

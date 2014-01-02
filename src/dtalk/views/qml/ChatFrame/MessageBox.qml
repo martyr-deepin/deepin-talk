@@ -1,32 +1,43 @@
 import QtQuick 2.1
+import "../Widgets"
+import QtGraphicalEffects 1.0
 
 Item {
 	id:container
-	property string type
-	property string content
-	height: messageBubble.height 
+    property var messageObj
+	height: Math.max(messageBubble.height, personInfo.height)
+    property real messageWidth: messageBubble.width + personInfo.width
 	
 	Bubble {
 		id: messageBubble
-		message: container.content
-		anchors.left: container.type == "received" ? personInfo.right : container.left
-		width: 250
+		message: messageObj.body
+		anchors.left: messageObj.type == "received" ? personInfo.right : container.left
+        maxWidth: parent.width * 0.66
 		y: 10
-        type: container.type
+        type: messageObj.type
 	}
 		
-	Rectangle {
+	Item {
 		id: personInfo
 		y: 10
-		width: 60
-		anchors.left: container.type == "received" ? container.left : messageBubble.right
-		anchors.leftMargin: container.type == "received" ? 0 : 10
+		width: 60; height: 50 + 15
+		anchors.left: messageObj.type == "received" ? container.left : messageBubble.right
+		anchors.leftMargin: messageObj.type == "received" ? 0 : 10
 		Column {
-			Image { 
-				source: "qrc:/images/common/person.png"; smooth: true; 
+            spacing: 5
+            
+			RoundImageButton { 
+				source: "qrc:/images/common/face.jpg"; smooth: true; 
 				anchors.horizontalCenter: parent.horizontalCenter
 				width: 50; height: 50
 				}
+            
+            TextShadow {
+                text: messageObj.created
+                font.pixelSize: 10
+				anchors.horizontalCenter: parent.horizontalCenter
+                
+            }
 		}
 			
 	}

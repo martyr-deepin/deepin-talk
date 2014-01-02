@@ -22,6 +22,7 @@
 
 from PyQt5 import QtWidgets
 import dtalk.views.resources_rc
+import dtalk.gui.plugins
 from dtalk.controls.panel import Panel
 from multiprocessing import freeze_support        
 

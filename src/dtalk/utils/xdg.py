@@ -22,9 +22,12 @@
 
 
 import os
+import time
 
 from dtalk.utils.constant import PROGRAM_NAME
 from dtalk.utils.crypto import get_md5
+
+OWNER_JID = None
 
 def get_parent_dir(filepath, level=1):
     parent_dir = os.path.realpath(filepath)
@@ -111,7 +114,13 @@ def get_qss(*subpath_elements):
     return os.path.join(program_dir, "dtalk", "views", "qss", *subpath_elements)
 
 
-def get_jid_dir(jid):
+def get_jid_dir(jid=None):
+    if jid is None:
+        jid  = OWNER_JID
+        
+    if jid is None:
+        raise RuntimeError("must be run after logged in")
+    
     d =  get_config_path(get_md5(jid))
     return makedirs(d)
 
@@ -120,13 +129,27 @@ def makedirs(d):
         os.makedirs(d)
     return d    
 
-def get_jid_db(jid):
+def get_jid_db(jid=None):
     return os.path.join(get_jid_dir(jid), 'data.db')
 
-def get_avatar_dir(jid):
+def get_avatar_dir(jid=None):
     d = os.path.join(get_jid_dir(jid), 'avatar')
     return makedirs(d)
 
+def get_screenshot_dir(jid=None):
+    d = os.path.join(get_jid_dir(jid), "screenshots")
+    return makedirs(d)
+
+def generate_time_md5():
+    t = str(time.time())
+    return get_md5(t)
+
+def get_uuid_screentshot_path():
+    path = os.path.join(get_screenshot_dir(), generate_time_md5())
+    while os.path.exists(path):
+        path = os.path.join(get_screenshot_dir(), generate_time_md5())
+    return path    
+    
 def _make_missing_dirs():
     """
         Make any missing base XDG directories

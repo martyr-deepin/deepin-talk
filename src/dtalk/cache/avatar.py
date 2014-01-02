@@ -24,8 +24,7 @@ import os
 import base64
 import logging
 
-import dtalk.conf
-from dtalk.utils.xdg import get_avatar_dir, get_qml
+from dtalk.utils.xdg import get_avatar_dir
 from dtalk.utils import crypto
 from dtalk.cache.signals import avatar_saved
 
@@ -80,11 +79,7 @@ class AvatarManager(object):
             
     @property       
     def avatar_dir(self):    
-        owner_jid = dtalk.conf.OWNER_JID
-        if owner_jid is None:
-            logger.warning("AvatarManager must be run after logged in")
-            raise RuntimeError("AvatarManager must be run after logged in")
-        return get_avatar_dir(owner_jid)
+        return get_avatar_dir()
 
     def save_avatar(self, jid, base64data):
         before_avatar = self.get_avatar(jid)

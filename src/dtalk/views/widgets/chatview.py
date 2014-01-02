@@ -42,6 +42,16 @@ class ChatView(QtWidgets.QListView):
         
 class MessageDelegate(QtWidgets.QStyledItemDelegate):        
     
+    def __init__(self, parent=None):    
+        super(MessageDelegate, self).__init__(parent)
+        
+        self.textDocument = QtGui.QTextDocument(self)
+        self.textDocument.cursorPositionChanged.connect(self.onCursorChanged)
+        
+        
+    def onCursorChanged(self, cursor):    
+        print cursor
+        
     def paint(self, painter, option, index):
         painter.setRenderHints(QtGui.QPainter.Antialiasing | QtGui.QPainter.SmoothPixmapTransform 
                             | QtGui.QPainter.TextAntialiasing)
@@ -61,7 +71,7 @@ class MessageDelegate(QtWidgets.QStyledItemDelegate):
         painter.fillPath(path, QtGui.QColor(82, 60, 145))
         
         # draw body
-        doc = QtGui.QTextDocument(self)
+        doc = self.textDocument
         doc.setHtml(instance.body)
         doc.setTextWidth(rect.width())
         ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
@@ -78,3 +88,4 @@ class MessageDelegate(QtWidgets.QStyledItemDelegate):
         size.setHeight(size.height() * 5)
         return size
         
+    

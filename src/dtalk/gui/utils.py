@@ -70,5 +70,13 @@ def createProxyWidget(widget, minimum=None, preferred=None, maximum=None):
         w.setMaximumSize(maximum)
     return w    
 
+
+def qimageToBase64(image, imageType):
+    imageAsByteArray = QtCore.QByteArray()
+    imageBuffer = QtCore.QBuffer(imageAsByteArray)
+    imageBuffer.open(QtCore.QIODevice.WriteOnly)
+    image.save(imageBuffer, imageType)
+    return str(imageAsByteArray.toBase64())
+
         
         

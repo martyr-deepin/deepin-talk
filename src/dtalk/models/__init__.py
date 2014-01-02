@@ -34,6 +34,7 @@ import peewee as pw
 from dtalk.utils.xmpp import split_jid, get_email
 from dtalk.utils.contextdecorator import contextmanager
 from dtalk.utils.xdg import get_jid_db
+from dtalk.utils.threads import threaded
 from dtalk.utils import six
 from dtalk.models import signals
 from dtalk.models.db import Model
@@ -43,6 +44,8 @@ logger = logging.getLogger('models.Model')
 DEFAULT_GROUP = '我的好友'
 
 database = pw.SqliteDatabase(None, check_same_thread=False, threadlocals=True)
+
+init_finished = False
 
 @contextmanager
 def disable_auto_commit(*args, **kwargs):
@@ -56,7 +59,9 @@ def disable_auto_commit(*args, **kwargs):
     finally:
         database.set_autocommit(True)
 
+@threaded        
 def init_db(jid):        
+    global init_finished
     f = get_jid_db(jid)
     database.init(f)
     created = False
@@ -66,6 +71,8 @@ def init_db(jid):
         create_tables()
         Friend.create_self(jid)
         created = True
+        
+    init_finished = True    
     signals.db_init_finished.send(sender=database, created=created)    
         
 def check_update_data(obj, data):

@@ -24,38 +24,50 @@ import logging
 from PyQt5 import QtCore, QtWidgets
 from dtalk.controls.qobject import QPropertyObject
 from dtalk.controls.models import GroupModel, MessageModel
-from dtalk.views.chatWindow import ChatWindow
+from dtalk.views.chat import ChatWindow
+# from dtalk.views.chatWindow import ChatWindow
 from dtalk.core.server import XMPPServer
 import dtalk.core.signals as serverSignals
 import dtalk.models.signals as dbSignals
-import dtalk.views.signals as viewSignals
 from dtalk.models import ReceivedMessage
 from dtalk.controls.qobject import postGui
 from dtalk.controls.notify import NotifyModel
-# from dtalk.controls.chat import ChatApp
-
+from dtalk.gui.utils import qimageToBase64
 
 logger = logging.getLogger("dtalk.controls.managers")
 
-class ModelManager(QPropertyObject()):
-    
-    dbInitFinished = QtCore.pyqtSignal()
+
+class CommonManager(QPropertyObject()):
     
     def __init__(self):
-        super(ModelManager, self).__init__()
-        dbSignals.db_init_finished.connect(self.on_db_init_finished)
+        super(CommonManager, self).__init__()
+        self.systemClipboard = None
         self.groupModel = GroupModel()
     
     @QtCore.pyqtSlot(str, result="QVariant")
     def getModel(self, modelType):
         return self.groupModel
-        
-    def on_db_init_finished(self, *args, **kwargs):    
-        self.dbInitFinished.emit()
     
+    @QtCore.pyqtSlot(result=str)    
+    def getClipboardText(self):    
+        self.initialClipboard()        
+        mimeData = self.systemClipboard.mimeData()
+        if mimeData.hasImage():
+            img = qimageToBase64(mimeData.imageData(), "png")
+            return '''<img src="data:image/png;base64,{0}" max-width="200" />'''.format(img)
+        elif mimeData.hasText():
+            return mimeData.text()
+        return ""
+    
+    def initialClipboard(self):
+        if self.systemClipboard is None:
+            self.systemClipboard = QtWidgets.QApplication.clipboard()        
     
 class ServerManager(QPropertyObject()):
+    __qtprops__ = { "loginFailedReason" : "" }
+    
     userLoginSuccessed = QtCore.pyqtSignal()
+    userLoginFailed = QtCore.pyqtSignal(str)
     userRosterReceived = QtCore.pyqtSignal()
     userRosterStatusReceived = QtCore.pyqtSignal()
     
@@ -65,6 +77,7 @@ class ServerManager(QPropertyObject()):
         serverSignals.user_login_successed.connect(self.on_user_login_successed)
         serverSignals.user_roster_received.connect(self.on_user_roster_received)
         serverSignals.user_roster_status_received.connect(self.on_user_friends_status_received)
+        serverSignals.user_login_failed.connect(self.on_user_login_failed)
         
     @QtCore.pyqtSlot(str, str)    
     def login(self, jid, password):
@@ -80,6 +93,9 @@ class ServerManager(QPropertyObject()):
     def on_user_friends_status_received(self, *args, **kwargs):    
         self.userRosterStatusReceived.emit()
         
+    def on_user_login_failed(self, reason, *args, **kwargs):    
+        self.loginFailedReason = reason
+        self.userLoginFailed.emit(reason)
         
 class ControlManager(QPropertyObject()):        
     
@@ -95,6 +111,7 @@ class ControlManager(QPropertyObject()):
         if jid not in self.chatWindowManager:
             w = ChatWindow(model=self.createModel(jid), jid=jid)
             w.requestClose.connect(self.onChatWindowClose)
+            w.setContextProperty("commonManager", commonManager)
             self.chatWindowManager[jid] = w
             w.show()
         else:    
@@ -126,9 +143,9 @@ class ControlManager(QPropertyObject()):
         del w.model
         del w.jid
         w.close()
-        # w.deleteLater()        
+        w.deleteLater()        
         # QtCore.QCoreApplication.sendPostedEvents(w, QtCore.QEvent.DeferredDelete)        
         
 serverManager = ServerManager()    
-modelManager = ModelManager()
+commonManager = CommonManager()
 controlManager = ControlManager()

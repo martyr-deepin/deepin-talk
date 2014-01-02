@@ -57,7 +57,7 @@ Item {
 	Image {
 		anchors.fill: parent
 		anchors.topMargin: 0 - Common.titlebarHeight
-		source: "../images/mask.png"
+		source: "qrc:/images/common/mask.png"
 	}	
 	
 	Rectangle {

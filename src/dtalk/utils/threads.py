@@ -20,13 +20,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from dtalk.dispatch import Signal
+import threading
+from functools import wraps
 
-user_login_successed = Signal(providing_args=['jid'])
-user_login_failed = Signal(providing_args=['jid', 'reason'])
-user_logged_out = Signal(providing_args=['jid'])
-user_roster_init_completed = Signal(providing_args=[])
-user_roster_received = Signal(providing_args=[])
-user_roster_status_received = Signal(providing_args=[])
-server_disconnected = Signal(providing_args=[])
-raise_excepted = Signal(providing_args=["exc_info"])
+def threaded(f):
+    """
+        A decorator that will make any function run in a new thread
+    """
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        t = threading.Thread(target=f, args=args, kwargs=kwargs)
+        t.setDaemon(True)
+        t.start()
+
+    return wrapper

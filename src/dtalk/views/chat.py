@@ -23,10 +23,9 @@
 from PyQt5 import QtCore
 from dtalk.views.base import BaseView
 from dtalk.utils.xdg import get_qml
-from dtalk.views.signals import window_close
-
 
 class ChatWindow(BaseView):
+    requestClose = QtCore.pyqtSignal()
     
     def __init__(self, model, jid, parent=None):
         super(ChatWindow, self).__init__(parent)
@@ -42,4 +41,6 @@ class ChatWindow(BaseView):
         self.engine().trimComponentCache()
         self.setContextProperty("messageModel", None)
         self.setContextProperty("windowView", None)
-        window_close.send(jid=self.jid, sender=None)
+        self.requestClose.emit()
+        
+

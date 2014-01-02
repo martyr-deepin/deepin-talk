@@ -23,7 +23,7 @@
 import copy
 from PyQt5 import QtCore
 from dtalk.utils import six
-from dtalk.controls.qobject import QObjectListModel, QPropertyMeta
+from dtalk.controls.qobject import QObjectListModel, QPropertyMeta, postGui
 from dtalk.models import BaseModel
 from dtalk.models import signals
 
@@ -110,6 +110,7 @@ class AbstractWrapperModel(QObjectListModel):
     def initial(self):
         pass
 
+    @postGui()
     def on_db_init_finished(self, created, *args, **kwargs):
         self.db_is_created = created        
         if not created:

@@ -26,7 +26,7 @@ Item {
 		antialiasing: true
 		smooth: true
 	}
-	
+    
 	states: [
 		State {
 			name: "hovered"

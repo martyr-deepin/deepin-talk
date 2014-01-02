@@ -5,7 +5,11 @@ import "../Widgets"
 Item {
     id: container
     property alias isLogging: loginButton.isLogging
-	
+    
+    function showErrorTip(text) {
+        errorTip.show(text)
+    }
+    
 	Column {
 			anchors.fill: parent
 			anchors.topMargin: 90
@@ -41,6 +45,18 @@ Item {
                         }
                         
                     }
+                    
+                    DTooltip { 
+                        id: errorTip
+                        anchors.top: parent.bottom
+                        anchors.left: parent.left
+                        anchors.topMargin: -20
+                        anchors.leftMargin: -5
+                        z: 100
+                        visible: false
+                    }
+
+                    z: 10
 				}
 				
 				Row {
@@ -57,9 +73,11 @@ Item {
                 id: loginButton
 				width: parent.width
                 onClicked: {
-                    if (jid.text != "" & passwd.text != ""){
+                    if (jid.text != "" && passwd.text != ""){
                         serverManager.login(jid.text, passwd.text)
                         isLogging = true
+                    } else {
+                        showErrorTip("请输入密码")
                     }
                 }
 			}

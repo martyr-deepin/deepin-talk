@@ -65,7 +65,6 @@ class FriendModel(AbstractWrapperModel):
     '''
     
     def initial(self, group_id=None, *args, **kwargs):
-        print id(self), "#####"
         self.group_id = group_id
         self.initData()    
         self.init_signals()
@@ -174,6 +173,9 @@ class MessageModel(AbstractWrapperModel):
         else:    
             setattr(instance, "successed", True)
         setattr(instance, "type", instance.TYPE)    
+        strCreated = instance.created.strftime("%H:%M:%S")
+        instance.created = strCreated
+
         
     @QtCore.pyqtSlot(str)
     def postMessage(self, body):

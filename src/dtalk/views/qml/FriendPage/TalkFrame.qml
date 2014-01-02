@@ -40,7 +40,7 @@ Item {
                     anchors.leftMargin: 10
                     anchors.fill: parent
                     delegate: GroupDelegate {}
-                    model: modelManager.getModel("friend")
+                    model: commonManager.getModel("friend")
                     interactive: true
                     clip: true
                 }
