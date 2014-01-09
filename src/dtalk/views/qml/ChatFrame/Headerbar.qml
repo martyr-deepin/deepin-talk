@@ -1,5 +1,6 @@
 import QtQuick 2.1
 import "../Widgets"
+import "../scripts/roster.js" as Roster
 
 Rectangle {
 	id: container
@@ -10,7 +11,7 @@ Rectangle {
 		spacing: 10
 		
 	    Nickname {
-	    	id: nickname
+            nickname: Roster.getDisplayName(messageModel.jidInfo())
 			anchors.horizontalCenter: parent.horizontalCenter		
 	    }
 	    
@@ -36,7 +37,7 @@ Rectangle {
 		DButton { source: "qrc:/images/chat/file.png"; anchors.verticalCenter: parent.verticalCenter }
 		DButton { source: "qrc:/images/chat/image.png"; anchors.verticalCenter: parent.verticalCenter } 
 		DButton { source: "qrc:/images/chat/block.png"; anchors.verticalCenter: parent.verticalCenter } 
-		RoundImageButton { source: "qrc:/images/common/face.jpg"; anchors.verticalCenter: parent.verticalCenter } 
+		RoundImageButton { source: messageModel.jidInfo().avatar; anchors.verticalCenter: parent.verticalCenter } 
 		DButton { source: "qrc:/images/chat/image.png"; anchors.verticalCenter: parent.verticalCenter } 
 		DButton { source: "qrc:/images/chat/timer.png"; anchors.verticalCenter: parent.verticalCenter } 
 		DButton { source: "qrc:/images/chat/shot.png"; anchors.verticalCenter: parent.verticalCenter } 

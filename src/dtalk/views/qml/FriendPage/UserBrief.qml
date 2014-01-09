@@ -1,12 +1,13 @@
 import QtQuick 2.1
 import "../Widgets"
 import "../scripts/common.js" as Common
+import "../scripts/roster.js" as Roster
 
 Item {
 	id: root
 	height: 176
-	property string username: "小邪兽"
-	property url faceSource: "qrc:/images/common/face.jpg"
+	property string username: Roster.getDisplayName(commonManager.selfInfo())
+	property url faceSource: commonManager.selfInfo().avatar
 	property url statusSource: "qrc:/images/status/online.png"
 	property string statusMessage: "这个家伙很懒，什么都没留下!什么都没留下!什么都没留下!什么都没留下!"
 	property int displayMode: 0

@@ -22,17 +22,20 @@
 
 import logging
 from PyQt5 import QtCore, QtWidgets
+
+import dtalk.core.signals as serverSignals
+import dtalk.models.signals as dbSignals
+import dtalk.utils.xdg as dtalkXdg
+import dtalk.controls.utils as controlUtils
+
 from dtalk.controls.qobject import QPropertyObject
 from dtalk.controls.models import GroupModel, MessageModel
 from dtalk.views.chat import ChatWindow
 # from dtalk.views.chatWindow import ChatWindow
 from dtalk.core.server import XMPPServer
-import dtalk.core.signals as serverSignals
-import dtalk.models.signals as dbSignals
 from dtalk.models import ReceivedMessage
 from dtalk.controls.qobject import postGui
 from dtalk.controls.notify import NotifyModel
-from dtalk.gui.utils import qimageToBase64
 
 logger = logging.getLogger("dtalk.controls.managers")
 
@@ -41,27 +44,22 @@ class CommonManager(QPropertyObject()):
     
     def __init__(self):
         super(CommonManager, self).__init__()
-        self.systemClipboard = None
         self.groupModel = GroupModel()
+        self._selfInfo = None
     
     @QtCore.pyqtSlot(str, result="QVariant")
     def getModel(self, modelType):
         return self.groupModel
     
-    @QtCore.pyqtSlot(result=str)    
-    def getClipboardText(self):    
-        self.initialClipboard()        
-        mimeData = self.systemClipboard.mimeData()
-        if mimeData.hasImage():
-            img = qimageToBase64(mimeData.imageData(), "png")
-            return '''<img src="data:image/png;base64,{0}" max-width="200" />'''.format(img)
-        elif mimeData.hasText():
-            return mimeData.text()
-        return ""
-    
-    def initialClipboard(self):
-        if self.systemClipboard is None:
-            self.systemClipboard = QtWidgets.QApplication.clipboard()        
+    @QtCore.pyqtSlot(str, result="QVariant")
+    def getJidInfo(self, jid):
+        return controlUtils.getJidInfo(jid)
+        
+    @QtCore.pyqtSlot(result="QVariant")    
+    def selfInfo(self):
+        if self._selfInfo is None:
+            self._selfInfo = controlUtils.getJidInfo(dtalkXdg.OWNER_JID)
+        return self._selfInfo
     
 class ServerManager(QPropertyObject()):
     __qtprops__ = { "loginFailedReason" : "" }
@@ -102,9 +100,8 @@ class ControlManager(QPropertyObject()):
     def __init__(self):
         super(ControlManager, self).__init__()
         self.chatWindowManager = dict()
-        self.notifyModel = NotifyModel()
+        self.notifyModel = NotifyModel(self)
         dbSignals.post_save.connect(self.on_received_message, sender=ReceivedMessage)        
-        
     
     @QtCore.pyqtSlot(str)
     def openChat(self, jid):
@@ -115,7 +112,7 @@ class ControlManager(QPropertyObject()):
             self.chatWindowManager[jid] = w
             w.show()
         else:    
-            self.chatWindowManager[jid]().raise_()
+            self.chatWindowManager[jid].raise_()
             
     def createModel(self, jid):        
         return MessageModel(to_jid=jid)
@@ -140,11 +137,9 @@ class ControlManager(QPropertyObject()):
         self.chatWindowManager.pop(jid)        
         w.requestClose.disconnect(self.onChatWindowClose)
         w.hide()
-        del w.model
-        del w.jid
         w.close()
         w.deleteLater()        
-        # QtCore.QCoreApplication.sendPostedEvents(w, QtCore.QEvent.DeferredDelete)        
+
         
 serverManager = ServerManager()    
 commonManager = CommonManager()

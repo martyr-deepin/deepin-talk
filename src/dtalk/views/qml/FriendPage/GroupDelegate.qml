@@ -25,7 +25,7 @@ Component {
                 Text { 
                     id: groupName
                     text: instance.name
-                    color: "#333333"
+                    color: "#fff"
                     anchors.verticalCenter: parent.verticalCenter
                 }
                 

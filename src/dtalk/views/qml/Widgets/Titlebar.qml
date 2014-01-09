@@ -1,8 +1,10 @@
 import QtQuick 2.1
+import "../scripts/common.js" as Common
 
 Item {
 	id: titlebar
 	
+    signal closed
 	function getImage (name) {
 		return "qrc:/images/button/" + name + ".png"
 	}
@@ -36,7 +38,8 @@ Item {
 			hoverImage: getImage("window_close_hover")
 			pressImage: getImage("window_close_press")
             onClicked: {
-                windowView.closeWindow()
+                /* Common.findParent(titlebar).destroy() */
+                titlebar.closed()
             }
 		}
 		

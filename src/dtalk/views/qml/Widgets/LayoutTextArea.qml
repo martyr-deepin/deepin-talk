@@ -50,6 +50,7 @@ TextEdit {
         font: textItem.font
         textFormat: textItem.textFormat
         opacity: 0
+        visible: false
  
         // this has to be called here, because textItem sends them before the workaround notices it,
         // which leads to wrong dimensions.

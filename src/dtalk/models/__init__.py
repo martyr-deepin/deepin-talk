@@ -127,7 +127,7 @@ class Friend(BaseModel):
         except cls.DoesNotExist:    
             obj = None
         return obj    
-
+    
     @classmethod
     def create_or_update_roster(cls, roster):
         with disable_auto_commit():

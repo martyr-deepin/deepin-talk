@@ -29,6 +29,7 @@ ShadowPanel {
 			clip: true
             focus: true
             Keys.onReturnPressed: returnPressed()
+            font.pixelSize: 14
 		}
 		
 		Image {

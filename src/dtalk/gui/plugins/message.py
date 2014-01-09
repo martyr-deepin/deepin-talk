@@ -20,6 +20,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+from __future__ import unicode_literals
+
+from PIL import Image
 from PyQt5 import QtCore, QtQuick, QtGui, QtWidgets
 from dtalk.utils.xdg import get_uuid_screentshot_path
 
@@ -31,9 +35,11 @@ class DMessage(QtQuick.QQuickItem):
         super(DMessage, self).__init__(parent)
         self.systemClipboard = None
         self._textDocument = None
-        self._maxWidth = 100
+        # self._textEdit = QtWidgets.QTextEdit()
+
+        self._maxWidth = 150
         self.setAcceptedMouseButtons(QtCore.Qt.LeftButton|QtCore.Qt.RightButton)
-        # self.setAcceptHoverEvents(True)
+        self.setAcceptHoverEvents(True)
         
     def getDocument(self):
         return self._textDocument
@@ -43,6 +49,7 @@ class DMessage(QtQuick.QQuickItem):
         if self._textDocument is None:
             self._textDocument = textDocument
             self._textCursor = QtGui.QTextCursor(self._textDocument)
+            # self._textEdit.setDocument(self._textDocument)
         self._documentNfy.emit()    
         
     document = QtCore.pyqtProperty(QtQuick.QQuickTextDocument, getDocument, setDocument, notify=_documentNfy)
@@ -84,23 +91,27 @@ class DMessage(QtQuick.QQuickItem):
         
     @QtCore.pyqtSlot(str)    
     def insertImage(self, image):
+        url = QtCore.QUrl(image)
+        image =  url.toLocalFile()
         imageSize = self.getImageSize(image)
         width = imageSize.width()
         height = imageSize.height()
         if width > self.maxWidth:
             height = height * (self.maxWidth / float(width))            
             width = self.maxWidth
-
-        if image.startswith(":/"):
-            image = "qrc" + image
             
+        # imageFormat = QtGui.QTextImageFormat()    
+        # imageFormat.setName(image)
+        # imageFormat.setWidth(width)
+        # imageFormat.setHeight(height)
+        # self._textCursor.insertImage(imageFormat)
         self._textCursor.insertHtml('<img src="{0}" width="{1}" height="{2}" />'.format(image, width, height))
         
-    def getImageSize(self, image):    
-        pixmap = QtGui.QPixmap(image)
-        imageSize = pixmap.size()
-        del pixmap
-        return imageSize
+    def getImageSize(self, url):    
+        im = Image.open(url)
+        size_ = QtCore.QSize(*im.size)
+        del im
+        return size_
         
     @QtCore.pyqtSlot(str)    
     def insertText(self, text):
@@ -113,17 +124,26 @@ class DMessage(QtQuick.QQuickItem):
         c = QtGui.QTextCursor(self._textDocument)
         c.setPosition(cursorPos)
         return c
+    
 
     @QtCore.pyqtSlot(int, int)
     def testCursor(self, width, height):
-        point = QtCore.QPointF(width, height)
+        point = QtCore.QPoint(width, height)
         textCursor = self.cursorForPosition(point)
         fmt = textCursor.charFormat()
         if fmt.isImageFormat():
             ifmt = fmt.toImageFormat()
             print ifmt.name()
             
-            
     def mousePressEvent(self, event):        
         self.testCursor(event.x(), event.y())
         event.setAccepted(False)
+        
+    # def mouseMoveEvent(self, event):
+    #     print "moveEvent"
+    #     self.testCursor(event.x(), event.y())
+    #     event.setAccepted(False)
+        
+    # def hoverMoveEvent(self, event):    
+    #     print "hoverMoveEvent"
+    #     event.setAccepted(False)

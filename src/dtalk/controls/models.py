@@ -33,6 +33,7 @@ from dtalk.controls.qobject import postGui
 from dtalk.cache import avatarManager
 import dtalk.cache.signals as cache_signals
 import dtalk.core.signals as server_signals
+import dtalk.controls.utils as controlUtils
 
 
 class GroupModel(AbstractWrapperModel):    
@@ -141,6 +142,7 @@ class MessageModel(AbstractWrapperModel):
     
     def initial(self, to_jid):
         self.to_jid = to_jid
+        self._wrapper_jid_info = controlUtils.getJidInfo(to_jid)
         self.init_signals()
         
     def init_signals(self):    
@@ -181,3 +183,6 @@ class MessageModel(AbstractWrapperModel):
     def postMessage(self, body):
         SendedMessage.send_message(self.to_jid, body)        
             
+    @QtCore.pyqtSlot(result="QVariant")    
+    def jidInfo(self):
+        return self._wrapper_jid_info

@@ -20,6 +20,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from dtalk.models import Friend
+from dtalk.controls.base import get_qobject_wrapper
+from dtalk.cache import avatarManager
 
 def get_friend(obj):
     if hasattr(obj, "friend"):
@@ -33,4 +36,14 @@ def get_display_name(obj):
     if instance.nickname:
         return instance.nickname
     return instance.jid
+    
+def getJidInfo(jid):
+    try:
+        obj = Friend.get(jid=jid)
+    except Friend.DoesNotExist:    
+        return None
+    else:
+        avatar = avatarManager.get_avatar(jid)
+        setattr(obj, "avatar", avatar)
+        return  get_qobject_wrapper(obj, unique_field="jid", other_fields=('avatar',))
     

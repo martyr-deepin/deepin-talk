@@ -20,6 +20,7 @@ Rectangle {
     property int borderWidth: 2
     property int rectRadius: 4
     property rect contentRect
+    property int sideWidth: blurWidth + borderMargin
 
     Canvas {
         id: canvas
@@ -73,7 +74,5 @@ Rectangle {
         y: rect.contentRect.y + borderMargin
         width: rect.contentRect.width - borderMargin * 2
         height: rect.contentRect.height - borderMargin * 2
-        anchors.centerIn: parent
-
     }
 }

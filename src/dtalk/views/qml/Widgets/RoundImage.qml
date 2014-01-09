@@ -6,7 +6,7 @@ Item {
 	
 	property alias source: image.source
 	property real radius: width/2
-	
+    
 	Image {
 		anchors.fill: parent		
 		id: image

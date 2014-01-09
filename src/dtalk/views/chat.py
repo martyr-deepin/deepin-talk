@@ -37,10 +37,8 @@ class ChatWindow(BaseView):
         
     @QtCore.pyqtSlot()    
     def closeWindow(self):
+        self.engine().trimComponentCache()        
         self.engine().clearComponentCache()
-        self.engine().trimComponentCache()
-        self.setContextProperty("messageModel", None)
-        self.setContextProperty("windowView", None)
         self.requestClose.emit()
+        del self.model
         
-

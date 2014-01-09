@@ -152,12 +152,13 @@ class QObjectListModel(QtCore.QAbstractListModel):
         self.countChanged.emit()
         return obj
     
+    @QtCore.pyqtSlot()
     def clear(self):
         if not self._data:
             return
-        self.beginRemoveRows(QtCore.QModelIndex(), 0, self.size() - 1)
+        self.beginResetModel()
         self._data = []
-        self.endRemoveRows()
+        self.endResetModel()
         self.countChanged.emit()
 
     def contains(self, obj):
