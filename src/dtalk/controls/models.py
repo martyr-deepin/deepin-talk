@@ -139,14 +139,16 @@ class FriendModel(AbstractWrapperModel):
             
 class MessageModel(AbstractWrapperModel):
     other_fields = ("type", "successed", "readed")
+    _jidInfoSignal = QtCore.pyqtSignal()
     
     def initial(self, to_jid):
         self.to_jid = to_jid
-        self._wrapper_jid_info = controlUtils.getJidInfo(to_jid)
+        self._jidInfo = None
         self.init_signals()
         
     def init_signals(self):    
         post_save.connect(self.on_sended_message, sender=SendedMessage)
+        post_save.connect(self.on_userinfo_changed, sender=Friend)
     
     @postGui()
     def on_sended_message(self, sender, instance, created, update_fields, *args, **kwargs):    
@@ -183,6 +185,18 @@ class MessageModel(AbstractWrapperModel):
     def postMessage(self, body):
         SendedMessage.send_message(self.to_jid, body)        
             
-    @QtCore.pyqtSlot(result="QVariant")    
+    @QtCore.pyqtProperty("QVariant", notify=_jidInfoSignal)
     def jidInfo(self):
-        return self._wrapper_jid_info
+        if self._jidInfo is None:
+            self._jidInfo = controlUtils.getJidInfo(self.to_jid)
+        return self._jidInfo    
+    
+    @jidInfo.setter
+    def jidInfo(self, obj):
+        self._jidInfo = obj
+        self._jidInfoSignal.emit()
+    
+    @postGui()    
+    def on_userinfo_changed(self, instance, *args, **kwargs):
+        if instance.jid == self.to_jid:
+            self.jidInfo = controlUtils.getJidInfo(instance)

@@ -23,6 +23,7 @@
 from dtalk.models import Friend
 from dtalk.controls.base import get_qobject_wrapper
 from dtalk.cache import avatarManager
+from dtalk.utils.six import string_types
 
 def get_friend(obj):
     if hasattr(obj, "friend"):
@@ -38,12 +39,14 @@ def get_display_name(obj):
     return instance.jid
     
 def getJidInfo(jid):
-    try:
-        obj = Friend.get(jid=jid)
-    except Friend.DoesNotExist:    
-        return None
-    else:
-        avatar = avatarManager.get_avatar(jid)
-        setattr(obj, "avatar", avatar)
-        return  get_qobject_wrapper(obj, unique_field="jid", other_fields=('avatar',))
-    
+    if isinstance(jid, string_types):
+        try:
+            obj = Friend.get(jid=jid)
+        except Friend.DoesNotExist:    
+            return None
+    else:    
+        obj = jid
+        
+    avatar = avatarManager.get_avatar(obj.jid)
+    setattr(obj, "avatar", avatar)
+    return  get_qobject_wrapper(obj, unique_field="jid", other_fields=('avatar',))

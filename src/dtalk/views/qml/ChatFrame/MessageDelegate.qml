@@ -40,7 +40,7 @@ Component {
                     spacing: 5
             
 			        RoundImageButton { 
-				        source: instance.type == "received" ? messageModel.jidInfo().avatar : commonManager.selfInfo().avatar;
+				        source: instance.type == "received" ? messageModel.jidInfo.avatar : commonManager.ownerInfo.avatar;
                         smooth: true; 
 				        anchors.horizontalCenter: parent.horizontalCenter
 				        width: 50; height: 50

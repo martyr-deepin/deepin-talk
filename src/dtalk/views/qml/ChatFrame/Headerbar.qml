@@ -11,7 +11,7 @@ Rectangle {
 		spacing: 10
 		
 	    Nickname {
-            nickname: Roster.getDisplayName(messageModel.jidInfo())
+            nickname: Roster.getDisplayName(messageModel.jidInfo)
 			anchors.horizontalCenter: parent.horizontalCenter		
 	    }
 	    
@@ -37,7 +37,7 @@ Rectangle {
 		DButton { source: "qrc:/images/chat/file.png"; anchors.verticalCenter: parent.verticalCenter }
 		DButton { source: "qrc:/images/chat/image.png"; anchors.verticalCenter: parent.verticalCenter } 
 		DButton { source: "qrc:/images/chat/block.png"; anchors.verticalCenter: parent.verticalCenter } 
-		RoundImageButton { source: messageModel.jidInfo().avatar; anchors.verticalCenter: parent.verticalCenter } 
+		RoundImageButton { source: messageModel.jidInfo.avatar; anchors.verticalCenter: parent.verticalCenter } 
 		DButton { source: "qrc:/images/chat/image.png"; anchors.verticalCenter: parent.verticalCenter } 
 		DButton { source: "qrc:/images/chat/timer.png"; anchors.verticalCenter: parent.verticalCenter } 
 		DButton { source: "qrc:/images/chat/shot.png"; anchors.verticalCenter: parent.verticalCenter } 

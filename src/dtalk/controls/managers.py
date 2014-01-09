@@ -25,27 +25,30 @@ from PyQt5 import QtCore, QtWidgets
 
 import dtalk.core.signals as serverSignals
 import dtalk.models.signals as dbSignals
+from dtalk.models import ReceivedMessage, Friend
 import dtalk.utils.xdg as dtalkXdg
 import dtalk.controls.utils as controlUtils
 
 from dtalk.controls.qobject import QPropertyObject
 from dtalk.controls.models import GroupModel, MessageModel
 from dtalk.views.chat import ChatWindow
-# from dtalk.views.chatWindow import ChatWindow
 from dtalk.core.server import XMPPServer
-from dtalk.models import ReceivedMessage
 from dtalk.controls.qobject import postGui
 from dtalk.controls.notify import NotifyModel
+
 
 logger = logging.getLogger("dtalk.controls.managers")
 
 
 class CommonManager(QPropertyObject()):
     
+    _ownerInfoSignal = QtCore.pyqtSignal()
+    
     def __init__(self):
         super(CommonManager, self).__init__()
         self.groupModel = GroupModel()
-        self._selfInfo = None
+        self._ownerInfo = None
+        dbSignals.post_save.connect(self.on_post_save, sender=Friend)
     
     @QtCore.pyqtSlot(str, result="QVariant")
     def getModel(self, modelType):
@@ -55,11 +58,21 @@ class CommonManager(QPropertyObject()):
     def getJidInfo(self, jid):
         return controlUtils.getJidInfo(jid)
         
-    @QtCore.pyqtSlot(result="QVariant")    
-    def selfInfo(self):
-        if self._selfInfo is None:
-            self._selfInfo = controlUtils.getJidInfo(dtalkXdg.OWNER_JID)
-        return self._selfInfo
+    @QtCore.pyqtProperty("QVariant", notify=_ownerInfoSignal)
+    def ownerInfo(self):
+        if self._ownerInfo is None:
+            self._ownerInfo = controlUtils.getJidInfo(dtalkXdg.OWNER_JID)
+        return self._ownerInfo
+    
+    @ownerInfo.setter
+    def ownerInfo(self, obj):
+        self._ownerInfo = obj
+        self._ownerInfoSignal.emit()
+        
+    @postGui()    
+    def on_post_save(self, instance,  *args, **kwargs):    
+        if instance.isSelf:
+            self.ownerInfo = controlUtils.getJidInfo(instance)
     
 class ServerManager(QPropertyObject()):
     __qtprops__ = { "loginFailedReason" : "" }
