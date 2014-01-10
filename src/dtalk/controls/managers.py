@@ -43,11 +43,13 @@ logger = logging.getLogger("dtalk.controls.managers")
 class CommonManager(QPropertyObject()):
     
     _ownerInfoSignal = QtCore.pyqtSignal()
+    dbInitFinished = QtCore.pyqtSignal()
     
     def __init__(self):
         super(CommonManager, self).__init__()
         self.groupModel = GroupModel()
         self._ownerInfo = None
+        dbSignals.db_init_finished.connect(self.on_db_init_finished)
         dbSignals.post_save.connect(self.on_post_save, sender=Friend)
     
     @QtCore.pyqtSlot(str, result="QVariant")
@@ -73,6 +75,9 @@ class CommonManager(QPropertyObject()):
     def on_post_save(self, instance,  *args, **kwargs):    
         if instance.isSelf:
             self.ownerInfo = controlUtils.getJidInfo(instance)
+            
+    def on_db_init_finished(self, *args, **kwargs):        
+        self.dbInitFinished.emit()
     
 class ServerManager(QPropertyObject()):
     __qtprops__ = { "loginFailedReason" : "" }
