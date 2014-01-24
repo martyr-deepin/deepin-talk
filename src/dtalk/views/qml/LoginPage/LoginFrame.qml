@@ -29,7 +29,6 @@ Item {
 					leftImage: "qrc:/images/common/person.png"
 					rightImage: "qrc:/images/common/arrow.png"
                     text: "houshao55@gmail.com"
-                    KeyNavigation.tab: passwd.textInput
 				}
 				
 				LoginInput {

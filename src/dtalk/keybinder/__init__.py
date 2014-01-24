@@ -20,12 +20,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import threading
 import weakref
 
 from PyQt5 import QtCore
 from dtalk.dispatch import saferef
-from dtalk.keybinder.xutils import XlibBackend
+
+if sys.platform.startswith("linux"):
+    from dtalk.keybinder.xutils import XlibBackend
+    KeyBinderBackend = XlibBackend
+else:    
+    from dtalk.keybinder.dummy import DummyBackend
+    KeyBinderBackend = DummyBackend
 
 WEAKREF_TYPES = (weakref.ReferenceType, saferef.BoundMethodWeakref)
 
@@ -47,7 +54,8 @@ class KeyBinder(threading.Thread, QtCore.QObject):
         QtCore.QObject.__init__(self)
         self.lock = threading.Lock()
         self.setDaemon(True)
-        self.backend = XlibBackend(self)
+        
+        self.backend = KeyBinderBackend(self)
         self.keyRelease.connect(self.on_key_release_event)
         self.receivers = {}
         

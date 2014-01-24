@@ -21,8 +21,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtQml
-from message import DMessage
+from dtalk.gui.plugins.message import DMessage
+from dtalk.gui.plugins.popup import PopupItem
 
 QtQml.qmlRegisterType(DMessage, "DTalk", 1, 0, "DMessage")
+QtQml.qmlRegisterType(PopupItem, "DTalk", 1, 0, "PopupItem")
+
 
 

@@ -52,6 +52,8 @@ from dtalk.keybinder import keyBinder
 class Panel(BaseView):
     
     hideOtherWindow = QtCore.pyqtSignal()
+    mousePressed = QtCore.pyqtSignal(QtCore.QPointF)
+    focusLosed =QtCore.pyqtSignal()
     
     def __init__(self):
         super(Panel, self).__init__()
@@ -72,6 +74,8 @@ class Panel(BaseView):
     def onFocusWindowChanged(self, focusWindow):    
         if focusWindow.__class__.__name__ != "QQuickWindow":
             self.hideOtherWindow.emit()
+        if focusWindow is None:    
+            self.focusLosed.emit()
             
     def initTray(self):        
         self.trayIcon = TrayIcon(self)
@@ -84,4 +88,8 @@ class Panel(BaseView):
     def closeWindow(self):
         pass
     
+        
+    def mousePressEvent(self, event):    
+        self.mousePressed.emit(QtCore.QPointF(event.x(), event.y()))
+        return super(Panel, self).mousePressEvent(event)
         

@@ -1,7 +1,7 @@
 import QtQuick 2.1
-import "../Widgets"
+import "../Widgets" as Widgets
 
-ShadowPanel {
+Widgets.ShadowPanel {
 	width: 260; height: 42
 	property alias leftImage: leftImg.source
 	property alias rightImage: rightImg.source
@@ -21,7 +21,7 @@ ShadowPanel {
 			anchors.verticalCenter: parent.verticalCenter
 		}
 		
-		TextInputShadow {
+		Widgets.DTextField {
 			id: input
 			width: 190; 
 			anchors.verticalCenter: parent.verticalCenter

@@ -12,7 +12,6 @@ DialogCorner {
     cornerDirection: "up"
     cornerPos: 40
     rectRadius: 2
-    
     property alias text: label.text
     
     function show(text) {
