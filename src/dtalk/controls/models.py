@@ -95,7 +95,6 @@ class FriendModel(AbstractWrapperModel):
     @postGui()    
     def on_post_save(self, sender, instance, created, update_fields, *args, **kwargs):
         if sender == Friend:
-            print self.group_id, instance.group.id
             if not self.verify(instance):
                 return 
             if created:

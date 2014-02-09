@@ -27,9 +27,11 @@ Resource.select(Resource, pw.fn.Max(Resource.priority).alias('priority')).group_
 '''
 
 import os
+import sys
 import datetime
 import logging
 import peewee as pw
+import traceback
 
 from dtalk.utils.xmpp import split_jid, get_email
 from dtalk.utils.contextdecorator import contextmanager
@@ -53,7 +55,7 @@ def disable_auto_commit(*args, **kwargs):
     try:
         yield
     except:
-        pass
+        traceback.print_exc(file=sys.stdout)
     else:
         database.commit()
     finally:
@@ -150,12 +152,12 @@ class Friend(BaseModel):
                     check_update_data(obj, data)
                     
     @classmethod                
-    def create_or_update_roster_sleek(cls, resoter_client):
+    def create_or_update_roster_sleek(cls, client_roster):
         with disable_auto_commit():
-            for jid in resoter_client:
-                item = resoter_client[jid]
+            for jid in client_roster.keys():
+                item = client_roster[jid]
                 data = dict()
-                data['jid'] = item.jid.bare
+                data['jid'] = item.jid
                 data['remark'] = item['name']
                 data['subscription'] = item['subscription']
                 groups = item['groups']

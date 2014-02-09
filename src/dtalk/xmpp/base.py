@@ -25,17 +25,15 @@ import sleekxmpp
 import logging
 import threading
 
-if sys.version_info < (3, 0):
-    from sleekxmpp.util.misc_ops import setdefaultencoding
-    setdefaultencoding('utf8')
 
 from sleekxmpp.exceptions import IqError, IqTimeout
 from dtalk.models import signals as db_signals
-from dtalk.models import SendedMessage, ReceivedMessage, Friend, Resource
+from dtalk.models import SendedMessage, ReceivedMessage, Friend
 from dtalk.xmpp import signals as xmpp_signals
 
 from dtalk.models import init_db
 import dtalk.utils.xdg
+from dtalk.utils.threads import threaded
 
 logger = logging.getLogger("dtalk.xmpp")
     
@@ -57,31 +55,13 @@ class BaseMessage(object):
             
 class BaseRoster(object):            
     
-    def __init__(self):
-        self._presences_received = threading.Event()
-        self._received = set()
-        self.add_event_handler("changed_status", self.wait_for_presences)
-        
+    # @threaded
+    def request_roster(self):
+        self.get_roster()
+        self.send_presence()
+    
     def process_all_roster(self):
-        try:
-            self.get_roster()
-        except IqError as err:    
-            logger.warning("Error: {0}".format(err.iq['error']['condition']))
-        except IqTimeout:    
-            logger.warning("Error: Request timed out")
-            
-        # send presence    
-        self.send_presence()    
-        self._presences_received.wait(5)
-        
         Friend.create_or_update_roster_sleek(self.client_roster)
-        
-    def wait_for_presences(self, pres):    
-        self._received.add(pres['from'].bare)
-        if len(self._received) >= len(self.client_roster.keys()):
-            self._presences_received.set()
-        else:    
-            self._presences_received.clear()
             
 class BaseVCard(object):            
     
@@ -113,10 +93,12 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
     def __init__(self, jid, password):
         sleekxmpp.ClientXMPP.__init__(self, jid, password)
         
+        self.process(block=False)
+        
         self.register_plugin("xep_0004") # Data Forms
         self.register_plugin("xep_0030") # Service Discovery
         # self.register_plugin("xep_0054") # vcard-temp
-        self.register_plugin("xep_0153")
+        # self.register_plugin("xep_0153")
         self.register_plugin("xep_0060") # pubsub
         
         BaseMessage.__init__(self)
@@ -128,9 +110,14 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
         self.add_event_handler("disconnected", self._on_disconnected)
         self.add_event_handler("failed_auth", self._on_failed_auth)
         self.add_event_handler("auth_success", self._on_auth_success)
+        self.use_ipv6 = False
+        
+    def _handle_roster(self, iq):        
+        sleekxmpp.ClientXMPP._handle_roster(self, iq)
+        self.process_all_roster()                
         
     def _on_session_start(self, event):   
-        self.process_all_roster()
+        self.request_roster()
         
     def _on_disconnected(self, event):    
         xmpp_signals.session_disconnected.send(sender=self)
@@ -152,8 +139,7 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
         init_db(jid)
     
     def run_service(self):    
-        if self.connect():
-            self.process(block=False)
+        self.connect()
             
     def action_logout(self):        
         self.disconnect(wait=True)

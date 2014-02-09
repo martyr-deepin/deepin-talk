@@ -20,15 +20,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+if sys.version_info < (3, 0):
+    from dtalk.utils.misc import setdefaultencoding
+    setdefaultencoding('utf8')
+
 from PyQt5 import QtWidgets
 import dtalk.views.resources_rc
 import dtalk.gui.plugins
 from dtalk.controls.panel import Panel
-from multiprocessing import freeze_support        
+
+import logging
+logger = logging.getLogger(__name__)
+# logging.basicConfig(level = logging.DEBUG) # change to 'DEBUG' to see more
+logging.basicConfig(level=logging.INFO) # change to 'DEBUG' to see more
 
 if __name__ == "__main__":        
-    freeze_support()
-    import sys
     from dtalk.gui.utils import loadStyleSheet
     app = QtWidgets.QApplication(sys.argv)
     loadStyleSheet()
