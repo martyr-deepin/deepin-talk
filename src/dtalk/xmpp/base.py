@@ -33,7 +33,7 @@ from dtalk.xmpp import signals as xmpp_signals
 
 from dtalk.models import init_db
 import dtalk.utils.xdg
-from dtalk.utils.threads import threaded
+from dtalk.cache import avatarManager
 
 logger = logging.getLogger("dtalk.xmpp")
     
@@ -62,15 +62,22 @@ class BaseRoster(object):
     
     def process_all_roster(self):
         Friend.create_or_update_roster_sleek(self.client_roster)
+        jids = self.client_roster.keys()
+        for jid in jids:
+            if not avatarManager.has_avatar(jid):
+                self.request_vcard(jid)
             
 class BaseVCard(object):            
     
     def __init__(self):
         self.add_event_handler("vcard_avatar_update", self._on_vcard_avatar)        
         
+    def request_vcard(self, jid):
+        logger.info("Received vCard avatar update from {0}. Asking for vcard".format(jid))
+        self.plugin['xep_0054'].get_vcard(jid, block=False, callback=self._on_vcard_get)
+        
     def _on_vcard_avatar(self, pres):    
-        logger.info("Received vCard avatar update from {0}. Asking for vcard".format(pres['from'].bare))
-        self.plugin['xep_0054'].get_vcard(pres['from'], block=False, callable=self._on_vcard_get)
+        self.request_vcard(pres['from'].bare)
         
     def _on_vcard_get(self, stanza):    
         vcard_temp = stanza.get("vcard_temp")
@@ -83,10 +90,7 @@ class BaseVCard(object):
         photo_bin = photo.get("BINVAL")
         if not photo_bin:
             return
-        
-        # photo_hash = hashlib.sha1()
-        # photo_hash.update(photo_bin)
-        # photo_hash = photo_hash.hexdigest()
+        avatarManager.save_avatar(jid, photo_bin)
         
 class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):    
     
@@ -97,7 +101,7 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
         
         self.register_plugin("xep_0004") # Data Forms
         self.register_plugin("xep_0030") # Service Discovery
-        # self.register_plugin("xep_0054") # vcard-temp
+        self.register_plugin("xep_0054") # vcard-temp
         # self.register_plugin("xep_0153")
         self.register_plugin("xep_0060") # pubsub
         

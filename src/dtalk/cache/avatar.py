@@ -41,10 +41,6 @@ class AvatarManager(object):
             data = fp.read()
             return base64.b64encode(data).decode("ascii")
         
-    @classmethod
-    def base64decode(cls, data):
-        return base64.decodestring(data)
-    
     def has_avatar(self, jid):
         return self.get_avatar(jid) != self.default_avatar
     
@@ -81,12 +77,11 @@ class AvatarManager(object):
     def avatar_dir(self):    
         return get_avatar_dir()
 
-    def save_avatar(self, jid, base64data):
+    def save_avatar(self, jid, image_data):
         before_avatar = self.get_avatar(jid)
         if before_avatar != self.default_avatar:
             os.remove(before_avatar)
-            
-        image_data = self.base64decode(base64data)
+
         path = self.avatar_filepath(jid, image_data, need_hash=True)
         if os.path.exists(path):
             return 
