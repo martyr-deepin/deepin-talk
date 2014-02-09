@@ -42,7 +42,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 from PyQt5 import QtWidgets
 from dtalk.utils.xdg import get_qml
-from dtalk.controls.managers import commonManager, serverManager, controlManager
+from dtalk.controls.managers import commonManager, controlManager, sessionManager
 from dtalk.views.base import BaseView
 from dtalk.controls.trayicon import TrayIcon
 from dtalk.keybinder import keyBinder
@@ -63,7 +63,7 @@ class Panel(BaseView):
         self.initTray()        
         self.setContextProperty("commonManager", commonManager)
         self.setContextProperty("controlManager", controlManager)
-        self.setContextProperty("serverManager", serverManager)
+        self.setContextProperty("serverManager", sessionManager)
         self.setContextProperty("trayIcon", self.trayIcon)
         self.setSource(QtCore.QUrl.fromLocalFile(get_qml('Main.qml')))
         # self.chat = ChatWindow(None, None)

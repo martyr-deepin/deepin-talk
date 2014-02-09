@@ -21,20 +21,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from PyQt5 import QtCore, QtWidgets
-
-import dtalk.core.signals as serverSignals
+from PyQt5 import QtCore
 import dtalk.models.signals as dbSignals
 from dtalk.models import ReceivedMessage, Friend
+
 import dtalk.utils.xdg as dtalkXdg
 import dtalk.controls.utils as controlUtils
 
 from dtalk.controls.qobject import QPropertyObject
 from dtalk.controls.models import GroupModel, MessageModel
 from dtalk.views.chat import ChatWindow
-from dtalk.core.server import XMPPServer
+
 from dtalk.controls.qobject import postGui
 from dtalk.controls.notify import NotifyModel
+
+from dtalk.xmpp.base import BaseClient
+from dtalk.xmpp import signals as xmppSignals
 
 
 logger = logging.getLogger("dtalk.controls.managers")
@@ -79,7 +81,7 @@ class CommonManager(QPropertyObject()):
     def on_db_init_finished(self, *args, **kwargs):        
         self.dbInitFinished.emit()
     
-class ServerManager(QPropertyObject()):
+class SessionManager(QPropertyObject()):
     __qtprops__ = { "loginFailedReason" : "" }
     
     userLoginSuccessed = QtCore.pyqtSignal()
@@ -88,30 +90,31 @@ class ServerManager(QPropertyObject()):
     userRosterStatusReceived = QtCore.pyqtSignal()
     
     def __init__(self):
-        super(ServerManager, self).__init__()
-        self._server = XMPPServer()
-        serverSignals.user_login_successed.connect(self.on_user_login_successed)
-        serverSignals.user_roster_received.connect(self.on_user_roster_received)
-        serverSignals.user_roster_status_received.connect(self.on_user_friends_status_received)
-        serverSignals.user_login_failed.connect(self.on_user_login_failed)
+        super(SessionManager, self).__init__()
         
-    @QtCore.pyqtSlot(str, str)    
+        xmppSignals.auth_successed.connect(self.on_user_login_successed)
+        xmppSignals.auth_failed.connect(self.on_user_login_failed)        
+        xmppSignals.user_roster_received.connect(self.on_user_roster_received)
+        xmppSignals.user_roster_status_received.connect(self.on_user_friends_status_received)
+
+        self.client = None
+        
+    @QtCore.pyqtSlot(str, str)
     def login(self, jid, password):
-        self._server.login(jid, password)
+        self.client = BaseClient(jid, password)
+        self.client.run_service()
         
-    def on_user_login_successed(self, sender, jid, *args, **kwargs):    
-        logger.info("-- [{0}] user login successed".format(jid))
+    def on_user_login_failed(self, *args, **kwargs):    
+        self.userLoginFailed.emit("linux")
+        
+    def on_user_login_successed(self, *args, **kwargs):    
         self.userLoginSuccessed.emit()
         
     def on_user_roster_received(self, *args, **kwargs):    
         self.userRosterReceived.emit()
-        
+       
     def on_user_friends_status_received(self, *args, **kwargs):    
         self.userRosterStatusReceived.emit()
-        
-    def on_user_login_failed(self, reason, *args, **kwargs):    
-        self.loginFailedReason = reason
-        self.userLoginFailed.emit(reason)
         
 class ControlManager(QPropertyObject()):        
     
@@ -159,6 +162,7 @@ class ControlManager(QPropertyObject()):
         w.deleteLater()        
 
         
-serverManager = ServerManager()    
+# serverManager = ServerManager()    
+sessionManager = SessionManager()
 commonManager = CommonManager()
 controlManager = ControlManager()

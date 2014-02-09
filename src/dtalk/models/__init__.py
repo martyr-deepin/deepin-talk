@@ -150,6 +150,29 @@ class Friend(BaseModel):
                     check_update_data(obj, data)
                     
     @classmethod                
+    def create_or_update_roster_sleek(cls, resoter_client):
+        with disable_auto_commit():
+            for jid in resoter_client:
+                item = resoter_client[jid]
+                data = dict()
+                data['jid'] = item.jid.bare
+                data['remark'] = item['name']
+                data['subscription'] = item['subscription']
+                groups = item['groups']
+                if len(groups) >= 1:
+                    group_name = groups[0]
+                else:   
+                    group_name = DEFAULT_GROUP
+                    
+                data['group'] = Group.get_or_create(name=group_name)
+                try:
+                    obj = cls.get(jid=data['jid'])
+                except cls.DoesNotExist:   
+                    cls.create(**data)
+                else:    
+                    check_update_data(obj, data)
+                    
+    @classmethod                
     def update_nickname(cls, jid, nickname):
         try:
             obj = cls.get(jid=jid)
@@ -230,6 +253,16 @@ class ReceivedMessage(BaseModel):
             return None
         else:    
             cls.create(friend=obj, body=stanza.body)
+            
+    @classmethod        
+    def received_message_from_sleek(cls, msg):
+        jid = msg['from']
+        try:
+            obj = Friend.get(jid=jid)
+        except Friend.DoesNotExist:    
+            logger.warning("-- have a message received but [{0}] not in your roster".format(jid))
+        else:    
+            cls.create(friend=obj, body=msg['body'])
     
 class SendedMessage(BaseModel):
     TYPE = "sended"

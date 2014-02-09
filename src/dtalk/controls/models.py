@@ -32,7 +32,7 @@ from dtalk.controls.base import AbstractWrapperModel
 from dtalk.controls.qobject import postGui
 from dtalk.cache import avatarManager
 import dtalk.cache.signals as cache_signals
-import dtalk.core.signals as server_signals
+import dtalk.xmpp.signals as xmpp_signals
 import dtalk.controls.utils as controlUtils
 
 
@@ -40,7 +40,7 @@ class GroupModel(AbstractWrapperModel):
     other_fields = ("friendModel",)
     
     def initial(self, *args, **kwargs):
-        server_signals.user_roster_status_received.connect(self._on_roster_received)
+        xmpp_signals.user_roster_status_received.connect(self._on_roster_received)
         
     @postGui()    
     def _on_roster_received(self, *args, **kwargs):    
