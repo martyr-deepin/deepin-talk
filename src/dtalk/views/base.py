@@ -40,3 +40,14 @@ class BaseView(QtQuick.QQuickView):
     @QtCore.pyqtSlot(result="QVariant")
     def getCursorPos(self):
         return QtGui.QCursor.pos()
+    
+    @QtCore.pyqtSlot()
+    def doMinimized(self):
+        # NOTE: This is bug of Qt5 that showMinimized() just can work once after restore window.
+        # I change window state before set it as WindowMinimized to fixed this bug!
+        self.setWindowState(QtCore.Qt.WindowMaximized)
+        
+        # Do minimized.
+        self.setWindowState(QtCore.Qt.WindowMinimized)
+        self.setVisible(True)
+    
