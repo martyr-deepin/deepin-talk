@@ -32,8 +32,8 @@ from dtalk.controls.panel import Panel
 
 import logging
 logger = logging.getLogger(__name__)
-# logging.basicConfig(level = logging.DEBUG) # change to 'DEBUG' to see more
-logging.basicConfig(level=logging.INFO) # change to 'DEBUG' to see more
+logging.basicConfig(level = logging.DEBUG) # change to 'DEBUG' to see more
+# logging.basicConfig(level=logging.INFO) # change to 'DEBUG' to see more
 
 if __name__ == "__main__":        
     from dtalk.gui.utils import loadStyleSheet

@@ -40,7 +40,7 @@ class GroupModel(AbstractWrapperModel):
     other_fields = ("friendModel",)
     
     def initial(self, *args, **kwargs):
-        xmpp_signals.user_roster_status_received.connect(self._on_roster_received)
+        xmpp_signals.user_roster_received.connect(self._on_roster_received)
         
     @postGui()    
     def _on_roster_received(self, *args, **kwargs):    

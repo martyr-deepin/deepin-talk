@@ -20,13 +20,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import sleekxmpp    
 import logging
-import threading
 
-
-from sleekxmpp.exceptions import IqError, IqTimeout
+# from sleekxmpp.exceptions import IqError, IqTimeout
 from dtalk.models import signals as db_signals
 from dtalk.models import SendedMessage, ReceivedMessage, Friend
 from dtalk.xmpp import signals as xmpp_signals
@@ -55,7 +52,6 @@ class BaseMessage(object):
             
 class BaseRoster(object):            
     
-    # @threaded
     def request_roster(self):
         self.get_roster()
         self.send_presence()
@@ -119,6 +115,7 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
     def _handle_roster(self, iq):        
         sleekxmpp.ClientXMPP._handle_roster(self, iq)
         self.process_all_roster()                
+        xmpp_signals.user_roster_received.send(sender=self)
         
     def _on_session_start(self, event):   
         self.request_roster()

@@ -40,6 +40,7 @@ from dtalk.utils.threads import threaded
 from dtalk.utils import six
 from dtalk.models import signals
 from dtalk.models.db import Model
+from sleekxmpp.jid import JID
 
 logger = logging.getLogger('models.Model')
 
@@ -258,7 +259,8 @@ class ReceivedMessage(BaseModel):
             
     @classmethod        
     def received_message_from_sleek(cls, msg):
-        jid = msg['from']
+        jid = JID(msg['from']).bare
+
         try:
             obj = Friend.get(jid=jid)
         except Friend.DoesNotExist:    
