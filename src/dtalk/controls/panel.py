@@ -86,8 +86,7 @@ class Panel(BaseView):
         
     @QtCore.pyqtSlot()    
     def closeWindow(self):
-        pass
-    
+        QtWidgets.qApp.quit()
         
     def mousePressEvent(self, event):    
         self.mousePressed.emit(QtCore.QPointF(event.x(), event.y()))
