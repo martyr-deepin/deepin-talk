@@ -25,6 +25,7 @@ Item {
 			normalImage: getImage("window_min_normal")
 			hoverImage: getImage("window_min_hover")
 			pressImage: getImage("window_min_press")
+            onClicked: windowView.showMinimized()
 		}
 		
 		ImageButton {

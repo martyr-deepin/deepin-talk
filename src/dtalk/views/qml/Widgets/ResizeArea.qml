@@ -15,6 +15,7 @@ MouseArea {
     property real lastWindowY: 0
     property real lastWindowWidth: 0
     property real lastWindowHeight: 0
+    property bool positionChanged: false
     
     property int edge: -1
     property int edgeTop: 1
@@ -103,13 +104,17 @@ MouseArea {
         changeCursor()
         changeEdge()
         
-        resizeFrame.show()
+        if (edge != -1) {
+            resizeFrame.show()
+        }
+
     }
     
     onPositionChanged: {
         if (isPress && edge > 0) {
             var pos = window.getCursorPos()
             resizeFrame.resize(edge, pos.x, pos.y)
+            positionChanged = true
         }
         
         changeCursor()
@@ -120,11 +125,14 @@ MouseArea {
         
         changeCursor()
 
-        window.x = resizeFrame.rect.x
-        window.y = resizeFrame.rect.y
-        window.width = resizeFrame.rect.width
-        window.height = resizeFrame.rect.height
-        
-        resizeFrame.visible = false
+        if (positionChanged) {
+            window.x = resizeFrame.rect.x
+            window.y = resizeFrame.rect.y
+            window.width = resizeFrame.rect.width
+            window.height = resizeFrame.rect.height
+            positionChanged = false
+        }
+
+        resizeFrame.visible = false                    
     }
 }

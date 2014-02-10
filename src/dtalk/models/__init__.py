@@ -50,6 +50,9 @@ database = pw.SqliteDatabase(None, check_same_thread=False, threadlocals=True)
 
 init_finished = False
 
+def check_db_inited():
+    return init_finished
+
 @contextmanager
 def disable_auto_commit(*args, **kwargs):
     database.set_autocommit(False)

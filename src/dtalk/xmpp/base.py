@@ -28,7 +28,7 @@ from dtalk.models import signals as db_signals
 from dtalk.models import SendedMessage, ReceivedMessage, Friend
 from dtalk.xmpp import signals as xmpp_signals
 
-from dtalk.models import init_db
+from dtalk.models import init_db, check_db_inited
 import dtalk.utils.xdg
 from dtalk.cache import avatarManager
 
@@ -57,11 +57,29 @@ class BaseRoster(object):
         self.send_presence()
     
     def process_all_roster(self):
+        
+        if check_db_inited():
+            self.save_rosters()
+        else:    
+            db_signals.db_init_finished.connect(self._on_db_init_finished)
+                
+    def save_rosters(self):            
+        
+        # save rosters to db.
         Friend.create_or_update_roster_sleek(self.client_roster)
+        
+        # send signal.
+        xmpp_signals.user_roster_received.send(sender=self)        
+        
+        # request vcard infos.
         jids = self.client_roster.keys()
         for jid in jids:
             if not avatarManager.has_avatar(jid):
                 self.request_vcard(jid)
+                
+    def _on_db_init_finished(self, *args, **kwargs):            
+        self.save_rosters()
+        
             
 class BaseVCard(object):            
     
@@ -115,7 +133,7 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
     def _handle_roster(self, iq):        
         sleekxmpp.ClientXMPP._handle_roster(self, iq)
         self.process_all_roster()                
-        xmpp_signals.user_roster_received.send(sender=self)
+
         
     def _on_session_start(self, event):   
         self.request_roster()
