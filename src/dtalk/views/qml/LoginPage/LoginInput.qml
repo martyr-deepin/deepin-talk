@@ -9,6 +9,7 @@ Widgets.ShadowPanel {
     property alias text: input.text
     property var textInput: input
     signal returnPressed
+    signal rightButtonClicked
 	
 	Row {
 		anchors.margins: 10
@@ -32,10 +33,11 @@ Widgets.ShadowPanel {
             font.pixelSize: 14
 		}
 		
-		Image {
+		Widgets.DButton {
 			id: rightImg
 			source: "qrc:/images/common/arrow.png"
 			anchors.verticalCenter: parent.verticalCenter
+            onClicked: rightButtonClicked()
 		}
 		
 	}

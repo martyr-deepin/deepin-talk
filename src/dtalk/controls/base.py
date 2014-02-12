@@ -24,8 +24,8 @@ import copy
 from PyQt5 import QtCore
 from dtalk.utils import six
 from dtalk.controls.qobject import QObjectListModel, QPropertyMeta, postGui
-from dtalk.models import BaseModel
-from dtalk.models import signals
+from dtalk.models.db import Model
+from dtalk.models import signals, user_db
 
 def string_title(name):
     names = name.split("_")
@@ -66,7 +66,7 @@ def get_instance_dict(instance, result=None, key_profix="", other_fields=None, l
             value = ""
         if key_profix != "":
             key = key.title()
-        if isinstance(value, BaseModel) and level != 0:
+        if isinstance(value, Model) and level != 0:
             get_instance_dict(value, result, key_profix="%s%s" % (key_profix, key), other_fields=None, level=level-1)
         elif isinstance(value, dict):
             for k, v in six.iteritems(value):
@@ -92,6 +92,7 @@ def get_qobject_wrapper(instance, unique_field, other_fields=None):
     return WrapperQuery()    
 
 class AbstractWrapperModel(QObjectListModel):
+    _db = user_db
     unique_field = "id"
     other_fields = None         # ('key',)
     instanceRole = QtCore.Qt.UserRole + 1
@@ -101,7 +102,8 @@ class AbstractWrapperModel(QObjectListModel):
         super(AbstractWrapperModel, self).__init__(parent)
         self.db_is_created = False        
         self._data = []
-        signals.db_init_finished.connect(self.on_db_init_finished, dispatch_uid=id(self))        
+        if self._db is not None:
+            signals.db_init_finished.connect(self.on_db_init_finished, sender=self._db)        
         self.initial(*args, **kwargs)
 
     def load(self):    

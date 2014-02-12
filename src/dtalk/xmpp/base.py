@@ -28,7 +28,7 @@ from dtalk.models import signals as db_signals
 from dtalk.models import SendedMessage, ReceivedMessage, Friend
 from dtalk.xmpp import signals as xmpp_signals
 
-from dtalk.models import init_db, check_db_inited
+from dtalk.models import init_user_db, check_user_db_inited
 import dtalk.utils.xdg
 from dtalk.cache import avatarManager
 
@@ -58,7 +58,7 @@ class BaseRoster(object):
     
     def process_all_roster(self):
         
-        if check_db_inited():
+        if check_user_db_inited():
             self.save_rosters()
         else:    
             db_signals.db_init_finished.connect(self._on_db_init_finished)
@@ -150,12 +150,12 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
         self.initial_db()
         
         # send auth successed signal.
-        xmpp_signals.auth_successed.send(sender=self, jid=self.boundjid.bare)
+        xmpp_signals.auth_successed.send(sender=self, jid=self.boundjid.bare, password=self.password)
         
     def initial_db(self):    
         jid = self.boundjid.bare
         dtalk.conf.xdg.OWNER_JID = jid
-        init_db(jid)
+        init_user_db(jid)
     
     def run_service(self):    
         self.connect()

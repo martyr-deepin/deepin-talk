@@ -23,13 +23,9 @@
 
 from dtalk.dispatch import Signal
 
-user_login_successed = Signal(providing_args=['jid'])
-user_login_failed = Signal(providing_args=['jid', 'reason'])
-user_logged_out = Signal(providing_args=['jid'])
-user_roster_init_completed = Signal(providing_args=[])
 user_roster_received = Signal(providing_args=[])
 user_roster_status_received = Signal(providing_args=[])
 session_disconnected = Signal(providing_args=[])
-auth_failed = Signal(providing_args=[])
-auth_successed = Signal(providing_args=["jid"])
+auth_failed = Signal(providing_args=['jid', 'reason'])
+auth_successed = Signal(providing_args=["jid", 'password'])
 raise_excepted = Signal(providing_args=["exc_info"])

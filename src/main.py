@@ -35,7 +35,12 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level = logging.DEBUG) # change to 'DEBUG' to see more
 # logging.basicConfig(level=logging.INFO) # change to 'DEBUG' to see more
 
+from dtalk.utils.xdg import _make_missing_dirs
+_make_missing_dirs()
+
 if __name__ == "__main__":        
+    from dtalk.models import init_common_db
+    init_common_db()
     from dtalk.gui.utils import loadStyleSheet
     app = QtWidgets.QApplication(sys.argv)
     loadStyleSheet()

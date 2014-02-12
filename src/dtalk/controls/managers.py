@@ -29,7 +29,7 @@ import dtalk.utils.xdg as dtalkXdg
 import dtalk.controls.utils as controlUtils
 
 from dtalk.controls.qobject import QPropertyObject
-from dtalk.controls.models import GroupModel, MessageModel
+from dtalk.controls.models import GroupModel, MessageModel, UserHistoryModel
 from dtalk.views.chat import ChatWindow
 
 from dtalk.controls.qobject import postGui
@@ -50,12 +50,17 @@ class CommonManager(QPropertyObject()):
     def __init__(self):
         super(CommonManager, self).__init__()
         self.groupModel = GroupModel()
+        self._userHistoryModel = UserHistoryModel(self)
         self._ownerInfo = None
         dbSignals.db_init_finished.connect(self.on_db_init_finished)
         dbSignals.post_save.connect(self.on_post_save, sender=Friend)
     
     @QtCore.pyqtSlot(str, result="QVariant")
     def getModel(self, modelType):
+        if modelType == "group":
+            return self.groupModel
+        elif modelType == "userHistory":
+            return self._userHistoryModel
         return self.groupModel
     
     @QtCore.pyqtSlot(str, result="QVariant")

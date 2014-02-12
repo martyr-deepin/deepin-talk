@@ -129,8 +129,8 @@ def makedirs(d):
         os.makedirs(d)
     return d    
 
-def get_jid_db(jid=None):
-    return os.path.join(get_jid_dir(jid), 'data.db')
+def get_jid_db(jid=None, name="data.db"):
+    return os.path.join(get_jid_dir(jid), name)
 
 def get_avatar_dir(jid=None):
     d = os.path.join(get_jid_dir(jid), 'avatar')

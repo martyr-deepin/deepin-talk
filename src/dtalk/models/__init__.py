@@ -35,26 +35,36 @@ import traceback
 
 from dtalk.utils.xmpp import split_jid, get_email
 from dtalk.utils.contextdecorator import contextmanager
-from dtalk.utils.xdg import get_jid_db
+from dtalk.utils.xdg import get_jid_db, get_config_path
 from dtalk.utils.threads import threaded
 from dtalk.utils import six
 from dtalk.models import signals
 from dtalk.models.db import Model
 from sleekxmpp.jid import JID
+from dtalk.dispatch import receiver
+import  dtalk.xmpp.signals as xmpp_signals
+
+USER_DB_VERSION = "0.1"
+COMMON_DB_VERSION = "0.1"
 
 logger = logging.getLogger('models.Model')
 
 DEFAULT_GROUP = '我的好友'
 
-database = pw.SqliteDatabase(None, check_same_thread=False, threadlocals=True)
+user_db = pw.SqliteDatabase(None, check_same_thread=False, threadlocals=True)
+common_db = pw.SqliteDatabase(None, check_same_thread=False, threadlocals=True)
 
-init_finished = False
+user_db_init_finished = False
+common_db_init_finished = False
 
-def check_db_inited():
-    return init_finished
+def check_user_db_inited():
+    return user_db_init_finished
+
+def check_common_db_inited():
+    return common_db_init_finished
 
 @contextmanager
-def disable_auto_commit(*args, **kwargs):
+def disable_auto_commit(database=user_db):
     database.set_autocommit(False)
     try:
         yield
@@ -66,20 +76,34 @@ def disable_auto_commit(*args, **kwargs):
         database.set_autocommit(True)
 
 @threaded        
-def init_db(jid):        
-    global init_finished
-    f = get_jid_db(jid)
-    database.init(f)
+def init_user_db(jid):        
+    global user_db_init_finished
+    f = get_jid_db(jid, name="data_{0}.db".format(USER_DB_VERSION))
+    user_db.init(f)
     created = False
     if not os.path.exists(f):
         logger.info("-- initial {0!r} database".format(jid))
-        database.connect()
-        create_tables()
+        user_db.connect()
+        create_user_tables()
         Friend.create_self(jid)
         created = True
         
-    init_finished = True    
-    signals.db_init_finished.send(sender=database, created=created)    
+    user_db_init_finished = True    
+    signals.db_init_finished.send(sender=user_db, created=created)    
+    
+@threaded    
+def init_common_db():
+    global common_db_init_finished
+    f = get_config_path("common_{0}.db".format(COMMON_DB_VERSION))    
+    common_db.init(f)
+    created = False
+    if not os.path.exists(f):
+        created = True
+        common_db.connect()
+        create_common_tables()
+        
+    common_db_init_finished = True    
+    signals.db_init_finished.send(sender=common_db, created=created)    
         
 def check_update_data(obj, data):
     change = False
@@ -93,20 +117,34 @@ def check_update_data(obj, data):
 
     if change:
         obj.save(update_fields=change_fields)
+        
+class BaseCommonModel(Model):        
+    
+    class Meta:
+        database = common_db
+        
+class UserHistory(BaseCommonModel):        
+    jid = pw.CharField(unique=True, index=True)
+    password = pw.CharField()
+    avatar = pw.CharField(null=True)
+    nickname = pw.CharField(null=True)
+    status = pw.CharField(null=True)
+    last_logined = pw.DateTimeField(default=datetime.datetime.now)
 
-class BaseModel(Model):
+
+class BaseUserModel(Model):
 
     class Meta:
-        database = database
+        database = user_db
 
-class Group(BaseModel):
+class Group(BaseUserModel):
     name = pw.CharField()
 
     class Meta:
         db_table = 'dtalk_group'
 
 
-class Friend(BaseModel):
+class Friend(BaseUserModel):
     jid = pw.CharField(unique=True, index=True)
     nickname = pw.CharField(null=True)
     remark = pw.CharField(null=True)
@@ -189,7 +227,7 @@ class Friend(BaseModel):
                 obj.nickname = nickname
                 obj.save(update_fields=["nickname"])
 
-class Resource(BaseModel):
+class Resource(BaseUserModel):
     friend = pw.ForeignKeyField(Friend, related_name='resources')
     resource = pw.CharField(null=True)
     show = pw.CharField(null=True)
@@ -239,7 +277,7 @@ class Resource(BaseModel):
             else:
                 obj.delete_instance()
 
-class ReceivedMessage(BaseModel):        
+class ReceivedMessage(BaseUserModel):        
     TYPE = "received"
     friend = pw.ForeignKeyField(Friend, related_name="sends")
     body = pw.TextField()
@@ -271,7 +309,7 @@ class ReceivedMessage(BaseModel):
         else:    
             cls.create(friend=obj, body=msg['body'])
     
-class SendedMessage(BaseModel):
+class SendedMessage(BaseUserModel):
     TYPE = "sended"
     friend = pw.ForeignKeyField(Friend, related_name="receives")
     body = pw.TextField()
@@ -291,7 +329,7 @@ class SendedMessage(BaseModel):
         else:    
             return cls.create(friend=obj, body=body)
 
-class FriendNotice(BaseModel):
+class FriendNotice(BaseUserModel):
     TYPE_REQUEST = 1
     TYPE_ACCEPT = 2
     TYPE_DENY = 3
@@ -327,7 +365,7 @@ class FriendNotice(BaseModel):
             cls.create(type=_type, jid=jid)
             
     
-def create_tables():
+def create_user_tables():
     Group.create_table()
     Friend.create_table()
     Resource.create_table()
@@ -335,3 +373,16 @@ def create_tables():
     SendedMessage.create_table()
     FriendNotice.create_table()
     
+def create_common_tables():    
+    UserHistory.create_table()
+    
+@receiver(xmpp_signals.auth_successed)
+def _add_to_user_history(sender, jid, password, *args, **kwargs):
+    data = dict(jid=jid, password=password)
+    try:
+        obj = UserHistory.get(jid=jid)
+    except UserHistory.DoesNotExist:    
+        UserHistory.create(**data)
+    else:    
+        data['last_logined'] = datetime.datetime.now()
+        check_update_data(obj, data)

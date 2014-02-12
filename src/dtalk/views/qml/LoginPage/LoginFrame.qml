@@ -1,6 +1,7 @@
 import QtQuick 2.1
 import QtQuick.Layouts 1.0
-import "../Widgets"
+import "../Widgets" as Widgets
+import DTalk 1.0
 
 Item {
     id: container
@@ -9,6 +10,7 @@ Item {
     function showErrorTip(text) {
         errorTip.show(text)
     }
+    
     
 	Column {
 			anchors.fill: parent
@@ -20,14 +22,91 @@ Item {
 			}
 		
 			Column {
+                z: 1000
 				spacing: 10
 				width: parent.width; height: 110
 
 				LoginInput {
-                    id: jid
+                    id: jidInput
 					anchors.horizontalCenter: parent.horizontalCenter
 					leftImage: "qrc:/images/common/person.png"
 					rightImage: "qrc:/images/common/arrow.png"
+                    z: 1000
+                    
+                    onRightButtonClicked: {
+                        accountCombo.visible = true
+                    }
+                    
+                    Keys.onDownPressed: {
+                        if (accountCombo.visible) {
+                            accountView.incrementCurrentIndex()
+                        } else {
+                            accountCombo.visible = true
+                        }
+                    }
+                    Keys.onUpPressed: {
+                        if (accountCombo.visible) {
+                            accountView.decrementCurrentIndex()                            
+                        } else {
+                            accountCombo.visible = true
+                        }
+
+                    }
+                    
+                    onReturnPressed: {
+                        if (accountCombo.visible) {
+                            accountView.setJid()
+                        }
+                    }
+                    
+                    Widgets.DropRect {
+                        id: accountCombo
+                        anchors.top: parent.bottom
+                        anchors.left: parent.left
+                        anchors.leftMargin: -8
+                        anchors.topMargin: -10
+                        borderMargin: 0
+                        rectRadius: 0
+                        width: parent.width + sideWidth + 4
+                        height: Math.max(accountView.contentHeight + sideWidth*2, 26+sideWidth*2)
+                        visible: false
+                        
+                        PopupItem {
+                            anchors.fill: parent
+                            windowObject: windowView
+                            parentObject: accountCombo
+                        }
+                        
+                        Item  {
+                            anchors.fill: parent
+                            
+                            Widgets.ScrollWidget {
+                                anchors.fill: parent
+                                ListView {
+                                    id: accountView
+                                    signal selected(string jid)
+                                    anchors.fill: parent
+                                    model: commonManager.getModel("userHistory")
+                                    delegate: AccountDelegate {}
+                                    
+                                    function hidePopup() {
+                                        accountCombo.visible = false
+                                    }
+                                    onSelected: {
+                                        jidInput.text = jid
+                                    }
+                                    
+                                    function setJid() {
+                                        var obj = model.get(currentIndex)
+                                        jidInput.text = obj.jid
+                                        hidePopup()
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                    
 				}
 				
 				LoginInput {
@@ -37,14 +116,14 @@ Item {
 					rightImage: "qrc:/images/common/keyboard.png"
 					echoMode: TextInput.Password
                     onReturnPressed: {
-                        if (jid.text != "" & passwd.text != ""){
-                            serverManager.login(jid.text, passwd.text)
+                        if (jidInput.text != "" & passwd.text != ""){
+                            serverManager.login(jidInput.text, passwd.text)
                             loginButton.isLogging = true
                         }
                         
                     }
                     
-                    DTooltip { 
+                    Widgets.DTooltip { 
                         id: errorTip
                         anchors.top: parent.bottom
                         anchors.left: parent.left
@@ -61,8 +140,8 @@ Item {
 					anchors.horizontalCenter: parent.horizontalCenter
 					spacing: 35
 					LoginStatus { height: 30 }
-					CheckBox { text: "记住密码" }
-					CheckBox { text: "自动登录" }
+					Widgets.CheckBox { text: "记住密码" }
+					Widgets.CheckBox { text: "自动登录" }
 				}
 		
 			}
@@ -71,8 +150,8 @@ Item {
                 id: loginButton
 				width: parent.width
                 onClicked: {
-                    if (jid.text != "" && passwd.text != ""){
-                        serverManager.login(jid.text, passwd.text)
+                    if (jidInput.text != "" && passwd.text != ""){
+                        serverManager.login(jidInput.text, passwd.text)
                         isLogging = true
                     } else {
                         showErrorTip("请输入密码")

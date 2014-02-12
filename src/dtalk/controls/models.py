@@ -26,8 +26,8 @@ logger = logging.getLogger("dtalk.controls.models")
 
 from PyQt5 import QtCore
 
-from dtalk.models.signals import post_save, post_delete
-from dtalk.models import Resource, Friend, Group, SendedMessage
+from dtalk.models.signals import post_save, post_delete, db_init_finished
+from dtalk.models import Resource, Friend, Group, SendedMessage, common_db, UserHistory, check_common_db_inited
 from dtalk.controls.base import AbstractWrapperModel        
 from dtalk.controls.qobject import postGui
 from dtalk.cache import avatarManager
@@ -199,3 +199,31 @@ class MessageModel(AbstractWrapperModel):
     def on_userinfo_changed(self, instance, *args, **kwargs):
         if instance.jid == self.to_jid:
             self.jidInfo = controlUtils.getJidInfo(instance)
+            
+            
+class UserHistoryModel(AbstractWrapperModel):            
+    _db = None
+    
+    def initial(self):
+        if check_common_db_inited():
+            self.initData()
+        else:    
+            db_init_finished.connect(self._on_common_db_inited, sender=common_db)
+            
+    @postGui()        
+    def _on_common_db_inited(self, *args, **kwargs):        
+        self.initData()
+            
+    def load(self):        
+        # for i in UserHistory.select():
+        #     print i
+        # return []
+        return UserHistory.select()
+    
+    @QtCore.pyqtSlot(int)
+    def removeByIndex(self, index):
+        obj = self.get(index)
+        dq = UserHistory.delete().where(UserHistory.id==obj.id)
+        dq.execute()
+        self.removeAt(index)
+
