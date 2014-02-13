@@ -111,7 +111,7 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
     def __init__(self, jid, password):
         sleekxmpp.ClientXMPP.__init__(self, jid, password)
         
-        self.process(block=False)
+        # self.process(block=False)
         
         self.register_plugin("xep_0004") # Data Forms
         self.register_plugin("xep_0030") # Service Discovery
@@ -161,4 +161,29 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
         self.connect()
             
     def action_logout(self):        
-        self.disconnect(wait=True)
+        self.disconnect()
+        
+import threading
+from dtalk.utils.threads import threaded
+
+class AsyncClient(threading.Thread):        
+    
+    def __init__(self):
+        super(AsyncClient, self).__init__()
+        self.setDaemon(True)
+        self.xmpp = None
+        
+    def action_login(self, jid, password):    
+        self.xmpp = BaseClient(jid, password)
+        
+    def run(self):    
+        self.xmpp.connect()
+        self.xmpp.process(block=True)
+            
+    @threaded    
+    def action_logout(self):        
+        try:
+            self.xmpp.disconnect(wait=False)
+        except: pass    
+        
+

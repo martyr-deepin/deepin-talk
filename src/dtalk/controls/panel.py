@@ -82,10 +82,14 @@ class Panel(BaseView):
         self.trayIcon.show()
 
     def initKeybinder(self):    
-        keyBinder.start()
+        # keyBinder.start()
+        pass
         
     @QtCore.pyqtSlot()    
     def closeWindow(self):
+        sessionManager.disconnect()        
+        self.hide()
+        self.close()
         QtWidgets.qApp.quit()
         
     def mousePressEvent(self, event):    

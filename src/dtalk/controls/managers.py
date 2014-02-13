@@ -35,7 +35,7 @@ from dtalk.views.chat import ChatWindow
 from dtalk.controls.qobject import postGui
 from dtalk.controls.notify import NotifyModel
 
-from dtalk.xmpp.base import BaseClient
+from dtalk.xmpp.base import BaseClient, AsyncClient
 from dtalk.xmpp import signals as xmppSignals
 
 
@@ -102,12 +102,16 @@ class SessionManager(QPropertyObject()):
         xmppSignals.user_roster_received.connect(self.on_user_roster_received)
         xmppSignals.user_roster_status_received.connect(self.on_user_friends_status_received)
 
-        self.client = None
+        # self.client = None
+        self.client = AsyncClient()
+        
         
     @QtCore.pyqtSlot(str, str)
     def login(self, jid, password):
-        self.client = BaseClient(jid, password)
-        self.client.run_service()
+        # self.client = BaseClient(jid, password)
+        # self.client.run_service()
+        self.client.action_login(jid, password)
+        self.client.start()
         
     def on_user_login_failed(self, *args, **kwargs):    
         self.userLoginFailed.emit("linux")
@@ -120,6 +124,12 @@ class SessionManager(QPropertyObject()):
        
     def on_user_friends_status_received(self, *args, **kwargs):    
         self.userRosterStatusReceived.emit()
+        
+    def disconnect(self):    
+        try:
+            self.client.action_logout()
+        except:    
+            pass
         
 class ControlManager(QPropertyObject()):        
     
