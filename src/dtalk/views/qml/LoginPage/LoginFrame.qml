@@ -15,6 +15,15 @@ Item {
         serverManager.login(jidInput.text, passwd.text,  remember.checked, autoLogin.checked, "online")
     }
     
+    function setLoginInfos(obj) {
+        jidInput.setTextByManual(obj.jid)
+        remember.checked = obj.remember
+        autoLogin.checked = obj.autoLogin
+        if (obj.remember) {
+            passwd.text = obj.password
+        }
+    }
+    
 	Column {
 		anchors.fill: parent
 		anchors.topMargin: 90
@@ -82,6 +91,8 @@ Item {
                         return
                     }
                     
+                    passwd.text = ""
+                    
                     if (lastLength >= length)  {
                         var temp = length
                         lastLength = temp
@@ -93,11 +104,8 @@ Item {
                     if (length > 0) {
                         var obj = accountView.model.queryJid(text)
                         if (obj != undefined) {
-                            setTextByManual(obj.jid)
+                            setLoginInfos(obj)
                             textInput.select(obj.selStart, obj.selEnd)                                
-                            if (obj.remember) {
-                                passwd.text = obj.password
-                            }
                         }
                     }
                 }
@@ -136,12 +144,13 @@ Item {
                                     accountCombo.visible = false
                                 }
                                 onSelected: {
-                                    jidInput.setTextByManual(jid)
+                                    setJid()
                                 }
                                 
                                 function setJid() {
                                     var obj = model.get(currentIndex)
-                                    jidInput.setTextByManual(obj.jid)
+                                    /* print(obj.jid, obj.remember, obj.autoLogin) */
+                                    setLoginInfos(obj)
                                     hidePopup()
                                 }
 

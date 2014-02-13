@@ -72,6 +72,7 @@ def get_instance_dict(instance, result=None, key_profix="", other_fields=None, l
         value = getattr(instance, key, None)
         if value is None:
             value = ""
+        key = string_title(key)
         if key_profix != "":
             key = key.title()
         if isinstance(value, Model) and level != 0:
