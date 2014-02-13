@@ -7,7 +7,9 @@ Widgets.ShadowPanel {
 	property alias rightImage: rightImg.source
 	property alias echoMode: input.echoMode
     property alias text: input.text
+    property alias length: input.length
     property var textInput: input
+    property alias inputFocus: input.focus
     signal returnPressed
     signal rightButtonClicked
 	

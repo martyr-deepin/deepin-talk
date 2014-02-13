@@ -50,3 +50,4 @@ def getJidInfo(jid):
     avatar = avatarManager.get_avatar(obj.jid)
     setattr(obj, "avatar", avatar)
     return  get_qobject_wrapper(obj, unique_field="jid", other_fields=('avatar',))
+

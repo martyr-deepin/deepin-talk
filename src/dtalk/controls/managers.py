@@ -106,11 +106,11 @@ class SessionManager(QPropertyObject()):
         self.client = AsyncClient()
         
         
-    @QtCore.pyqtSlot(str, str)
-    def login(self, jid, password):
+    @QtCore.pyqtSlot(str, str, bool, bool, str)
+    def login(self, jid, password, remember, autoLogin, status):
         # self.client = BaseClient(jid, password)
         # self.client.run_service()
-        self.client.action_login(jid, password)
+        self.client.action_login(jid, password, remember, autoLogin, status)
         self.client.start()
         
     def on_user_login_failed(self, *args, **kwargs):    

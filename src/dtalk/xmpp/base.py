@@ -108,7 +108,7 @@ class BaseVCard(object):
         
 class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):    
     
-    def __init__(self, jid, password):
+    def __init__(self, jid, password, remember, auto_login, status):
         sleekxmpp.ClientXMPP.__init__(self, jid, password)
         
         # self.process(block=False)
@@ -130,6 +130,10 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
         self.add_event_handler("auth_success", self._on_auth_success)
         self.use_ipv6 = False
         
+        self._remembar_password = remember
+        self._auto_login = auto_login
+        self._status = status
+        
     def _handle_roster(self, iq):        
         sleekxmpp.ClientXMPP._handle_roster(self, iq)
         self.process_all_roster()                
@@ -150,7 +154,12 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
         self.initial_db()
         
         # send auth successed signal.
-        xmpp_signals.auth_successed.send(sender=self, jid=self.boundjid.bare, password=self.password)
+        xmpp_signals.auth_successed.send(sender=self, jid=self.boundjid.bare,
+                                         password=self.password,
+                                         remember=self._remembar_password,
+                                         auto_login=self._auto_login,
+                                         status=self._status
+        )
         
     def initial_db(self):    
         jid = self.boundjid.bare
@@ -173,8 +182,8 @@ class AsyncClient(threading.Thread):
         self.setDaemon(True)
         self.xmpp = None
         
-    def action_login(self, jid, password):    
-        self.xmpp = BaseClient(jid, password)
+    def action_login(self, jid, password, remember, auto_login, status):    
+        self.xmpp = BaseClient(jid, password, remember, auto_login, status)
         
     def run(self):    
         self.xmpp.connect()

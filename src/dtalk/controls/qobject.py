@@ -238,3 +238,9 @@ class postGui(QtCore.QObject):
             self._func(*args, **kwargs)
             
             
+def ObjectWrapper(dictData):    
+    class WrapperQuery(QPropertyObject()):
+        __qtprops__ = dictData
+        
+    return WrapperQuery()    
+            

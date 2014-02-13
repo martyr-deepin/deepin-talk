@@ -24,11 +24,13 @@
 import logging
 logger = logging.getLogger("dtalk.controls.models")
 
+import peewee as pw
+
 from PyQt5 import QtCore
 
 from dtalk.models.signals import post_save, post_delete, db_init_finished
 from dtalk.models import Resource, Friend, Group, SendedMessage, common_db, UserHistory, check_common_db_inited
-from dtalk.controls.base import AbstractWrapperModel        
+from dtalk.controls.base import AbstractWrapperModel, peeweeWrapper
 from dtalk.controls.qobject import postGui
 from dtalk.cache import avatarManager
 import dtalk.cache.signals as cache_signals
@@ -209,15 +211,13 @@ class UserHistoryModel(AbstractWrapperModel):
             self.initData()
         else:    
             db_init_finished.connect(self._on_common_db_inited, sender=common_db)
+        self._obj = None    
             
     @postGui()        
     def _on_common_db_inited(self, *args, **kwargs):        
         self.initData()
             
     def load(self):        
-        # for i in UserHistory.select():
-        #     print i
-        # return []
         return UserHistory.select()
     
     @QtCore.pyqtSlot(int)
@@ -226,4 +226,18 @@ class UserHistoryModel(AbstractWrapperModel):
         dq = UserHistory.delete().where(UserHistory.id==obj.id)
         dq.execute()
         self.removeAt(index)
+        
+    @QtCore.pyqtSlot(str, result="QVariant")    
+    def queryJid(self, jid):
+        jid = jid.lower()
+        jids = UserHistory.select().where(
+            (pw.fn.Lower(pw.fn.Substr(UserHistory.jid, 1, len(jid))) == jid)
+        )
+        jids = list(jids)
+        if len(jids) > 0:
+            instance = jids[0]
+            others = dict(selStart=len(jid), selEnd=len(instance.jid))
+            self._obj = peeweeWrapper(jids[0], others)
+            return self._obj
+        return QtCore.QVariant()
 

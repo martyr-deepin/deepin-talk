@@ -1,12 +1,13 @@
 import QtQuick 2.1
 
 Item {
+    id: root
 	width: box.width + rowSpacing + label.contentWidth
 	height: 30
 	property real rowSpacing: 5
 	property alias text: label.text
-	property alias isChecked: check.visible
-	signal checked (bool status)
+    property alias checked: check.visible
+	signal clicked (bool status)
 	
 		
 	Row {
@@ -36,7 +37,7 @@ Item {
 		hoverEnabled: true
 		onClicked: {
 			check.visible = !check.visible
-			checked(check.visible)
+			root.clicked(check.visible)
 		}
 	}
 }

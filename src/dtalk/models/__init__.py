@@ -126,11 +126,11 @@ class BaseCommonModel(Model):
 class UserHistory(BaseCommonModel):        
     jid = pw.CharField(unique=True, index=True)
     password = pw.CharField()
-    avatar = pw.CharField(null=True)
     nickname = pw.CharField(null=True)
     status = pw.CharField(null=True)
+    remember = pw.BooleanField(default=True)
+    auto_login = pw.BooleanField(default=True)
     last_logined = pw.DateTimeField(default=datetime.datetime.now)
-
 
 class BaseUserModel(Model):
 
@@ -377,8 +377,8 @@ def create_common_tables():
     UserHistory.create_table()
     
 @receiver(xmpp_signals.auth_successed)
-def _add_to_user_history(sender, jid, password, *args, **kwargs):
-    data = dict(jid=jid, password=password)
+def _add_to_user_history(sender, jid, password, remember, auto_login, status, *args, **kwargs):
+    data = dict(jid=jid, password=password, remember=remember, auto_login=auto_login, status=status)
     try:
         obj = UserHistory.get(jid=jid)
     except UserHistory.DoesNotExist:    

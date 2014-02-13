@@ -23,7 +23,7 @@
 import copy
 from PyQt5 import QtCore
 from dtalk.utils import six
-from dtalk.controls.qobject import QObjectListModel, QPropertyMeta, postGui
+from dtalk.controls.qobject import QObjectListModel, QPropertyMeta, postGui, ObjectWrapper
 from dtalk.models.db import Model
 from dtalk.models import signals, user_db
 
@@ -31,6 +31,14 @@ def string_title(name):
     names = name.split("_")
     lasts = "".join(map(lambda name: name.title(), names[1:]))
     return "%s%s" % (names[0], lasts)
+
+def peeweeWrapper(instance, others=None):
+    params = instance.__dict__['_data']
+    ret = {}
+    for k, v in six.iteritems(params):
+        ret[string_title(k)] = v
+    ret.update(others)    
+    return ObjectWrapper(ret)
 
 
 class WrapperModelMeta(QtCore.pyqtWrapperType):
