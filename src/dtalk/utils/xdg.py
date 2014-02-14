@@ -162,3 +162,11 @@ def _make_missing_dirs():
         os.makedirs(config_home)
     if not os.path.exists(cache_home):
         os.makedirs(cache_home)
+
+        
+def path_to_uri(path):
+    url = path.replace("\\", "/")
+    if not url.startswith("/"):
+        url = "/" + url
+    return url    
+        

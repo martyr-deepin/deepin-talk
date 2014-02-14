@@ -24,7 +24,7 @@ import os
 import base64
 import logging
 
-from dtalk.utils.xdg import get_avatar_dir
+from dtalk.utils.xdg import get_avatar_dir, path_to_uri
 from dtalk.utils import crypto
 from dtalk.cache.signals import avatar_saved
 
@@ -63,7 +63,7 @@ class AvatarManager(object):
             if len(avatars) == 0:
                 return self.default_avatar
             else:
-                return avatars[0]
+                return path_to_uri(avatars[0])
             
     def avatar_filepath(self, jid, sha1hash, need_hash=False):
         return os.path.join(self.avatar_dir, self.format_filename(jid, sha1hash, need_hash=need_hash))
