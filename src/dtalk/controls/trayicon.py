@@ -22,6 +22,7 @@
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from dtalk.controls import signals as cSignal 
+from dtalk.controls.qobject import postGui
 from dtalk.keybinder  import keyBinder
 
 class TrayIcon(QtWidgets.QSystemTrayIcon):
@@ -69,11 +70,13 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
     def mouseMoveEvent(self, event):
         print event
 
+    @postGui()    
     def blinking_trayicon(self, sender, icon, *args, **kwargs):
         self.blinkIcon = QtGui.QIcon(icon)
         self.blinkTimer.start(400)
         self.currentIcon = self.blinkIcon
     
+    @postGui()    
     def stilled_trayicon(self, *args, **kwargs):
         self.blinkTimer.stop()
         self.currentIcon = self.defaultIcon
