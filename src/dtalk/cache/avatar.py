@@ -56,7 +56,7 @@ class AvatarManager(object):
             jid_md5 = crypto.get_md5(jid)
             path = os.path.join(self.avatar_dir, "%s_%s" % (jid_md5, sha1hash))            
             if os.path.exists(path):
-                return path
+                return path_to_uri(path)
             return self.default_avatar
         else:    
             avatars = self.get_avatars(jid)

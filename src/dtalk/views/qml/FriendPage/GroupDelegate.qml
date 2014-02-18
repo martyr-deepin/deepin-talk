@@ -1,4 +1,5 @@
 import QtQuick 2.1
+import "../Widgets" as Widgets
 
 Component {
     Item {
@@ -15,6 +16,7 @@ Component {
             Row {
                 anchors.fill: parent
                 spacing: 10
+                
                 Image { 
                     id: arrow
                     source: "qrc:/images/common/arrow.png" 
@@ -22,7 +24,7 @@ Component {
                     rotation: wrapper.expend ? 0 : -90
                 }
                 
-                Text { 
+                Widgets.GlowText { 
                     id: groupName
                     text: instance.name
                     /* color: "#fff" */

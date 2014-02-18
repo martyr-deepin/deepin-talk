@@ -73,6 +73,7 @@ class BaseRoster(object):
         
         # request vcard infos.
         jids = self.client_roster.keys()
+        jids.insert(0, self.boundjid.bare)
         for jid in jids:
             if not avatarManager.has_avatar(jid):
                 self.request_vcard(jid)
@@ -87,7 +88,7 @@ class BaseVCard(object):
         self.add_event_handler("vcard_avatar_update", self._on_vcard_avatar)        
         
     def request_vcard(self, jid):
-        logger.info("Received vCard avatar update from {0}. Asking for vcard".format(jid))
+        logger.debug("Received vCard avatar update from {0}. Asking for vcard".format(jid))
         self.plugin['xep_0054'].get_vcard(jid, block=False, callback=self._on_vcard_get)
         
     def _on_vcard_avatar(self, pres):    
@@ -96,7 +97,7 @@ class BaseVCard(object):
     def _on_vcard_get(self, stanza):    
         vcard_temp = stanza.get("vcard_temp")
         jid = stanza.get_from().bare
-        logger.info("Received vCard from {0}".format(jid))
+        logger.debug("Received vCard from {0}".format(jid))
         
         photo = vcard_temp['PHOTO']
         if not photo:
@@ -192,7 +193,7 @@ class AsyncClient(threading.Thread):
     @threaded    
     def action_logout(self):        
         try:
-            self.xmpp.disconnect(wait=False)
+            self.xmpp.disconnect(wait=False, send_close=False)
         except: pass    
         
 
