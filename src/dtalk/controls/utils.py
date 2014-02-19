@@ -25,13 +25,13 @@ from dtalk.controls.base import get_qobject_wrapper
 from dtalk.cache import avatarManager
 from dtalk.utils.six import string_types
 
-def get_friend(obj):
+def getFriend(obj):
     if hasattr(obj, "friend"):
         return obj.friend
     return obj
 
-def get_display_name(obj):
-    instance = get_friend(obj)
+def getDisplayName(obj):
+    instance = getFriend(obj)
     if instance.remark:
         return instance.remark
     if instance.nickname:

@@ -151,7 +151,7 @@ class ControlManager(QPropertyObject()):
             self.chatWindowManager[jid].raise_()
             
     def createModel(self, jid):        
-        return MessageModel(to_jid=jid)
+        return MessageModel(toJid=jid)
     
     @postGui()
     def on_received_message(self, sender, instance, created, update_fields, *args, **kwargs):

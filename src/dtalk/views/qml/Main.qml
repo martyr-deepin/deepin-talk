@@ -10,6 +10,8 @@ DWindow {
     Item {
         anchors.fill: parent
         
+        NotifyBox {}
+        
         Connections {
             /* target: serverManager */
             /* onUserLoginSuccessed: { */

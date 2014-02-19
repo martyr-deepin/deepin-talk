@@ -33,24 +33,23 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
     def __init__(self, parent=None):
         self.defaultIcon = QtGui.QIcon(":/images/common/logo.png")        
         super(TrayIcon, self).__init__(self.defaultIcon, parent)
-        self.transparentIcon = QtGui.QIcon(":/images/common/transparent.png")
-        self.blinkIcon = None
         self.currentIcon = self.defaultIcon
         self._hovered = False
         self.activated.connect(self.onTrayIconActivated)
         
-        cSignal.blink_trayicon.connect(self.blinking_trayicon)
-        cSignal.still_trayicon.connect(self.stilled_trayicon)
-        keyBinder.mouseMoved.connect(self.on_global_mouse_moved)
+        cSignal.blink_trayicon.connect(self.blinkingTrayicon)
+        cSignal.still_trayicon.connect(self.stilledTrayicon)
+        keyBinder.mouseMoved.connect(self.onGlobalMouseMoved)
         
         self.hoverTimer = QtCore.QTimer()
         self.hoverTimer.setInterval(200)
         self.hoverTimer.setSingleShot(True)
-        self.hoverTimer.timeout.connect(self.on_timer_timeout)
-        self.blinkTimer = QtCore.QTimer()
-        self.blinkTimer.setInterval(400)
-        self.blinkTimer.setSingleShot(False)
-        self.blinkTimer.timeout.connect(self.on_blink_timer_timeout)
+        self.hoverTimer.timeout.connect(self.onHoverTimerTimeout)
+        self.flashTimer = QtCore.QTimer()
+        self.flashTimer.setInterval(400)
+        self.flashTimer.setSingleShot(False)
+        self.flashTimer.timeout.connect(self.flash)
+        self._flashFlag = True
         
     def onTrayIconActivated(self, reason):    
         if reason in (QtWidgets.QSystemTrayIcon.Context, QtWidgets.QSystemTrayIcon.Trigger):
@@ -59,56 +58,55 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
     @QtCore.pyqtSlot(result="QVariant")        
     def getPos(self):        
         geometry = self.geometry()
-        mouseX = int(geometry.x() / 2 + geometry.width() / 2)
-        mouseY = int(geometry.y() / 2)
+        mouseX = int(geometry.x() + geometry.width() / 2)
+        mouseY = int(geometry.y())
         return QtCore.QPoint(mouseX, mouseY)
     
     def getNormalGeometry(self):
         geometry = self.geometry()
-        return QtCore.QRect(geometry.x() / 2, geometry.y() / 2, geometry.width(), geometry.height())
-    
-    def mouseMoveEvent(self, event):
-        print event
+        return QtCore.QRect(geometry.x(), geometry.y(), geometry.width(), geometry.height())
+        
+    def flash(self):    
+        if self._flashFlag:
+            self.setIcon(QtGui.QIcon())
+        else:    
+            self.setIcon(self.currentIcon)
+        self._flashFlag = not self._flashFlag    
 
     @postGui()    
-    def blinking_trayicon(self, sender, icon, *args, **kwargs):
-        self.blinkIcon = QtGui.QIcon(icon)
-        self.blinkTimer.start(400)
-        self.currentIcon = self.blinkIcon
+    def blinkingTrayicon(self, sender, icon, *args, **kwargs):
+        try:
+            if icon.startswith("qrc:/"):
+                icon = icon.lstrip("qrc")
+        except: pass
+        
+        self.currentIcon = QtGui.QIcon(icon)
+        self.flashTimer.start(400)
     
     @postGui()    
-    def stilled_trayicon(self, *args, **kwargs):
-        self.blinkTimer.stop()
+    def stilledTrayicon(self, *args, **kwargs):
+        self.flashTimer.stop()
         self.currentIcon = self.defaultIcon
         self.setIcon(self.defaultIcon)
-    
-    def on_blink_timer_timeout(self):
-        if self.currentIcon != self.transparentIcon:
-            self.currentIcon = self.transparentIcon
-            self.setIcon(self.transparentIcon)
-        else:    
-            if self.blinkIcon is not None:
-                self.currentIcon = self.blinkIcon
-                self.setIcon(self.blinkIcon)
-    
-    def set_hovered(self, value):
+        
+    def setHovered(self, value):
         if self._hovered != value:
             self._hovered = value
             self._hoveredNty.emit()
             self.hoverStatusChanged.emit(value)
             
-    def get_hovered(self):        
+    def getHovered(self):        
         return self._hovered
     
-    def on_global_mouse_moved(self, x, y):
+    def onGlobalMouseMoved(self, x, y):
         rect = self.getNormalGeometry()
         if rect.contains(x, y):
             self.hoverTimer.stop()            
-            self.set_hovered(True)
+            self.setHovered(True)
         else:    
             self.hoverTimer.start()
             
-    def on_timer_timeout(self):        
-        self.set_hovered(False)
+    def onHoverTimerTimeout(self):        
+        self.setHovered(False)
             
-    hovered = QtCore.pyqtProperty(bool, get_hovered, set_hovered, notify=_hoveredNty)        
+    hovered = QtCore.pyqtProperty(bool, getHovered, setHovered, notify=_hoveredNty)        

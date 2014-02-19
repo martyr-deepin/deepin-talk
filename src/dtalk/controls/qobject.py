@@ -124,6 +124,9 @@ class QObjectListModel(QtCore.QAbstractListModel):
         self._data[i] = obj
         self.dataChanged.emit(self.index(i), self.index(i), [])
         
+    def itemChange(self, i):    
+        self.dataChanged.emit(self.index(i), self.index(i), [])
+        
     def move(self, fromIndex, toIndex):    
         value = toIndex
         if toIndex > fromIndex:

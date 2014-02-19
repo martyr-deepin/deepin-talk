@@ -48,7 +48,7 @@ Component {
             width: parent.width
             visible: wrapper.expend
             id: friendView
-            model: instance.friendModel                
+            model: instance.friendModel
             interactive: false            
             clip: true
         }

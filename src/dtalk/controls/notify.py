@@ -22,7 +22,7 @@
 
 from PyQt5 import QtCore
 from dtalk.controls.qobject import QPropertyObject, QObjectListModel
-from dtalk.controls.utils import get_display_name, get_friend
+from dtalk.controls.utils import getDisplayName, getFriend
 from dtalk.controls import signals as cSignals
 from dtalk.cache import avatarManager
 
@@ -41,8 +41,8 @@ class MessageNotifyObject(BaseNotifyObject):
     def __init__(self, instance):
         super(MessageNotifyObject, self).__init__()
         self.instance = instance
-        self.title = get_display_name(instance)
-        friend = get_friend(instance)
+        self.title = getDisplayName(instance)
+        friend = getFriend(instance)
         self.image = avatarManager.get_avatar(friend.jid)    
         self.total = 1
         
@@ -56,7 +56,7 @@ class NotifyModel(QObjectListModel):
         super(NotifyModel, self).__init__(parent)
         
     def data(self, index, role):
-        if not index.isValid() or index.row() > self.size:
+        if not index.isValid() or index.row() > self.size():
             return QtCore.QVariant()
         try:
             item = self._data[index.row()]
@@ -67,17 +67,31 @@ class NotifyModel(QObjectListModel):
             return item
         return QtCore.QVariant()        
     
-    def get_obj_by_instance(self, instance):
+    def getObjByInstance(self, instance):
         ret = None
         for obj in self._data:
             if obj.instance.friend.jid == instance.friend.jid:
                 ret = obj
                 break
         return ret    
-                
+    
+    @QtCore.pyqtSlot(int)
+    def showMessage(self, index):
+        try:
+            obj = self.get(index)        
+        except:
+            pass
+        else:
+            self.removeAt(index)
+            
+            if self.size() > 0:
+                newObj = self.get(0)
+                cSignals.blink_trayicon.send(sender=self, icon=newObj.image)
+            else:    
+                cSignals.still_trayicon.send(sender=self)
     
     def appendMessage(self, instance):
-        obj = self.get_obj_by_instance(instance)
+        obj = self.getObjByInstance(instance)
         if obj is not None:
             obj.total += 1
         else:    

@@ -19,7 +19,7 @@ ListView {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    controlManager.openChat(instance.jid)
+                    controlManager.openChat(model.jid)
                 }
             }
 			
@@ -32,7 +32,7 @@ ListView {
 					id: faceImage
 					width: 40; height: 40
 					anchors.verticalCenter: parent.verticalCenter
-					source: instance.avatar
+					source: model.avatar
 				}
 				
 				Rectangle {
@@ -47,7 +47,7 @@ ListView {
 						anchors.centerIn: parent
 						color: "#fff"
 						font.pixelSize: 12
-						text: Roster.getDisplayName(instance)
+                        text: model.displayName
 					}
 					
 				}

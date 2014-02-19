@@ -82,8 +82,7 @@ class Panel(BaseView):
         self.trayIcon.show()
 
     def initKeybinder(self):    
-        # keyBinder.start()
-        pass
+        keyBinder.start()
         
     @QtCore.pyqtSlot()    
     def closeWindow(self):

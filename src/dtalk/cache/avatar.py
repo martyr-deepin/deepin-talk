@@ -88,6 +88,7 @@ class AvatarManager(object):
         with open(path, 'wb') as fp:
             fp.write(image_data)
         logger.debug("{0} avatar have saved".format(jid))    
+        path = path_to_uri(path)
         avatar_saved.send(sender=self, jid=jid, path=path)    
         
     def check_avatar(self, jid, sha1hash, need_hash=False):    

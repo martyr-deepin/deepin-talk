@@ -28,13 +28,17 @@ import peewee as pw
 
 from PyQt5 import QtCore
 
-from dtalk.models.signals import post_save, post_delete, db_init_finished
-from dtalk.models import Resource, Friend, Group, SendedMessage, common_db, UserHistory, check_common_db_inited
+from dtalk.models import signals as dbSignals
+from dtalk.models import (Friend, Group, SendedMessage, ReceivedMessage,
+                          common_db, UserHistory, check_common_db_inited, disable_auto_commit)
+
 from dtalk.controls.base import AbstractWrapperModel, peeweeWrapper
-from dtalk.controls.qobject import postGui
+from dtalk.controls.qobject import postGui, QObjectListModel
 from dtalk.cache import avatarManager
-import dtalk.cache.signals as cache_signals
-import dtalk.xmpp.signals as xmpp_signals
+from dtalk.utils.threads import threaded
+
+import dtalk.cache.signals as cacheSignals
+import dtalk.xmpp.signals as xmppSignals
 import dtalk.controls.utils as controlUtils
 
 
@@ -42,7 +46,7 @@ class GroupModel(AbstractWrapperModel):
     other_fields = ("friendModel",)
     
     def initial(self, *args, **kwargs):
-        xmpp_signals.user_roster_received.connect(self._on_roster_received)
+        xmppSignals.user_roster_received.connect(self._on_roster_received)
         
     @postGui()    
     def _on_roster_received(self, *args, **kwargs):    
@@ -54,113 +58,171 @@ class GroupModel(AbstractWrapperModel):
     
     @classmethod
     def attach_attrs(cls, instance):
-        friend_model = FriendModel(group_id=instance.id)
+        friend_model = FriendModel(groupId=instance.id)
         setattr(instance, "friendModel", friend_model)
         
-
-class FriendModel(AbstractWrapperModel):        
-    other_fields = ("resource", "avatar")
-    ownerObj = None
+class FriendModel(QObjectListModel):
+    jidRole = QtCore.Qt.UserRole + 1
+    nicknameRole = QtCore.Qt.UserRole + 2
+    remarkRole  = QtCore.Qt.UserRole + 3
+    subscriptionRole  = QtCore.Qt.UserRole + 4
+    groupRole = QtCore.Qt.UserRole + 5
+    isSelfRole = QtCore.Qt.UserRole + 6
+    displayNameRole = QtCore.Qt.UserRole + 7
+    
+    # extends
+    avatarRole = QtCore.Qt.UserRole + 8
         
-    '''
-    load(): select data from the database of interest
-    init_signals: after the first call initData(), its initial
-    '''
-    
-    def initial(self, group_id=None, *args, **kwargs):
-        self.group_id = group_id
-        self.initData()    
-        self.init_signals()
-    
-    def load(self):
+    _roles = {
+        jidRole : "jid",
+        nicknameRole : "nickname",
+        remarkRole : "remark",
+        subscriptionRole : "subscription",
+        groupRole : "groupName",
+        isSelfRole : "isSelf",
+        avatarRole : "avatar",
+        displayNameRole: "displayName",
+    }
+        
+        
+    def __init__(self, parent=None, groupId=None):
+        super(FriendModel, self).__init__(parent)
+        self.groupId = groupId        
+        
+        self._initSignals()
+        self._initData()
+        
+    def _initSignals(self):    
+        dbSignals.post_save.connect(self.onFriendPostSave, sender=Friend)
+        dbSignals.post_delete.connect(self.onFriendPostDelete, sender=Friend)
+        cacheSignals.avatar_saved.connect(self.onAvatarSaved, sender=Friend)
+        
+    def _initData(self):    
         kwargs = dict(subscription="both", isSelf=False)
-        if self.group_id is not None:
-            kwargs["group"] = self.group_id
-        friends = Friend.filter(**kwargs)
-        return friends
+        if self.groupId is not None:
+            kwargs["group"] = self.groupId
+        friends = list(Friend.filter(**kwargs))
+        self.setAll(friends)
         
-    def init_signals(self):    
-        post_save.connect(self.on_post_save, sender=Resource, dispatch_uid=str(id(self)))
-        post_delete.connect(self.on_post_delete, sender=Resource, dispatch_uid=str(id(self)))
-        post_save.connect(self.on_post_save, sender=Friend, dispatch_uid=str(id(self)))
-        post_delete.connect(self.on_post_delete, sender=Friend, dispatch_uid=str(id(self)))
-        cache_signals.avatar_saved.connect(self.on_avatar_saved, dispatch_uid=str(id(self)))
+    @postGui()
+    def onFriendPostSave(self, instance, created, update_fields, *args, **kwargs):    
         
-    def update_changed(self, instance, update_fields):    
-        obj = self.get_obj_by_jid(instance.jid)
-        if not obj:
-            return
-        if update_fields and isinstance(update_fields, list):
-            for key in update_fields:            
-                setattr(obj, key, getattr(instance, key, None))
-                
-    @postGui()    
-    def on_post_save(self, sender, instance, created, update_fields, *args, **kwargs):
-        if sender == Friend:
-            if not self.verify(instance):
-                return 
-            if created:
-                obj = self.wrapper_instance(instance)                
-                self.append(obj)
-            else:    
-                self.update_changed(instance, update_fields)
-                
-    @postGui()            
-    def on_post_delete(self, sender, instance, *args, **kwargs):
-        pass
-    
-    def verify(self, instance):
-        return instance.subscription == "both" and instance.isSelf == False and self.group_id == instance.group.id
-    
-    def get_obj_by_jid(self, jid):
-        ret = None
-        for obj in self._data:
-            if obj.jid == jid:
-                ret = obj
-                break
-        return ret
-    
-    @classmethod
-    def attach_attrs(cls, instance):
-        resources = sorted(instance.resources, key=lambda item: item.priority, reverse=True)
-        if len(resources) >= 1:
-            resource = resources[0]
+        # verity instance
+        if not self.verify(instance):        
+            return 
+        
+        if created:
+            self.append(instance)
         else:    
-            resource = Resource.get_dummy_data()
-        avatar = avatarManager.get_avatar(instance.jid)    
-        setattr(instance, "avatar", avatar)
-        setattr(instance, "resource", resource)                    
+            self.replace(instance)
+            
+    @postGui()        
+    def onFriendPostDelete(self, instance, *args, **kwargs):
+        try:
+            self.remove(instance)
+        except: pass    
     
     @postGui()
-    def on_avatar_saved(self, sender, jid, path, *args, **kwargs):
-        ret = self.get_obj_by_jid(jid)
+    def onAvatarSaved(self, jid, path):
+        ret = self.getObjByJid(jid)
         if ret:
-            ret.avatar = path
+            _, index = ret
+            self.itemChange(index)
+        
+    def getObjByJid(self, jid):    
+        for index, obj in enumerate(self._data):
+            if obj.jid == jid:
+                return (obj, index)
+        return None    
+                
+    def verify(self, instance):    
+        return instance.subscription == "both" and instance.isSelf == False and self.groupId == instance.group.id
+        
+    def data(self, index, role):
+        if not index.isValid() or index.row() > self.size():
+            return QtCore.QVariant()
+        try:
+            item = self._data[index.row()]
+        except:    
+            return QtCore.QVariant()
+        
+        roleName = self._roles[role]
+        if hasattr(item, roleName):
+            return getattr(item, roleName)
+        elif roleName == "groupName":
+            return item.group.name
+        elif roleName == "avatar":
+            return avatarManager.get_avatar(item.jid)
+        elif roleName == "displayName":
+            return controlUtils.getDisplayName(item)
+        return QtCore.QVariant()
 
             
-class MessageModel(AbstractWrapperModel):
-    other_fields = ("type", "successed", "readed")
+class MessageModel(QObjectListModel):
     _jidInfoSignal = QtCore.pyqtSignal()
     
-    def initial(self, to_jid):
-        self.to_jid = to_jid
-        self._jidInfo = None
-        self.init_signals()
-        
-    def init_signals(self):    
-        post_save.connect(self.on_sended_message, sender=SendedMessage)
-        post_save.connect(self.on_userinfo_changed, sender=Friend)
+    typeRole = QtCore.Qt.UserRole + 1
+    successedRole = QtCore.Qt.UserRole + 2
+    readedRole = QtCore.Qt.UserRole + 3
+    bodyRole  = QtCore.Qt.UserRole + 4
+    createdRole = QtCore.Qt.UserRole + 5
     
+    _roles = {
+        typeRole : "type",
+        successedRole : "successed",
+        readedRole : "readed",
+        bodyRole : "body",
+        createdRole : "published"
+    }
+    
+    def __init__(self, toJid, loadMessages=False, parent=None):
+        super(MessageModel, self).__init__(parent)
+        self._toJid = toJid
+        self._jidInfo = None
+        self._initSignals()
+        if loadMessages:
+            self.loadUnreadedMessages()
+        
+    def _initSignals(self):    
+        dbSignals.post_save.connect(self.onSendedMessage, sender=SendedMessage)
+        dbSignals.post_save.connect(self.onUserinfoChanged, sender=Friend)
+        
+    def data(self, index, role):    
+        if not index.isValid() or index.row() > self.size():
+            return QtCore.QVariant()
+        try:
+            item = self._data[index.row()]
+        except:    
+            return QtCore.QVariant()
+        
+        roleName = self._roles[role]
+        if hasattr(item, roleName):
+            return getattr(item, roleName)
+        elif roleName == "published":
+            return item.created.strftime("%H:%M:%S")
+        return QtCore.QVariant()
+        
+    def loadUnreadedMessages(self):
+        qs = ReceivedMessage.select().where(ReceivedMessage.readed==False,
+                                            ReceivedMessage.friend==Friend.get(jid=self._toJid))
+        objs = list(qs)
+        self.setAll(objs)
+        with disable_auto_commit():
+            for obj in objs:
+                if obj.readed != True:
+                    obj.readed = True
+                    obj.save(update_fields=['readed'])
+        
     @postGui()
-    def on_sended_message(self, sender, instance, created, update_fields, *args, **kwargs):    
+    def onSendedMessage(self, sender, instance, created, update_fields, *args, **kwargs):    
         if created:
             self.appendMessage(instance)
     
     def appendMessage(self, instance, received=False):
         if not self.verify(instance):
             return
-        obj = self.wrapper_instance(instance)
-        self.append(obj)
+        
+        self.append(instance)
         
         if received:
             if hasattr(instance, "readed"):
@@ -169,27 +231,16 @@ class MessageModel(AbstractWrapperModel):
                     instance.save(update_fields=["readed"])
         
     def verify(self, instance):    
-        return instance.friend.jid == self.to_jid
-    
-    @classmethod
-    def attach_attrs(cls, instance):
-        if isinstance(instance, SendedMessage):
-            setattr(instance, "readed", True)
-        else:    
-            setattr(instance, "successed", True)
-        setattr(instance, "type", instance.TYPE)    
-        strCreated = instance.created.strftime("%H:%M:%S")
-        instance.created = strCreated
-
+        return instance.friend.jid == self._toJid
         
     @QtCore.pyqtSlot(str)
     def postMessage(self, body):
-        SendedMessage.send_message(self.to_jid, body)        
+        SendedMessage.send_message(self._toJid, body)        
             
     @QtCore.pyqtProperty("QVariant", notify=_jidInfoSignal)
     def jidInfo(self):
         if self._jidInfo is None:
-            self._jidInfo = controlUtils.getJidInfo(self.to_jid)
+            self._jidInfo = controlUtils.getJidInfo(self._toJid)
         return self._jidInfo    
     
     @jidInfo.setter
@@ -198,8 +249,8 @@ class MessageModel(AbstractWrapperModel):
         self._jidInfoSignal.emit()
     
     @postGui()    
-    def on_userinfo_changed(self, instance, *args, **kwargs):
-        if instance.jid == self.to_jid:
+    def onUserinfoChanged(self, instance, *args, **kwargs):
+        if instance.jid == self._toJid:
             self.jidInfo = controlUtils.getJidInfo(instance)
             
             
@@ -210,7 +261,7 @@ class UserHistoryModel(AbstractWrapperModel):
         if check_common_db_inited():
             self.initData()
         else:    
-            db_init_finished.connect(self._on_common_db_inited, sender=common_db)
+            dbSignals.db_init_finished.connect(self._on_common_db_inited, sender=common_db)
         self._obj = None    
             
     @postGui()        

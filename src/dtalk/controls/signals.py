@@ -24,3 +24,4 @@ from dtalk.dispatch import Signal
 
 blink_trayicon = Signal(providing_args=['icon'])
 still_trayicon = Signal(providing_args=[])
+show_message = Signal(providing_args=['jid'])

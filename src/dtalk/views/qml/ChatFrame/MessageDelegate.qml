@@ -1,5 +1,5 @@
 import QtQuick 2.1
-import "../Widgets"
+import "../Widgets" as Widgets
 
 Component {
 	id: messageDelegate
@@ -15,7 +15,7 @@ Component {
 		
         Item {
 	        id: messageBox
-			x: instance.type == "received" ? 10 : parent.width - messageBox.messageWidth - 10
+			x: model.type == "received" ? 10 : parent.width - messageBox.messageWidth - 10
             /* instance: instance ? undefined : instance */
             width: parent.width
 	        height: Math.max(messageBubble.height, personInfo.height)
@@ -23,31 +23,31 @@ Component {
 	
 	        Bubble {
 		        id: messageBubble
-		        message: instance.body
-		        anchors.left: instance.type == "received" ? personInfo.right : messageBox.left
+		        message: model.body
+		        anchors.left: model.type == "received" ? personInfo.right : messageBox.left
                 maxWidth: parent.width * 0.66
 		        y: 10
-                type: instance.type
+                type: model.type
 	        }
 		
 	        Item {
 		        id: personInfo
 		        y: 10
 		        width: 60; height: 50 + 15
-		        anchors.left: instance.type == "received" ? messageBox.left : messageBubble.right
-		        anchors.leftMargin: instance.type == "received" ? 0 : 10
+		        anchors.left: model.type == "received" ? messageBox.left : messageBubble.right
+		        anchors.leftMargin: model.type == "received" ? 0 : 10
 		        Column {
                     spacing: 5
             
-			        RoundImageButton { 
-				        source: instance.type == "received" ? messageModel.jidInfo.avatar : commonManager.ownerInfo.avatar;
+			        Widgets.RoundImageButton { 
+				        source: model.type == "received" ? messageModel.jidInfo.avatar : commonManager.ownerInfo.avatar;
                         smooth: true; 
 				        anchors.horizontalCenter: parent.horizontalCenter
 				        width: 50; height: 50
 				    }
             
-                    TextShadow {
-                        text: instance.created
+                    Widgets.GlowText {
+                        text: model.published
                         font.pixelSize: 10
 				        anchors.horizontalCenter: parent.horizontalCenter
                 

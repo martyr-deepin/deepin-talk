@@ -28,7 +28,7 @@ Component {
             onEntered: { selectEffect.visible = true; print("enter") }
             onExited: { selectEffect.visible = false }
             onClicked: {
-                print("clicked")
+                wrapper.ListView.view.model.showMessage(index)
             }
             
         }

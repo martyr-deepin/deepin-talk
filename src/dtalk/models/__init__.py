@@ -278,7 +278,7 @@ class Resource(BaseUserModel):
                 obj.delete_instance()
 
 class ReceivedMessage(BaseUserModel):        
-    TYPE = "received"
+    type = "received"
     friend = pw.ForeignKeyField(Friend, related_name="sends")
     body = pw.TextField()
     readed = pw.BooleanField(default=False)
@@ -310,7 +310,7 @@ class ReceivedMessage(BaseUserModel):
             cls.create(friend=obj, body=msg['body'])
     
 class SendedMessage(BaseUserModel):
-    TYPE = "sended"
+    type = "sended"
     friend = pw.ForeignKeyField(Friend, related_name="receives")
     body = pw.TextField()
     successed = pw.BooleanField(default=True)
