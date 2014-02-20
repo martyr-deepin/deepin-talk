@@ -1,5 +1,5 @@
 import QtQuick 2.1
-import "../Widgets"
+import "../Widgets" as Widgets
 import DTalk 1.0
 
 Item {
@@ -9,8 +9,8 @@ Item {
     property string message
     property int padding: 8
     property real maxWidth: 0
-    width: message.width + padding * 3
-    height: Math.max(message.height, message.paintedHeight) + padding * 2
+    width: textArea.width + padding * 3
+    height: textArea.height + padding * 2
 
     BorderImage {
         id: background
@@ -28,8 +28,8 @@ Item {
             anchors.bottomMargin: padding
             anchors.fill: parent
 
-            LayoutTextArea {
-                id: message
+            Widgets.LayoutTextArea {
+                id: textArea
                 anchors.left: parent.left
                 anchors.top: parent.top
                 minHeight: 43 - padding * 2
@@ -37,10 +37,10 @@ Item {
                 maxWidth: container.maxWidth
                 color: container.type == "received" ? Qt.rgba(0.9, 0.9, 0.9, 1.0) : Qt.rgba(82/255.0, 52/255.0, 165/255.0, 0.9)
                 wrapMode: Text.Wrap
+                /* verticalAlignment: Text.AlignVCenter */
                 textFormat: Text.RichText
                 selectByMouse: true
                 selectByKeyboard: true
-                verticalAlignment: Text.AlignVCenter
                 readOnly: true
                 text: container.message
                 focus: true
