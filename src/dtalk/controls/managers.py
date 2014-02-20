@@ -26,10 +26,9 @@ import dtalk.models.signals as dbSignals
 from dtalk.models import ReceivedMessage, Friend
 
 import dtalk.utils.xdg as dtalkXdg
-import dtalk.controls.utils as controlUtils
-
 from dtalk.controls.qobject import QPropertyObject
 from dtalk.controls.models import GroupModel, MessageModel, UserHistoryModel, getJidInfo
+from dtalk.controls import signals as cSignals
 from dtalk.views.chat import ChatWindow
 
 from dtalk.controls.qobject import postGui
@@ -138,20 +137,27 @@ class ControlManager(QPropertyObject()):
         self.chatWindowManager = dict()
         self.notifyModel = NotifyModel(self)
         dbSignals.post_save.connect(self.on_received_message, sender=ReceivedMessage)        
-    
-    @QtCore.pyqtSlot(str)
-    def openChat(self, jid):
+        cSignals.show_message.connect(self.onNitfiyMessageClicked)
+        
+    def onNitfiyMessageClicked(self, jid, msg, *args, **kwargs):    
+       self.showChatWindow(jid, loadMessages=True)
+       
+    def showChatWindow(self, jid, loadMessages=False):    
         if jid not in self.chatWindowManager:
-            w = ChatWindow(model=self.createModel(jid), jid=jid)
+            w = ChatWindow(model=self.createModel(jid, loadMessages), jid=jid)
             w.requestClose.connect(self.onChatWindowClose)
             w.setContextProperty("commonManager", commonManager)
             self.chatWindowManager[jid] = w
             w.show()
         else:    
             self.chatWindowManager[jid].raise_()
+    
+    @QtCore.pyqtSlot(str)
+    def openChat(self, jid):
+        self.showChatWindow(jid)
             
-    def createModel(self, jid):        
-        return MessageModel(toJid=jid)
+    def createModel(self, jid, loadMessages):        
+        return MessageModel(toJid=jid, loadMessages=loadMessages)
     
     @postGui()
     def on_received_message(self, sender, instance, created, update_fields, *args, **kwargs):

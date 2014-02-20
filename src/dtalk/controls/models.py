@@ -249,10 +249,10 @@ class MessageModel(QObjectListModel):
         objs = map(lambda item: MessageWrapper(item), qs)
         self.setAll(objs)
         with disable_auto_commit():
-            for obj in objs:
-                if obj.readed != True:
-                    obj.readed = True
-                    obj.save(update_fields=['readed'])
+            for ins in qs:
+                if ins.readed != True:
+                    ins.readed = True
+                    ins.save(update_fields=['readed'])
         
     @postGui()
     def onSendedMessage(self, sender, instance, created, update_fields, *args, **kwargs):    

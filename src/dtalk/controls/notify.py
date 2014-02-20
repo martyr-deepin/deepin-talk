@@ -83,12 +83,13 @@ class NotifyModel(QObjectListModel):
             pass
         else:
             self.removeAt(index)
-            
             if self.size() > 0:
                 newObj = self.get(0)
                 cSignals.blink_trayicon.send(sender=self, icon=newObj.image)
             else:    
                 cSignals.still_trayicon.send(sender=self)
+                
+            cSignals.show_message.send(sender=self, jid=obj.instance.friend.jid, msg=obj.instance)    
     
     def appendMessage(self, instance):
         obj = self.getObjByInstance(instance)
