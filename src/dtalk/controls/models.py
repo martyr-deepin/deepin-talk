@@ -76,6 +76,9 @@ class FriendWrapper(QPropertyObject()):
         self.avatar = avatarManager.get_avatar(self.jid)
         self.displayName = controlUtils.getDisplayName(instance)
         
+    def updateAvatar(self):    
+        self.avatar = avatarManager.get_avatar(self.jid)
+        
     def __eq__(self, other):    
         return self.jid == other.jid
     
@@ -163,7 +166,7 @@ class FriendModel(QObjectListModel):
     def _initSignals(self):    
         dbSignals.post_save.connect(self.onFriendPostSave, sender=Friend)
         dbSignals.post_delete.connect(self.onFriendPostDelete, sender=Friend)
-        cacheSignals.avatar_saved.connect(self.onAvatarSaved, sender=Friend)
+        cacheSignals.avatar_saved.connect(self.onAvatarSaved)
         
     def _initData(self):    
         kwargs = dict(subscription="both", isSelf=False)
@@ -194,11 +197,11 @@ class FriendModel(QObjectListModel):
         except: pass    
     
     @postGui()
-    def onAvatarSaved(self, jid, path):
+    def onAvatarSaved(self, jid, path, *args, **kwargs):
         ret = self.getObjByJid(jid)
         if ret:
-            _, index = ret
-            self.itemChange(index)
+            obj, _ = ret
+            obj.updateAvatar()
         
     def getObjByJid(self, jid):    
         for index, obj in enumerate(self._data):

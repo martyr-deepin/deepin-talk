@@ -40,6 +40,7 @@ Item {
                 textFormat: Text.RichText
                 selectByMouse: true
                 selectByKeyboard: true
+                verticalAlignment: Text.AlignVCenter
                 readOnly: true
                 text: container.message
                 focus: true

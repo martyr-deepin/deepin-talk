@@ -51,19 +51,18 @@ class AvatarManager(object):
         return sorted(full_path_files, key=lambda item: os.path.getmtime(item), reverse=True)
     
     def get_avatar(self, jid, sha1hash=None):
-
+        jid_md5 = crypto.get_md5(jid)        
         if sha1hash:
-            jid_md5 = crypto.get_md5(jid)
             path = os.path.join(self.avatar_dir, "%s_%s" % (jid_md5, sha1hash))            
             if os.path.exists(path):
                 return path_to_uri(path)
             return self.default_avatar
         else:    
-            avatars = self.get_avatars(jid)
-            if len(avatars) == 0:
-                return self.default_avatar
-            else:
-                return path_to_uri(avatars[0])
+            avatar_files = os.listdir(self.avatar_dir)
+            for f in avatar_files:
+                if f.startswith(jid_md5):
+                    return path_to_uri(os.path.join(self.avatar_dir, f))
+            return self.default_avatar
             
     def avatar_filepath(self, jid, sha1hash, need_hash=False):
         return os.path.join(self.avatar_dir, self.format_filename(jid, sha1hash, need_hash=need_hash))
@@ -93,8 +92,6 @@ class AvatarManager(object):
         
     def check_avatar(self, jid, sha1hash, need_hash=False):    
         path = self.avatar_filepath(jid, sha1hash, need_hash=need_hash)
-        if os.path.exists(path):
-            return True
-        return False
+        return os.path.exists(path)
             
 avatarManager = AvatarManager()

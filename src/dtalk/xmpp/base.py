@@ -92,7 +92,12 @@ class BaseVCard(object):
         self.plugin['xep_0054'].get_vcard(jid, block=False, callback=self._on_vcard_get)
         
     def _on_vcard_avatar(self, pres):    
-        self.request_vcard(pres['from'].bare)
+        data = pres['vcard_temp_update']['photo']
+        if not data:
+            return
+        jid = pres['from'].bare
+        if not avatarManager.check_avatar(jid, data):
+            self.request_vcard(jid)
         
     def _on_vcard_get(self, stanza):    
         vcard_temp = stanza.get("vcard_temp")
@@ -117,7 +122,7 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
         self.register_plugin("xep_0004") # Data Forms
         self.register_plugin("xep_0030") # Service Discovery
         self.register_plugin("xep_0054") # vcard-temp
-        # self.register_plugin("xep_0153")
+        self.register_plugin("xep_0153")
         self.register_plugin("xep_0060") # pubsub
         
         BaseMessage.__init__(self)
