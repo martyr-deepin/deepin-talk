@@ -117,6 +117,10 @@ class DMessage(QtQuick.QQuickItem):
     def insertText(self, text):
         self._textCursor.insertText(text)
         
+    @QtCore.pyqtSlot(str)
+    def insertHtml(self, html):
+        self._textCursor.insertHtml(html)
+        
     def cursorForPosition(self, point):    
         cursorPos = self._textDocument.documentLayout().hitTest(point, QtCore.Qt.FuzzyHit)
         if cursorPos == -1:
