@@ -1,7 +1,6 @@
 import QtQuick 2.1
 import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
-import "../scripts/roster.js" as Roster
 import "../Widgets"
 
 
@@ -19,7 +18,7 @@ ListView {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    controlManager.openChat(model.jid)
+                    controlManager.openChat(instance.jid)
                 }
             }
 			
@@ -32,7 +31,7 @@ ListView {
 					id: faceImage
 					width: 40; height: 40
 					anchors.verticalCenter: parent.verticalCenter
-					source: model.avatar
+					source: instance.avatar
 				}
 				
 				Rectangle {
@@ -47,7 +46,7 @@ ListView {
 						anchors.centerIn: parent
 						color: "#fff"
 						font.pixelSize: 12
-                        text: model.displayName
+                        text: instance.displayName
 					}
 					
 				}

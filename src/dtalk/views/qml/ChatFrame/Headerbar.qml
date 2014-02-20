@@ -1,6 +1,5 @@
 import QtQuick 2.1
 import "../Widgets"
-import "../scripts/roster.js" as Roster
 
 Rectangle {
 	id: container
@@ -11,7 +10,7 @@ Rectangle {
 		spacing: 10
 		
 	    Nickname {
-            nickname: Roster.getDisplayName(messageModel.jidInfo)
+            nickname: messageModel.jidInfo.displayName
 			anchors.horizontalCenter: parent.horizontalCenter		
 	    }
 	    

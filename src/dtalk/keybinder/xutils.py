@@ -36,8 +36,10 @@ x_modifiers = (X.ControlMask, X.ShiftMask, X.Mod1Mask,
  
 for mod in x_modifiers:
     known_modifiers_mask |= mod
-
+    
+ctx = None
 def record_event(record_callback):
+    global ctx
     ctx = record_dpy.record_create_context(
         0,
         [record.AllClients],
@@ -56,6 +58,10 @@ def record_event(record_callback):
     record_dpy.record_enable_context(ctx, record_callback)
     record_dpy.record_free_context(ctx)
     
+def stop_record():    
+    record_dpy.record_disable_context(ctx)
+    record_dpy.record_free_context(ctx)
+        
 def get_event_data(data):
     return rq.EventField(None).parse_binary_value(data, record_dpy.display, None, None)
     
@@ -98,6 +104,7 @@ class XlibBackend(BaseBackend):
     def initial(self):
         self.wait_for_release = False
         self._identifier = None
+        self._stop_flag = False
         
     def response(self):    
         record_event(self.record_callback)
@@ -110,6 +117,8 @@ class XlibBackend(BaseBackend):
         data = reply.data
         
         while len(data):
+            if self._stop_flag:
+                break
             event, data = get_event_data(data)
             if event.type == X.KeyPress and not self.wait_for_release:
                 keycode = event.detail
@@ -125,3 +134,7 @@ class XlibBackend(BaseBackend):
                     
             elif event.type == X.MotionNotify:     
                 self.emitMouseMoved(int(event.root_x), int(event.root_y))
+                
+    def stop(self):            
+        self._stop_flag = True
+        stop_record()

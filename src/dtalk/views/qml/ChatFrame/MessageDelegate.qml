@@ -15,7 +15,7 @@ Component {
 		
         Item {
 	        id: messageBox
-			x: model.type == "received" ? 10 : parent.width - messageBox.messageWidth - 10
+			x: instance.type_ == "received" ? 10 : parent.width - messageBox.messageWidth - 10
             /* instance: instance ? undefined : instance */
             width: parent.width
 	        height: Math.max(messageBubble.height, personInfo.height)
@@ -23,31 +23,31 @@ Component {
 	
 	        Bubble {
 		        id: messageBubble
-		        message: model.body
-		        anchors.left: model.type == "received" ? personInfo.right : messageBox.left
+		        message: instance.body
+		        anchors.left: instance.type_ == "received" ? personInfo.right : messageBox.left
                 maxWidth: parent.width * 0.66
 		        y: 10
-                type: model.type
+                type: instance.type_
 	        }
 		
 	        Item {
 		        id: personInfo
 		        y: 10
 		        width: 60; height: 50 + 15
-		        anchors.left: model.type == "received" ? messageBox.left : messageBubble.right
-		        anchors.leftMargin: model.type == "received" ? 0 : 10
+		        anchors.left: instance.type_ == "received" ? messageBox.left : messageBubble.right
+		        anchors.leftMargin: instance.type_ == "received" ? 0 : 10
 		        Column {
                     spacing: 5
             
 			        Widgets.RoundImageButton { 
-				        source: model.type == "received" ? messageModel.jidInfo.avatar : commonManager.ownerInfo.avatar;
+				        source: instance.type_ == "received" ? messageModel.jidInfo.avatar : commonManager.ownerInfo.avatar;
                         smooth: true; 
 				        anchors.horizontalCenter: parent.horizontalCenter
 				        width: 50; height: 50
 				    }
             
                     Widgets.GlowText {
-                        text: model.published
+                        text: instance.created
                         font.pixelSize: 10
 				        anchors.horizontalCenter: parent.horizontalCenter
                 

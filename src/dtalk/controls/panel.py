@@ -87,6 +87,7 @@ class Panel(BaseView):
     @QtCore.pyqtSlot()    
     def closeWindow(self):
 
+        keyBinder.stop()
         sessionManager.disconnect()        
 
         self.hide()

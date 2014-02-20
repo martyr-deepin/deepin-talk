@@ -1,7 +1,6 @@
 import QtQuick 2.1
 import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
-import "../scripts/roster.js" as Roster
 import "../Widgets"
 
 
@@ -11,8 +10,6 @@ Item {
 	UserBrief {
 		id: userBrief
 		width: parent.width
-        /* faceSource: Roster.ownerObj.avatar */
-        /* username: Roster.getDisplayName(Roster.ownerObj) */
 		anchors.horizontalCenter: parent.horizontalCenter
 	}
     

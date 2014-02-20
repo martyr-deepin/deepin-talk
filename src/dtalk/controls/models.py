@@ -28,19 +28,91 @@ import peewee as pw
 
 from PyQt5 import QtCore
 
+from dtalk.utils.six import string_types
 from dtalk.models import signals as dbSignals
 from dtalk.models import (Friend, Group, SendedMessage, ReceivedMessage,
                           common_db, UserHistory, check_common_db_inited, disable_auto_commit)
 
 from dtalk.controls.base import AbstractWrapperModel, peeweeWrapper
-from dtalk.controls.qobject import postGui, QObjectListModel
+from dtalk.controls.qobject import postGui, QObjectListModel, QPropertyObject
 from dtalk.cache import avatarManager
-from dtalk.utils.threads import threaded
+
 
 import dtalk.cache.signals as cacheSignals
 import dtalk.xmpp.signals as xmppSignals
 import dtalk.controls.utils as controlUtils
 
+def getJidInfo(jid):
+    if isinstance(jid, string_types):
+        try:
+            obj = Friend.get(jid=jid)
+        except Friend.DoesNotExist:    
+            return None
+    else:    
+        obj = jid
+        
+    return FriendWrapper(obj)    
+
+
+class FriendWrapper(QPropertyObject()):
+    
+    __qtprops__ = {
+        "jid" : "",
+        "nickname" : "",
+        "ramark" : "",
+        "subscription" : "",
+        "groupName" : "",
+        "displayName" : "",
+        "avatar" : "",
+    }
+    
+    def __init__(self, instance, parent=None):
+        super(FriendWrapper, self).__init__(parent)
+        
+        self.jid = instance.jid
+        self.nickname = instance.nickname
+        self.remark = instance.remark
+        self.groupName = instance.group.name
+        self.avatar = avatarManager.get_avatar(self.jid)
+        self.displayName = controlUtils.getDisplayName(instance)
+        
+    def __eq__(self, other):    
+        return self.jid == other.jid
+    
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    
+    def __repr__(self):
+        return "<{0} {1}>".format(self.__class__.__name__, self.jid)
+    
+class MessageWrapper(QPropertyObject()):    
+        
+    __qtprops__ = {
+        "type_" : "",
+        "successed" : True,
+        "reaed" : False,
+        "body" : "",
+        "created" : ""
+    }
+    
+    def __init__(self, instance, parent=None):
+        super(MessageWrapper, self).__init__(parent)
+        
+        self._instance = instance
+        self.type_ = instance.TYPE
+        self.successed = getattr(instance, "successed", True)
+        self.reaed = getattr(instance, "readed", False)
+        self.body = instance.body
+        self.created = instance.created.strftime("%H:%M:%S")
+        
+    def __eq__(self, other):    
+        return self._instance.__class__ == other._instance.__class__ and self._instance.id == other._instance.id
+    
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    
+    def __repr__(self):
+        return "<{0} {1}>".format(self.__class__.__name__, self._instance.TYPE)
 
 class GroupModel(AbstractWrapperModel):    
     other_fields = ("friendModel",)
@@ -62,26 +134,10 @@ class GroupModel(AbstractWrapperModel):
         setattr(instance, "friendModel", friend_model)
         
 class FriendModel(QObjectListModel):
-    jidRole = QtCore.Qt.UserRole + 1
-    nicknameRole = QtCore.Qt.UserRole + 2
-    remarkRole  = QtCore.Qt.UserRole + 3
-    subscriptionRole  = QtCore.Qt.UserRole + 4
-    groupRole = QtCore.Qt.UserRole + 5
-    isSelfRole = QtCore.Qt.UserRole + 6
-    displayNameRole = QtCore.Qt.UserRole + 7
-    
-    # extends
-    avatarRole = QtCore.Qt.UserRole + 8
+    instanceRole = QtCore.Qt.UserRole + 1
         
     _roles = {
-        jidRole : "jid",
-        nicknameRole : "nickname",
-        remarkRole : "remark",
-        subscriptionRole : "subscription",
-        groupRole : "groupName",
-        isSelfRole : "isSelf",
-        avatarRole : "avatar",
-        displayNameRole: "displayName",
+        instanceRole : "instance",
     }
         
         
@@ -92,6 +148,18 @@ class FriendModel(QObjectListModel):
         self._initSignals()
         self._initData()
         
+    def data(self, index, role):
+        if not index.isValid() or index.row() > self.size():
+            return QtCore.QVariant()
+        try:
+            item = self._data[index.row()]
+        except:    
+            return QtCore.QVariant()
+        
+        if role == self.instanceRole:
+            return item
+        return QtCore.QVariant()
+        
     def _initSignals(self):    
         dbSignals.post_save.connect(self.onFriendPostSave, sender=Friend)
         dbSignals.post_delete.connect(self.onFriendPostDelete, sender=Friend)
@@ -101,7 +169,7 @@ class FriendModel(QObjectListModel):
         kwargs = dict(subscription="both", isSelf=False)
         if self.groupId is not None:
             kwargs["group"] = self.groupId
-        friends = list(Friend.filter(**kwargs))
+        friends = map(lambda item: FriendWrapper(item), Friend.filter(**kwargs))
         self.setAll(friends)
         
     @postGui()
@@ -111,15 +179,18 @@ class FriendModel(QObjectListModel):
         if not self.verify(instance):        
             return 
         
+        obj = FriendWrapper(instance)
+        
         if created:
-            self.append(instance)
+            self.append(obj)
         else:    
-            self.replace(instance)
+            self.replace(obj)
             
     @postGui()        
     def onFriendPostDelete(self, instance, *args, **kwargs):
+        obj = FriendWrapper(instance)
         try:
-            self.remove(instance)
+            self.remove(obj)
         except: pass    
     
     @postGui()
@@ -137,42 +208,15 @@ class FriendModel(QObjectListModel):
                 
     def verify(self, instance):    
         return instance.subscription == "both" and instance.isSelf == False and self.groupId == instance.group.id
-        
-    def data(self, index, role):
-        if not index.isValid() or index.row() > self.size():
-            return QtCore.QVariant()
-        try:
-            item = self._data[index.row()]
-        except:    
-            return QtCore.QVariant()
-        
-        roleName = self._roles[role]
-        if hasattr(item, roleName):
-            return getattr(item, roleName)
-        elif roleName == "groupName":
-            return item.group.name
-        elif roleName == "avatar":
-            return avatarManager.get_avatar(item.jid)
-        elif roleName == "displayName":
-            return controlUtils.getDisplayName(item)
-        return QtCore.QVariant()
 
             
 class MessageModel(QObjectListModel):
     _jidInfoSignal = QtCore.pyqtSignal()
     
-    typeRole = QtCore.Qt.UserRole + 1
-    successedRole = QtCore.Qt.UserRole + 2
-    readedRole = QtCore.Qt.UserRole + 3
-    bodyRole  = QtCore.Qt.UserRole + 4
-    createdRole = QtCore.Qt.UserRole + 5
+    instanceRole = QtCore.Qt.UserRole + 1
     
     _roles = {
-        typeRole : "type",
-        successedRole : "successed",
-        readedRole : "readed",
-        bodyRole : "body",
-        createdRole : "published"
+        instanceRole : "instance",
     }
     
     def __init__(self, toJid, loadMessages=False, parent=None):
@@ -195,17 +239,14 @@ class MessageModel(QObjectListModel):
         except:    
             return QtCore.QVariant()
         
-        roleName = self._roles[role]
-        if hasattr(item, roleName):
-            return getattr(item, roleName)
-        elif roleName == "published":
-            return item.created.strftime("%H:%M:%S")
+        if role == self.instanceRole:
+            return item
         return QtCore.QVariant()
         
     def loadUnreadedMessages(self):
         qs = ReceivedMessage.select().where(ReceivedMessage.readed==False,
                                             ReceivedMessage.friend==Friend.get(jid=self._toJid))
-        objs = list(qs)
+        objs = map(lambda item: MessageWrapper(item), qs)
         self.setAll(objs)
         with disable_auto_commit():
             for obj in objs:
@@ -222,7 +263,7 @@ class MessageModel(QObjectListModel):
         if not self.verify(instance):
             return
         
-        self.append(instance)
+        self.append(MessageWrapper(instance))
         
         if received:
             if hasattr(instance, "readed"):
@@ -240,7 +281,7 @@ class MessageModel(QObjectListModel):
     @QtCore.pyqtProperty("QVariant", notify=_jidInfoSignal)
     def jidInfo(self):
         if self._jidInfo is None:
-            self._jidInfo = controlUtils.getJidInfo(self._toJid)
+            self._jidInfo = getJidInfo(self._toJid)
         return self._jidInfo    
     
     @jidInfo.setter

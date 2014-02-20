@@ -91,6 +91,9 @@ class KeyBinder(threading.Thread, QtCore.QObject):
     def run(self):            
         self.backend.response()
         
+    def stop(self):    
+        self.backend.stop()
+        
     def on_key_release_event(self, identifier):    
         if not self.receivers:
             return

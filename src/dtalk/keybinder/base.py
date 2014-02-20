@@ -42,4 +42,7 @@ class BaseBackend(object):
         
     def emitMouseMoved(self, x, y):    
         self.keybinder.mouseMoved.emit(x, y)
+        
+    def stop(self):    
+        raise NotImplementedError
 

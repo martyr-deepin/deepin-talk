@@ -29,13 +29,13 @@ import dtalk.utils.xdg as dtalkXdg
 import dtalk.controls.utils as controlUtils
 
 from dtalk.controls.qobject import QPropertyObject
-from dtalk.controls.models import GroupModel, MessageModel, UserHistoryModel
+from dtalk.controls.models import GroupModel, MessageModel, UserHistoryModel, getJidInfo
 from dtalk.views.chat import ChatWindow
 
 from dtalk.controls.qobject import postGui
 from dtalk.controls.notify import NotifyModel
 
-from dtalk.xmpp.base import BaseClient, AsyncClient
+from dtalk.xmpp.base import AsyncClient
 from dtalk.xmpp import signals as xmppSignals
 
 
@@ -65,12 +65,12 @@ class CommonManager(QPropertyObject()):
     
     @QtCore.pyqtSlot(str, result="QVariant")
     def getJidInfo(self, jid):
-        return controlUtils.getJidInfo(jid)
+        return getJidInfo(jid)
         
     @QtCore.pyqtProperty("QVariant", notify=_ownerInfoSignal)
     def ownerInfo(self):
         if self._ownerInfo is None:
-            self._ownerInfo = controlUtils.getJidInfo(dtalkXdg.OWNER_JID)
+            self._ownerInfo = getJidInfo(dtalkXdg.OWNER_JID)
         return self._ownerInfo
     
     @ownerInfo.setter
@@ -81,7 +81,7 @@ class CommonManager(QPropertyObject()):
     @postGui()    
     def on_post_save(self, instance,  *args, **kwargs):    
         if instance.isSelf:
-            self.ownerInfo = controlUtils.getJidInfo(instance)
+            self.ownerInfo = getJidInfo(instance)
             
     def on_db_init_finished(self, *args, **kwargs):        
         self.dbInitFinished.emit()

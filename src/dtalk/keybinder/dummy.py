@@ -29,3 +29,8 @@ class DummyBackend(BaseBackend):
         
     def parse_key(self, keys):    
         return keys
+    
+    def stop(self):
+        pass
+    
+    

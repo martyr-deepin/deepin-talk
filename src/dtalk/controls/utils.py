@@ -38,18 +38,3 @@ def getDisplayName(obj):
         return instance.nickname
     return instance.jid
     
-def getJidInfo(jid):
-    if isinstance(jid, string_types):
-        try:
-            obj = Friend.get(jid=jid)
-        except Friend.DoesNotExist:    
-            return None
-    else:    
-        obj = jid
-        
-    avatar = avatarManager.get_avatar(obj.jid)
-    setattr(obj, "avatar", avatar)
-    return  get_qobject_wrapper(obj, unique_field="jid", other_fields=('avatar',))
-
-
-
