@@ -9,7 +9,8 @@ Item {
     property string message
     property int padding: 8
     property real maxWidth: 0
-    width: textArea.width + padding * 3
+    property real arrowWidth: 10
+    width: textArea.width + padding * 2 + arrowWidth
     height: textArea.height + padding * 2
 
     BorderImage {
@@ -24,7 +25,7 @@ Item {
         Item {
             anchors.leftMargin: container.type == "received" ? padding * 2 : padding
             anchors.rightMargin: container.type == "received" ? padding : padding * 2
-            anchors.topMargin: padding
+            anchors.topMargin:  padding
             anchors.bottomMargin: padding
             anchors.fill: parent
 
@@ -33,7 +34,7 @@ Item {
                 anchors.left: parent.left
                 anchors.top: parent.top
                 minHeight: 43 - padding * 2
-                minWidth: 80 - padding * 3
+                minWidth: 80 - padding * 2 + arrowWidth
                 maxWidth: container.maxWidth
                 color: container.type == "received" ? Qt.rgba(0.9, 0.9, 0.9, 1.0) : Qt.rgba(82/255.0, 52/255.0, 165/255.0, 0.9)
                 wrapMode: Text.Wrap

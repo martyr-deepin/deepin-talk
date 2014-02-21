@@ -50,4 +50,5 @@ class BaseView(QtQuick.QQuickView):
         # Do minimized.
         self.setWindowState(QtCore.Qt.WindowMinimized)
         self.setVisible(True)
+        
     

@@ -52,8 +52,10 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
         self._flashFlag = True
         
     def onTrayIconActivated(self, reason):    
-        if reason in (QtWidgets.QSystemTrayIcon.Context, QtWidgets.QSystemTrayIcon.Trigger):
-            pass
+        if reason == QtWidgets.QSystemTrayIcon.Trigger:
+            cSignal.raise_window.send(sender=self)
+        # if reason in (QtWidgets.QSystemTrayIcon.Context, ):
+        #     pass
         
     @QtCore.pyqtSlot(result="QVariant")        
     def getPos(self):        

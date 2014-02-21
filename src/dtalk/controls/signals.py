@@ -26,4 +26,4 @@ blink_trayicon = Signal(providing_args=['icon'])
 still_trayicon = Signal(providing_args=[])
 unreaded_message = Signal(providing_args=['jid', 'msg'])
 show_message = Signal(providing_args=['jid', 'msg'])
-
+raise_window = Signal(providing_args=[])

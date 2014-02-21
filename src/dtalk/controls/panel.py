@@ -40,12 +40,13 @@ if os.name == 'posix':
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from dtalk.utils.xdg import get_qml
 from dtalk.controls.managers import commonManager, controlManager, sessionManager
 from dtalk.views.base import BaseView
 from dtalk.controls.trayicon import TrayIcon
 from dtalk.keybinder import keyBinder
+from dtalk.controls import signals as cSignals
 # from dtalk.views.chatWindow import ChatWindow
 
 
@@ -59,6 +60,9 @@ class Panel(BaseView):
         super(Panel, self).__init__()
         self.setMinimumSize(QtCore.QSize(336, 780))        
         QtWidgets.qApp.focusWindowChanged.connect(self.onFocusWindowChanged)
+        self.setIcon(QtGui.QIcon(":/images/common/logo.png"))
+        
+        cSignals.raise_window.connect(self.requestRaiseWindow)
         
         self.initTray()        
         self.setContextProperty("commonManager", commonManager)
@@ -105,3 +109,9 @@ class Panel(BaseView):
         self.mousePressed.emit(QtCore.QPointF(event.x(), event.y()))
         return super(Panel, self).mousePressEvent(event)
         
+    def requestRaiseWindow(self, *args, **kwargs):
+        if not self.isActive():
+            self.requestActivate()
+        else:    
+            self.doMinimized()
+    
