@@ -82,7 +82,12 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
                 icon = icon.lstrip("qrc")
         except: pass
         
-        self.currentIcon = QtGui.QIcon(icon)
+        blinkingIcon = QtGui.QIcon(icon)
+        if blinkingIcon.isNull():
+            self.currentIcon = self.defaultIcon
+        else:    
+            self.currentIcon = blinkingIcon
+            
         self.flashTimer.start(400)
     
     @postGui()    
