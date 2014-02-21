@@ -39,7 +39,6 @@ from dtalk.controls.notify import NotifyModel
 from dtalk.xmpp.base import AsyncClient
 from dtalk.xmpp import signals as xmppSignals
 
-
 logger = logging.getLogger("dtalk.controls.managers")
 
 
@@ -86,6 +85,7 @@ class CommonManager(QPropertyObject()):
             
     def on_db_init_finished(self, *args, **kwargs):        
         self.dbInitFinished.emit()
+    
     
 class SessionManager(QPropertyObject()):
     __qtprops__ = { "loginFailedReason" : "" }

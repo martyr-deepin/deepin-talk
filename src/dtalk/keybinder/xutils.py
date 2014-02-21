@@ -62,7 +62,8 @@ def record_event(record_callback):
     
 def stop_record():    
     record_dpy.record_disable_context(ctx)
-    record_dpy.record_free_context(ctx)
+    record_dpy.close()
+    local_dpy.close()
         
 def get_event_data(data):
     return rq.EventField(None).parse_binary_value(data, record_dpy.display, None, None)
@@ -138,5 +139,7 @@ class XlibBackend(BaseBackend):
                 self.emitMouseMoved(int(event.root_x), int(event.root_y))
                 
     def stop(self):            
-        self._stop_flag = True
-        stop_record()
+        self._stop_flag = True        
+        stop_record()        
+
+
