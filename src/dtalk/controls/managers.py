@@ -151,7 +151,7 @@ class ControlManager(QPropertyObject()):
             w.requestClose.connect(self.onChatWindowClose)
             w.setContextProperty("commonManager", commonManager)
             self.chatWindowManager[jid] = w
-            w.show()
+            w.showCenter()
         else:    
             self.chatWindowManager[jid].raise_()
     

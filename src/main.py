@@ -45,5 +45,6 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     loadStyleSheet()
     win = Panel()
-    win.show()
+    win.showRightSide()
     sys.exit(app.exec_())
+ 

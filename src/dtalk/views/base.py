@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5 import QtGui, QtQuick, QtCore
+from PyQt5 import QtGui, QtQuick, QtCore, QtWidgets
         
 class BaseView(QtQuick.QQuickView):
     
@@ -51,4 +51,17 @@ class BaseView(QtQuick.QQuickView):
         self.setWindowState(QtCore.Qt.WindowMinimized)
         self.setVisible(True)
         
-    
+    def showCenter(self):    
+        screenSize = QtWidgets.QApplication.desktop().geometry().size()
+        x = (screenSize.width() - self.width()) / 2
+        y = (screenSize.height() - self.height()) /2
+        self.setPosition(x, y)
+        self.show()
+        
+    def showRightSide(self):    
+        screenSize = QtWidgets.QApplication.desktop().geometry().size()
+        x = screenSize.width() - self.width() - 80
+        y = (screenSize.height() - self.height()) /2
+        self.setPosition(x, y)
+        self.show()
+

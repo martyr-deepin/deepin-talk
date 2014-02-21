@@ -3,17 +3,18 @@ import QtQuick 2.1
 FocusScope {
     id: focusScope
     width: 250; height: 28
+    property string placeholder    
+    signal clicked
 
-    BorderImage {
-        source: "images/lineedit-bg.png"
+    Rectangle {
+        color: "transparent"
         width: parent.width; height: parent.height
-        border { left: 4; top: 4; right: 4; bottom: 4 }
     }
 
-    BorderImage {
-        source: "images/lineedit-bg-focus.png"
+    Rectangle {
+        color: "transparent"
         width: parent.width; height: parent.height
-        border { left: 4; top: 4; right: 4; bottom: 4 }
+        border { width: 1; color: "#333"}
         visible: parent.activeFocus ? true : false
     }
 
@@ -21,14 +22,14 @@ FocusScope {
         id: typeSomething
         anchors.fill: parent; anchors.leftMargin: 8
         verticalAlignment: Text.AlignVCenter
-        text: "Type something..."
+        text: placeholder
         color: "gray"
         font.italic: true
     }
 
     MouseArea { 
         anchors.fill: parent
-        onClicked: { focusScope.focus = true; textInput.openSoftwareInputPanel(); } 
+        onClicked: { focusScope.focus = true }
     }
 
     TextInput {
@@ -41,19 +42,20 @@ FocusScope {
     Image {
         id: clear
         anchors { right: parent.right; rightMargin: 8; verticalCenter: parent.verticalCenter }
-        source: "images/clear.png"
-        opacity: 0
+        source: "/home/evilbeast/skypefiles/返回.png"
+        /* opacity: 0 */
 
         MouseArea { 
             anchors.fill: parent
-            onClicked: { textInput.text = ''; focusScope.focus = true; textInput.openSoftwareInputPanel(); }
+            /* onClicked: { textInput.text = ''; focusScope.focus = true} */
+            onClicked: focusScope.clicked()
         }
     }
 
     states: State {
         name: "hasText"; when: textInput.text != ''
         PropertyChanges { target: typeSomething; opacity: 0 }
-        PropertyChanges { target: clear; opacity: 1 }
+        /* PropertyChanges { target: clear; opacity: 1 } */
     }
 
     transitions: [
