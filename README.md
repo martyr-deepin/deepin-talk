@@ -1,9 +1,8 @@
 Talk for linux deepin
 =============================
 
-Depends：
---------
-
+Install PyQt5
+-------------
 ```
 sudo apt-get install python-setuptools
 sudo apt-get install python-sip python-pyqt5
@@ -13,8 +12,18 @@ sudo apt-get install libqt5graphicaleffects5 qtdeclarative5-dialogs-plugin
 sudo easy_install peewee
 ```
 
+Install SleekXMPP
+-----------------
+
 ```
-git clone https://github.com/lovesnow/pyxmpp2.git
-cd pyxmpp2
+git clone https://github.com/lovesnow/sleekxmpp.git
+cd SleekXMPP
 sudo python setup.py install
+```
+
+Install other packages
+-----------------------
+
+```
+sudo apt-get install python-imaging python-xlib
 ```
