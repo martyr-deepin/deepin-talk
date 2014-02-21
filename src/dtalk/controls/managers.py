@@ -20,6 +20,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
+
 import logging
 from PyQt5 import QtCore
 import dtalk.models.signals as dbSignals
@@ -101,19 +103,20 @@ class SessionManager(QPropertyObject()):
         xmppSignals.user_roster_received.connect(self.on_user_roster_received)
         xmppSignals.user_roster_status_received.connect(self.on_user_friends_status_received)
 
-        # self.client = None
-        self.client = AsyncClient()
+        self.client = None
+
         
         
     @QtCore.pyqtSlot(str, str, bool, bool, str)
     def login(self, jid, password, remember, autoLogin, status):
         # self.client = BaseClient(jid, password)
         # self.client.run_service()
+        self.client = AsyncClient()        
         self.client.action_login(jid, password, remember, autoLogin, status)
         self.client.start()
         
     def on_user_login_failed(self, *args, **kwargs):    
-        self.userLoginFailed.emit("linux")
+        self.userLoginFailed.emit("登录失败, 请检查输入")
         
     def on_user_login_successed(self, *args, **kwargs):    
         self.userLoginSuccessed.emit()

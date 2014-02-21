@@ -43,6 +43,9 @@ import dtalk.xmpp.signals as xmppSignals
 import dtalk.controls.utils as controlUtils
 
 def getJidInfo(jid):
+    if not jid:
+        return None
+    
     if isinstance(jid, string_types):
         try:
             obj = Friend.get(jid=jid)
@@ -72,7 +75,11 @@ class FriendWrapper(QPropertyObject()):
         self.jid = instance.jid
         self.nickname = instance.nickname
         self.remark = instance.remark
-        self.groupName = instance.group.name
+        try:
+            self.groupName = instance.group.name
+        except:    
+            self.groupName = ""
+        
         self.avatar = avatarManager.get_avatar(self.jid)
         self.displayName = controlUtils.getDisplayName(instance)
         

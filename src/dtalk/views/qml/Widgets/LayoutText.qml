@@ -27,7 +27,7 @@ Text {
             dynamicWidth = 0
         }
  
-        dynamicHeight = widthComputingWorkaround.paintedHeight
+        dynamicHeight = Math.max(widthComputingWorkaround.paintedHeight, paintedHeight)
  
         if( dynamicHeight > maxHeight ){
             dynamicHeight = maxHeight

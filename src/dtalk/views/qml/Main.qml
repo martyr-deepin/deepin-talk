@@ -9,7 +9,17 @@ DWindow {
     
     Item {
         anchors.fill: parent
+        signal userLoginFailed(string reason)
         
+        Component.onCompleted: {
+            serverManager.userLoginFailed.connect(userLoginFailed)
+        }
+        
+        onUserLoginFailed: {
+                loginFrame.isLogging = false
+                loginFrame.showErrorTip(reason)
+        }
+                
         NotifyBox {}
         
         Connections {
@@ -30,15 +40,6 @@ DWindow {
             /*     loginFrame.isLogging = false */
             /*     loginFrame.showErrorTip(serverManager.loginFailedReason) */
             /* } */
-        }
-        
-        Connections {
-            target: serverManager
-            onUserLoginFailed: {
-                loginFrame.isLogging = false
-                loginFrame.showErrorTip(serverManager.loginFailedReason)
-            }
-            
         }
         
         Component {
