@@ -24,8 +24,6 @@ import ctypes
 import pythoncom
 import pyHook
 
-from itertools import permutations
-
 
 from dtalk.keybinder.base import BaseBackend
 from dtalk.utils import six

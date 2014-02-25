@@ -137,7 +137,7 @@ class ControlManager(QPropertyObject()):
         dbSignals.post_save.connect(self.on_received_message, sender=ReceivedMessage)        
         cSignals.show_message.connect(self.onNitfiyMessageClicked)
         
-    def onNitfiyMessageClicked(self, jid, msg, *args, **kwargs):    
+    def onNitfiyMessageClicked(self, jid, *args, **kwargs):    
        self.showChatWindow(jid, loadMessages=True)
        
     def showChatWindow(self, jid, loadMessages=False):    

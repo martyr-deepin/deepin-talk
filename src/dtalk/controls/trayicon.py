@@ -105,7 +105,6 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
     def getHovered(self):        
         return self._hovered
     
-    @postGui()
     def onGlobalMouseMoved(self, x, y):
         rect = self.getNormalGeometry()
         if rect.contains(x, y):
