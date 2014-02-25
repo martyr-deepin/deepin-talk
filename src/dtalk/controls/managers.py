@@ -36,7 +36,7 @@ from dtalk.views.chat import ChatWindow
 from dtalk.controls.qobject import postGui
 from dtalk.controls.notify import NotifyModel
 
-from dtalk.xmpp.base import AsyncClient
+from dtalk.xmpp.base import xmppClient
 from dtalk.xmpp import signals as xmppSignals
 
 logger = logging.getLogger("dtalk.controls.managers")
@@ -102,18 +102,13 @@ class SessionManager(QPropertyObject()):
         xmppSignals.auth_failed.connect(self.on_user_login_failed)        
         xmppSignals.user_roster_received.connect(self.on_user_roster_received)
         xmppSignals.user_roster_status_received.connect(self.on_user_friends_status_received)
-
-        self.client = None
-
-        
         
     @QtCore.pyqtSlot(str, str, bool, bool, str)
     def login(self, jid, password, remember, autoLogin, status):
         # self.client = BaseClient(jid, password)
         # self.client.run_service()
-        self.client = AsyncClient()        
-        self.client.action_login(jid, password, remember, autoLogin, status)
-        self.client.start()
+        xmppClient.action_login(jid, password, remember, autoLogin, status)
+        xmppClient.start()
         
     def on_user_login_failed(self, *args, **kwargs):    
         self.userLoginFailed.emit("登录失败, 请检查输入")
@@ -129,7 +124,7 @@ class SessionManager(QPropertyObject()):
         
     def disconnect(self):    
         try:
-            self.client.action_logout()
+            xmppClient.action_logout()
         except:    
             pass
         

@@ -21,31 +21,71 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from dtalk.controls.qobject import QPropertyObject, QObjectListModel
+from dtalk.controls.qobject import QPropertyObject, QObjectListModel, postGui
 from dtalk.controls.utils import getDisplayName, getFriend
 from dtalk.controls import signals as cSignals
 from dtalk.cache import avatarManager
+from dtalk.models import signals as dbSignals, FriendNotice
 
+
+NOTIFY_JID = "roster@im.linuxdeepin.com"
+NOTIFY_TYPE_MESSAGE = 1
+NOTIFY_TYPE_ROSTER = 2
 
 class BaseNotifyObject(QPropertyObject()):
-    __qtprops__ = { "title" : "", "total": 0, "image" : ""}
+    __qtprops__ = { "title" : "", "total": 0, "image" : "", "type_" : NOTIFY_TYPE_MESSAGE, "jid" : "" }
     
     def __eq__(self, other):
-        return self.instance.friend.jid == other.friend.jid
+        return self.type_ == other.type_ and self.jid == other.jid
     
     def __ne__(self, other):
-        return not self == other
+        return not self.__eq__(other)
+    
+    def onClicked(self):
+        raise NotImplementedError
+    
+    def addInstance(self, instance):
+        self.total += 1
             
 class MessageNotifyObject(BaseNotifyObject):    
     
     def __init__(self, instance):
         super(MessageNotifyObject, self).__init__()
-        self.instance = instance
+        friend = getFriend(instance)        
+        self._instance = instance
         self.title = getDisplayName(instance)
-        friend = getFriend(instance)
         self.image = avatarManager.get_avatar(friend.jid)    
         self.total = 1
+        self.type_ = NOTIFY_TYPE_MESSAGE
+        self.jid = friend.jid
         
+    def onClicked(self):    
+        cSignals.show_message.send(sender=self, jid=self.jid)    
+        return True
+        
+class RosterNotifyObject(BaseNotifyObject):    
+    
+    def __init__(self, presence):
+        super(RosterNotifyObject, self).__init__()
+        self._instance = presence
+        self.type_ = NOTIFY_TYPE_ROSTER
+        self.title = "验证消息"        
+        self.jid = NOTIFY_JID
+        self.image = "qrc:/images/common/logo.png"
+        self.total = 1
+        self._instances = [ presence ]
+        
+    def onClicked(self):    
+        presence = self._instances.pop()
+        cSignals.roster_request_add.send(sender=self, instance=presence)
+        self.total -= 1
+        if self.total <= 0:
+            return True
+        return False
+    
+    def addInstance(self, instance):
+        self._instances.append(instance._instance)
+        self.total += 1
         
 class NotifyModel(QObjectListModel):        
     
@@ -54,6 +94,7 @@ class NotifyModel(QObjectListModel):
     
     def __init__(self, parent=None):
         super(NotifyModel, self).__init__(parent)
+        dbSignals.post_save.connect(self.onFriendNoticePostSave, sender=FriendNotice)
         
     def data(self, index, role):
         if not index.isValid() or index.row() > self.size():
@@ -68,34 +109,45 @@ class NotifyModel(QObjectListModel):
         return QtCore.QVariant()        
     
     def getObjByInstance(self, instance):
-        ret = None
-        for obj in self._data:
-            if obj.instance.friend.jid == instance.friend.jid:
-                ret = obj
-                break
-        return ret    
+        if instance in self._data:
+            return self._data[self._data.index(instance)]
+        return None
     
     @QtCore.pyqtSlot(int)
-    def showMessage(self, index):
+    def onClicked(self, index):
         try:
             obj = self.get(index)        
         except:
             pass
         else:
-            self.removeAt(index)
             if self.size() > 0:
                 newObj = self.get(0)
                 cSignals.blink_trayicon.send(sender=self, icon=newObj.image)
             else:    
                 cSignals.still_trayicon.send(sender=self)
                 
-            cSignals.show_message.send(sender=self, jid=obj.instance.friend.jid, msg=obj.instance)    
-    
-    def appendMessage(self, instance):
-        obj = self.getObjByInstance(instance)
+            removed = obj.onClicked()    
+            if removed:
+                self.removeAt(index)
+                
+    def appendObject(self, newObj):        
+        obj = self.getObjByInstance(newObj)
         if obj is not None:
-            obj.total += 1
+            obj.addInstance(newObj)
         else:    
-            notifyObj = MessageNotifyObject(instance)
-            self.append(notifyObj)
-            cSignals.blink_trayicon.send(sender=self, icon=notifyObj.image)
+            self.append(newObj)
+            cSignals.blink_trayicon.send(sender=self, icon=newObj.image)
+                
+    def appendMessage(self, instance):
+        obj = MessageNotifyObject(instance)        
+        self.appendObject(obj)
+            
+    def appendNotice(self, presence):        
+        notifyObj = RosterNotifyObject(presence)
+        self.appendObject(notifyObj)
+
+    @postGui()    
+    def onFriendNoticePostSave(self, instance, *args, **kwargs):
+        self.appendNotice(instance)
+        
+        

@@ -333,37 +333,28 @@ class FriendNotice(BaseUserModel):
     TYPE_REQUEST = 1
     TYPE_ACCEPT = 2
     TYPE_DENY = 3
+    TYPE_UNKNOW = 4
     CHOICES = (
         (TYPE_REQUEST, '好友请求'), 
         (TYPE_ACCEPT, '请求被接受'), 
         (TYPE_DENY, '请求被拒绝')
         )
-    type = pw.IntegerField(choices=CHOICES)
+    ACTION_CHOICES = (
+        (TYPE_ACCEPT, '接受好友请求'), 
+        (TYPE_DENY, '拒绝好友请求'),
+        (TYPE_UNKNOW, '未处理'),
+    )
+    
+    type_ = pw.IntegerField(choices=CHOICES, default=TYPE_REQUEST)
     jid = pw.CharField()
+    content = pw.TextField(null=True)
     readed = pw.BooleanField(default=False)
+    action = pw.IntegerField(choices=ACTION_CHOICES, default=TYPE_UNKNOW)
+    action_content = pw.TextField(null=True)
     created = pw.DateTimeField(default=datetime.datetime.now)
 
     class Meta:
         db_table = 'dtalk_friend_notice'
-
-    @classmethod
-    def record_from_stanza(cls, stanza):
-        stanza_type = stanza.stanza_type
-        if stanza_type == 'subscribe':
-            _type = cls.TYPE_REQUEST
-        elif stanza_type == 'subscribed':
-            _type = cls.TYPE_ACCEPT
-        elif stanza_type == 'unsubscribed':
-            _type = cls.TYPE_DENY
-        else:
-            logger.warning('Unknown stanza type: {0}'.format(stanza_type))
-            return False
-        jid = get_email(stanza.from_jid)
-        try:
-            cls.get(type=_type, jid=jid, readed=False)
-        except cls.DoesNotExist:
-            cls.create(type=_type, jid=jid)
-            
     
 def create_user_tables():
     Group.create_table()
@@ -386,3 +377,13 @@ def _add_to_user_history(sender, jid, password, remember, auto_login, status, *a
     else:    
         data['last_logined'] = datetime.datetime.now()
         check_update_data(obj, data)
+
+        
+@receiver(xmpp_signals.roster_subscription_request)        
+def _add_to_roster_notice(presence, *args, **kwargs):
+    params = dict(
+        type_ = FriendNotice.TYPE_REQUEST,
+        jid = presence['from'].bare,
+        content = presence['status']
+    )
+    FriendNotice.create(**params)

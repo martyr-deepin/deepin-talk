@@ -23,13 +23,21 @@
 import sys
 import threading
 import weakref
+import logging
+
+logger = logging.getLogger("dtalk.KeyBinder")
 
 from PyQt5 import QtCore
 from dtalk.dispatch import saferef
 
-if sys.platform.startswith("linux"):
+platform = sys.platform
+
+if platform.startswith("linux"):
     from dtalk.keybinder.xutils import XlibBackend
     KeyBinderBackend = XlibBackend
+elif platform.startswith("win"):    
+    from dtalk.keybinder.win import Win32Backend
+    KeyBinderBackend = Win32Backend
 else:    
     from dtalk.keybinder.dummy import DummyBackend
     KeyBinderBackend = DummyBackend
@@ -60,11 +68,16 @@ class KeyBinder(threading.Thread, QtCore.QObject):
         self.receivers = {}
         
     def bind(self, key, receiver, weak=True):    
-        key = self.backend.parse_key(key)
+        _key = self.backend.parse_key(key)
+        
+        if _key is None:
+            logger.error("{0} is invaild key".format(key))
+            return
+        
         if weak:
             receiver = saferef.safeRef(receiver, onDelete=self._remove_receiver)
         with self.lock:    
-            self.receivers[key] = receiver
+            self.receivers[_key] = receiver
             
     def check_key_event(self, identifier):        
         with self.lock:

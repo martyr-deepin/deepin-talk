@@ -29,3 +29,5 @@ session_disconnected = Signal(providing_args=[])
 auth_failed = Signal(providing_args=['jid', 'reason'])
 auth_successed = Signal(providing_args=["jid", 'password', 'remember', 'auto_login', 'status'])
 raise_excepted = Signal(providing_args=["exc_info"])
+roster_subscription_request = Signal(providing_args=['presence'])
+

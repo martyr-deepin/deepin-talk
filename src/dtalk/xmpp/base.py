@@ -52,6 +52,15 @@ class BaseMessage(object):
             
 class BaseRoster(object):            
     
+    def __init__(self):
+        self.add_event_handler("roster_subscription_request", self._on_roster_subscription_request)
+        self.add_event_handler("roster_subscription_authorized", self._on_roster_subscription_authorized)
+        self.add_event_handler("roster_subscription_remove", self._on_roster_subscription_remove)
+        self.add_event_handler("roster_subscription_removed", self._on_roster_subscription_removed)
+        self.add_event_handler("got_online", self._on_roster_got_online)
+        self.add_event_handler("got_offline", self._on_roster_got_online)
+        self.add_event_handler("changed_status", self._on_roster_changed_status)
+        
     def request_roster(self):
         self.get_roster()
         self.send_presence()
@@ -81,7 +90,29 @@ class BaseRoster(object):
     def _on_db_init_finished(self, *args, **kwargs):            
         self.save_rosters()
         
+    def _on_roster_subscription_request(self, presence):    
+        logger.info("receive {0} subscription request".format(presence['from'].bare))
+        xmpp_signals.roster_subscription_request.send(sender=self, presence=presence)
+        
+    def _on_roster_subscription_authorized(self, presence):    
+        logger.info("receive {0} subscription authorzied".format(presence['from'].bare))
+        
+    def _on_roster_subscription_remove(self, presence):    
+        logger.debug("receive {0} subscription remove".format(presence['from'].bare))
+        self.client_roster.unsubscribe(presence['from'].bare)
             
+    def _on_roster_subscription_removed(self, presence):    
+        logger.info("receive {0} subscription removed".format(presence['from'].bare))
+        
+    def _on_roster_got_online(self, presence):    
+        logger.info("receive {0} got online".format(presence['from'].bare))
+        
+    def _on_roster_got_offline(self, presence):    
+        logger.info("receive {0} got offline".format(presence['from'].bare))
+        
+    def _on_roster_changed_status(self, presence):
+        logger.info("receive {0} change status".format(presence['from'].bare))
+        
 class BaseVCard(object):            
     
     def __init__(self):
@@ -178,20 +209,20 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
     def action_logout(self):        
         self.disconnect()
         
-import threading
 from dtalk.utils.threads import threaded
 
-class AsyncClient(threading.Thread):        
+class AsyncClient(object):        
     
     def __init__(self):
         super(AsyncClient, self).__init__()
-        self.setDaemon(True)
         self.xmpp = None
         
+
     def action_login(self, jid, password, remember, auto_login, status):    
         self.xmpp = BaseClient(jid, password, remember, auto_login, status)
         
-    def run(self):    
+    @threaded            
+    def start(self):    
         self.xmpp.connect()
         self.xmpp.process(block=True)
             
@@ -201,4 +232,8 @@ class AsyncClient(threading.Thread):
             self.xmpp.disconnect(wait=False, send_close=False)
         except: pass    
         
-
+    @property    
+    def is_component(self):
+        return bool(self.xmpp)
+        
+xmppClient = AsyncClient()        
