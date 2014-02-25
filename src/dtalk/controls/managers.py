@@ -105,8 +105,6 @@ class SessionManager(QPropertyObject()):
         
     @QtCore.pyqtSlot(str, str, bool, bool, str)
     def login(self, jid, password, remember, autoLogin, status):
-        # self.client = BaseClient(jid, password)
-        # self.client.run_service()
         xmppClient.action_login(jid, password, remember, autoLogin, status)
         xmppClient.start()
         
@@ -181,7 +179,6 @@ class ControlManager(QPropertyObject()):
         w.deleteLater()        
 
         
-# serverManager = ServerManager()    
 sessionManager = SessionManager()
 commonManager = CommonManager()
 controlManager = ControlManager()

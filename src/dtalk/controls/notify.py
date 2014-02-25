@@ -120,15 +120,17 @@ class NotifyModel(QObjectListModel):
         except:
             pass
         else:
+                
+            removed = obj.onClicked()    
+            if removed:
+                self.removeAt(index)
+                
             if self.size() > 0:
                 newObj = self.get(0)
                 cSignals.blink_trayicon.send(sender=self, icon=newObj.image)
             else:    
                 cSignals.still_trayicon.send(sender=self)
                 
-            removed = obj.onClicked()    
-            if removed:
-                self.removeAt(index)
                 
     def appendObject(self, newObj):        
         obj = self.getObjByInstance(newObj)

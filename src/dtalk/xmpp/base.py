@@ -95,23 +95,23 @@ class BaseRoster(object):
         xmpp_signals.roster_subscription_request.send(sender=self, presence=presence)
         
     def _on_roster_subscription_authorized(self, presence):    
-        logger.info("receive {0} subscription authorzied".format(presence['from'].bare))
+        logger.debug("receive {0} subscription authorzied".format(presence['from'].bare))
         
     def _on_roster_subscription_remove(self, presence):    
         logger.debug("receive {0} subscription remove".format(presence['from'].bare))
         self.client_roster.unsubscribe(presence['from'].bare)
             
     def _on_roster_subscription_removed(self, presence):    
-        logger.info("receive {0} subscription removed".format(presence['from'].bare))
+        logger.debug("receive {0} subscription removed".format(presence['from'].bare))
         
     def _on_roster_got_online(self, presence):    
-        logger.info("receive {0} got online".format(presence['from'].bare))
+        logger.debug("receive {0} got online".format(presence['from'].bare))
         
     def _on_roster_got_offline(self, presence):    
-        logger.info("receive {0} got offline".format(presence['from'].bare))
+        logger.debug("receive {0} got offline".format(presence['from'].bare))
         
     def _on_roster_changed_status(self, presence):
-        logger.info("receive {0} change status".format(presence['from'].bare))
+        logger.debug("receive {0} change status".format(presence['from'].bare))
         
 class BaseVCard(object):            
     

@@ -4,7 +4,11 @@ Item {
     id: root
     
     SearchBox {
+        id: searchBox
+    }
+    
+    ListView {
         
     }
-        
+    
 }
