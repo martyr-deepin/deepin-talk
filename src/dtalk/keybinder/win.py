@@ -140,7 +140,7 @@ ID2KEY = {
     1012: 'Shift'
 }
 
-KEY2ID = dict((v, k) for k,v in six.iteritems(ID2Key))
+KEY2ID = dict((v, k) for k,v in six.iteritems(ID2KEY))
 
 """
 Merge two keys into one
