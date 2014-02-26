@@ -66,7 +66,9 @@ class EchoBot(sleekxmpp.ClientXMPP):
         pass
         #self.send_presence()
         #self.get_roster()
-        self.plugin["Brotherhood"].hello()
+        #self.plugin["Brotherhood"].hello()
+        #self.plugin["Brotherhood"].get_all_users()
+        self.plugin["Brotherhood"].get_vhost_users("talk.linuxdeepin.com")
 
     def message(self, msg):
         """

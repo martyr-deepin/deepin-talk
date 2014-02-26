@@ -15,9 +15,8 @@ from sleekxmpp.xmlstream.matcher import StanzaPath
 
 class Brotherhood(BasePlugin):
     name = "brotherhood"
-    description = "xmpp extendsion:brotherhood"
+    description = "xmpp extension:brotherhood"
     dependencies = set()
-    #stanza = stanza
     default_config = {}
 
     def plugin_init(self):
@@ -27,13 +26,13 @@ class Brotherhood(BasePlugin):
                          self.handle_disco_users))
 
         register_stanza_plugin(Iq, DiscoUsers)
-        self._disco_ops = [
-                "get_all_users", "get_vhost_users", 
-                "get_all_online_users", "get_vhost_online_users"
-                ]
         
     def plugin_end(self):
         self.xmpp.remove_handler("Disco Users")
+
+    def post_init(self):
+        BasePlugin.post_init(self)
+        self.xmpp['xep_0030'].add_feature("deepin:iq:brotherhood")
 
     def handle_disco_users(self, iq):
         if iq["type"] == "get":
@@ -44,11 +43,41 @@ class Brotherhood(BasePlugin):
     def hello(self):
         print "Hello, World!"
 
+    def get_all_users(self, **kwargs):
+        iq = self.xmpp.Iq()
+        iq["type"] = "get"
+        query = iq["disco_brother"]
+        query["method"] = "get_all_users"
+        return iq.send()
+
+    def get_vhost_users(self, host, **kwargs):
+        iq = self.xmpp.Iq()
+        iq["type"] = "get"
+        query = iq["disco_brother"]
+        query["method"] = "get_vhost_users"
+        query["host"] = host
+        return iq.send()
+
+    def get_all_online_users(self):
+        iq = self.xmpp.Iq()
+        iq["type"] = "get"
+        query = iq["disco_brother"]
+        query["method"] = "get_all_online_users"
+        return iq.send()
+
+    def get_vhost_online_users(self, host):
+        iq = self.xmpp.Iq()
+        iq["type"] = "get"
+        query = iq["disco_brother"]
+        query["method"] = "get_vhost_online_users"
+        query["host"] = host
+        return iq.send()
+
 class DiscoUsers(ElementBase):
     name = "query"
     namespace = "deepin:iq:brotherhood"
     plugin_attrib = "disco_brother"
-    interfaces = set(("server", "users"))
+    interfaces = set(("method", "host", "server", "users"))
 
     _users = set()
 
