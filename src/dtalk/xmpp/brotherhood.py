@@ -43,35 +43,35 @@ class Brotherhood(BasePlugin):
     def hello(self):
         print "Hello, World!"
 
-    def get_all_users(self, **kwargs):
+    def get_all_users(self, block=False, timeout=None, callback=None, **kwargs):
         iq = self.xmpp.Iq()
         iq["type"] = "get"
         query = iq["disco_brother"]
         query["method"] = "get_all_users"
-        return iq.send()
+        return iq.send(block=block, timeout=timeout, callback=callback)
 
-    def get_vhost_users(self, host, **kwargs):
+    def get_vhost_users(self, host, block=False, timeout=None, callback=None, **kwargs):
         iq = self.xmpp.Iq()
         iq["type"] = "get"
         query = iq["disco_brother"]
         query["method"] = "get_vhost_users"
         query["host"] = host
-        return iq.send()
+        return iq.send(block=block, timeout=timeout, callback=callback)
 
-    def get_all_online_users(self):
+    def get_all_online_users(self, block=False, timeout=None, callback=None, **kwargs):
         iq = self.xmpp.Iq()
         iq["type"] = "get"
         query = iq["disco_brother"]
         query["method"] = "get_all_online_users"
-        return iq.send()
+        return iq.send(block=block, timeout=timeout, callback=callback)
 
-    def get_vhost_online_users(self, host):
+    def get_vhost_online_users(self, host, block=False, timeout=None, callback=None, **kwargs):
         iq = self.xmpp.Iq()
         iq["type"] = "get"
         query = iq["disco_brother"]
         query["method"] = "get_vhost_online_users"
         query["host"] = host
-        return iq.send()
+        return iq.send(block=block, timeout=timeout, callback=callback)
 
 class DiscoBrother(ElementBase):
     name = "query"
