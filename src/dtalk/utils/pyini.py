@@ -26,7 +26,7 @@ import token
 from dtalk.utils.sorteddict import SortedDict
 from traceback import print_exc
 
-from dtalk.utils.six import print_, StringIO
+from dtalk.utils.six import print_, StringIO, text_type
 
 __all__ = ['SortedDict', 'Section', 'Ini', 'uni_prt']
 
@@ -143,7 +143,7 @@ def uni_prt(a, encoding='utf-8', beautiful=False, indent=0, convertors=None):
         for i in escapechars:
             t = t.replace(i[0], i[1])
         s.append("'%s'" % t)
-    elif isinstance(a, unicode):
+    elif isinstance(a, text_type):
         t = a
         for i in escapechars:
             t = t.replace(i[0], i[1])
@@ -170,11 +170,11 @@ def eval_value(value, globals, locals, encoding):
         try:
             v = eval_value(str(txt), globals, locals, encoding)
             _type = type(txt)
-            if not isinstance(v, (str, unicode)):
+            if not isinstance(v, (str, text_type)):
                 v = _type(v)
             elif not isinstance(v, _type):
-                if _type is unicode:
-                    v = unicode(v, encoding)
+                if _type is text_type:
+                    v = text_type(v, encoding)
                 else:
                     v = v.encode(encoding)
         except:
@@ -182,7 +182,7 @@ def eval_value(value, globals, locals, encoding):
             v = m.group()
         return v
     
-    if isinstance(result, (str, unicode)):
+    if isinstance(result, (str, text_type)):
         result = r_var.sub(sub_, result)
     return result
     
@@ -220,7 +220,7 @@ class Lazy(object):
         try:
             v = eval_value(value, self.globals, self.globals[self.sec_name], self.encoding)
             return v
-        except Exception as e:
+        except Exception:
             print_exc()
             raise Exception("Converting value (%s) error" % value)
         
@@ -408,7 +408,7 @@ class Ini(SortedDict):
     def read(self, fobj, filename=''):
         encoding = None
         
-        if isinstance(fobj, (str, unicode)):
+        if isinstance(fobj, (str, text_type)):
             f = open(fobj, 'rb')
             text = f.read()
             f.close()
@@ -426,7 +426,7 @@ class Ini(SortedDict):
             
         if not encoding:
             try:
-                unicode(text, 'UTF-8')
+                text_type(text, 'UTF-8')
                 encoding = 'UTF-8'
             except:
                 encoding = defaultencoding
@@ -437,7 +437,6 @@ class Ini(SortedDict):
         f.seek(begin)
         lineno = 0
         comments = []
-        status = 'c'
         section = None
         while 1:
             lastpos = f.tell()
@@ -499,7 +498,7 @@ class Ini(SortedDict):
                         f.seek(lastpos+end)
                         try:
                             value, iden_existed = self.__read_line(f)
-                        except Exception as e:
+                        except Exception:
                             print_exc()
                             raise Exception("Parsing ini file error in %s:%d:%s" % (filename or self._inifile, lineno, line))
                         if self._lazy:
@@ -513,7 +512,7 @@ class Ini(SortedDict):
                             else:
                                 try:
                                     v = eval_value(value, self.env(), self[sec_name], self._encoding)
-                                except Exception as e:
+                                except Exception:
                                     print_exc()
                                     print_(dict(self))
                                     raise Exception("Converting value (%s) error in %s:%d:%s" % (value, filename or self._inifile, lineno, line))
@@ -527,7 +526,7 @@ class Ini(SortedDict):
             filename = self.filename
         if not filename:
             filename = sys.stdout
-        if isinstance(filename, (str, unicode)):
+        if isinstance(filename, (str, text_type)):
             f = open(filename, 'wb')
             need_close = True
         else:
