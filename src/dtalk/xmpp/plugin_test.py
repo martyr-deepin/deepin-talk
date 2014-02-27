@@ -48,10 +48,11 @@ class EchoBot(sleekxmpp.ClientXMPP):
         #self.send_presence()
         #self.get_roster()
         #self.plugin["Brotherhood"].hello()
-        self.plugin["Brotherhood"].get_hosts()
+        #self.plugin["Brotherhood"].get_hosts()
         #self.plugin["Brotherhood"].get_all_users()
         #self.plugin["Brotherhood"].get_all_online_users()
         #self.plugin["Brotherhood"].get_vhost_users("talk.linuxdeepin.com")
+        self.plugin["Brotherhood"].get_vhost_online_users("talk.linuxdeepin.com")
 
     def message(self, msg):
         if msg['type'] in ('chat', 'normal'):

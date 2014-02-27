@@ -81,7 +81,7 @@ class Brotherhood(BasePlugin):
         iq["type"] = "get"
         query = iq["disco_brother"]
         query["method"] = "get_vhost_users"
-        query["host"] = host
+        query["disco_host"]["server"] = host
         return iq.send(block=block, timeout=timeout, callback=callback)
 
     def get_all_online_users(self, block=False, timeout=None, callback=None, **kwargs):
@@ -96,7 +96,7 @@ class Brotherhood(BasePlugin):
         iq["type"] = "get"
         query = iq["disco_brother"]
         query["method"] = "get_vhost_online_users"
-        query["host"] = host
+        query["disco_host"]["server"] = host
         return iq.send(block=block, timeout=timeout, callback=callback)
 
 class DiscoBrother(ElementBase):
@@ -127,13 +127,13 @@ class DiscoHost(ElementBase):
     name = "host"
     namespace = "deepin:iq:brotherhood"
     plugin_attrib = "disco_host"
-    interfaces = set("server")
+    interfaces = set(("server",))
 
 class DiscoUser(ElementBase):
     name = "user"
     namespace = "deepin:iq:brotherhood"
     plugin_attrib = "disco_user"
-    interfaces = set("jid")
+    interfaces = set(("jid",))
 
 register_stanza_plugin(DiscoBrother, DiscoHost, iterable = True)
 register_stanza_plugin(DiscoBrother, DiscoUser, iterable = True)
