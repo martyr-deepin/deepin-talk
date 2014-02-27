@@ -362,8 +362,8 @@ class Section(SortedDict):
     def __delattr__(self, key):
         try: 
             del self[key]
-        except KeyError, k: 
-            raise AttributeError, k
+        except KeyError as k: 
+            raise AttributeError(k)
     
     def __str__(self):     
         buf = StringIO.StringIO()
@@ -474,7 +474,7 @@ class Ini(SortedDict):
                     comments = []
                 elif '=' in line:
                     if section is None:
-                        raise Exception, "No section found, please define it first in %s file" % self.filename
+                        raise Exception("No section found, please define it first in %s file" % self.filename)
 
                     #if find <=, then it'll replace the old value for mutable variables
                     #because the default behavior will merge list and dict
@@ -500,9 +500,9 @@ class Ini(SortedDict):
                         f.seek(lastpos+end)
                         try:
                             value, iden_existed = self.__read_line(f)
-                        except Exception, e:
+                        except Exception as e:
                             print_exc()
-                            raise Exception, "Parsing ini file error in %s:%d:%s" % (filename or self._inifile, lineno, line)
+                            raise Exception("Parsing ini file error in %s:%d:%s" % (filename or self._inifile, lineno, line))
                         if self._lazy:
                             if iden_existed:
                                 v = EvalValue(value, filename or self._inifile, lineno, line)
