@@ -80,8 +80,10 @@ class BaseRoster(object):
         # send signal.
         xmpp_signals.user_roster_received.send(sender=self)        
         
+        logger.debug("user roster have received")        
+        
         # request vcard infos.
-        jids = self.client_roster.keys()
+        jids = list(self.client_roster.keys())
         jids.insert(0, self.boundjid.bare)
         for jid in jids:
             if not avatarManager.has_avatar(jid):
@@ -112,6 +114,7 @@ class BaseRoster(object):
         
     def _on_roster_changed_status(self, presence):
         logger.debug("receive {0} change status".format(presence['from'].bare))
+        xmpp_signals.roster_changed_status.send(sender=self, presence=presence)
         
 class BaseVCard(object):            
     

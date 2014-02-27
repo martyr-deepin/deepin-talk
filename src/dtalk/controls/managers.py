@@ -30,6 +30,7 @@ from dtalk.models import ReceivedMessage, Friend
 import dtalk.utils.xdg as dtalkXdg
 from dtalk.controls.qobject import QPropertyObject
 from dtalk.controls.models import GroupModel, MessageModel, UserHistoryModel, getJidInfo
+from dtalk.controls.search import SearchGroupModel
 from dtalk.controls import signals as cSignals
 from dtalk.views.chat import ChatWindow
 
@@ -51,6 +52,7 @@ class CommonManager(QPropertyObject()):
         super(CommonManager, self).__init__()
         self.groupModel = GroupModel()
         self._userHistoryModel = UserHistoryModel(self)
+        self._searchGroupModel = SearchGroupModel(self)
         self._ownerInfo = None
         dbSignals.db_init_finished.connect(self.on_db_init_finished)
         dbSignals.post_save.connect(self.on_post_save, sender=Friend)
@@ -61,6 +63,8 @@ class CommonManager(QPropertyObject()):
             return self.groupModel
         elif modelType == "userHistory":
             return self._userHistoryModel
+        elif modelType == "searchGroup":
+            return self._searchGroupModel
         return self.groupModel
     
     @QtCore.pyqtSlot(str, result="QVariant")
@@ -135,8 +139,8 @@ class ControlManager(QPropertyObject()):
         dbSignals.post_save.connect(self.on_received_message, sender=ReceivedMessage)        
         cSignals.show_message.connect(self.onNitfiyMessageClicked)
         
-    def onNitfiyMessageClicked(self, jid, *args, **kwargs):    
-       self.showChatWindow(jid, loadMessages=True)
+    def onNitfiyMessageClicked(self, jid, loaded, *args, **kwargs):    
+       self.showChatWindow(jid, loadMessages=loaded)
        
     def showChatWindow(self, jid, loadMessages=False):    
         if jid not in self.chatWindowManager:

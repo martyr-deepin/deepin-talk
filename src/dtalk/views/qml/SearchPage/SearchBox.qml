@@ -4,6 +4,9 @@ FocusScope {
     id: focusScope
     width: 250; height: 28
     property string placeholder    
+    property alias text: textInput.text
+    property alias length: textInput.length
+    
     signal clicked
 
     Rectangle {

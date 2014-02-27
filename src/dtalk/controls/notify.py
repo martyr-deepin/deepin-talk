@@ -60,7 +60,7 @@ class MessageNotifyObject(BaseNotifyObject):
         self.jid = friend.jid
         
     def onClicked(self):    
-        cSignals.show_message.send(sender=self, jid=self.jid)    
+        cSignals.show_message.send(sender=self, jid=self.jid, loaded=True)    
         return True
         
 class RosterNotifyObject(BaseNotifyObject):    

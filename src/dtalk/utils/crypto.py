@@ -22,8 +22,11 @@
 
 
 import hashlib
+from dtalk.utils.six import text_type
 
 def get_md5(strings):
+    if isinstance(strings, text_type):
+        strings = strings.encode("utf-8")
     return hashlib.md5(strings).hexdigest()    
 
 def sha1hash(data):

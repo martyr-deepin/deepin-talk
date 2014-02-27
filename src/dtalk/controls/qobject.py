@@ -246,4 +246,25 @@ def ObjectWrapper(dictData):
         __qtprops__ = dictData
         
     return WrapperQuery()    
+
+class QInstanceModel(QObjectListModel):
+    
+    instanceRole = QtCore.Qt.UserRole + 1
+        
+    _roles = {
+        instanceRole : "instance",
+    }
+    
+    def data(self, index, role):
+        if not index.isValid() or index.row() > self.size():
+            return QtCore.QVariant()
+        try:
+            item = self._data[index.row()]
+        except:    
+            return QtCore.QVariant()
+        
+        if role == self.instanceRole:
+            return item
+        return QtCore.QVariant()
+    
             

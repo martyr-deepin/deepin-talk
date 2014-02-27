@@ -50,18 +50,25 @@ class AvatarManager(object):
         full_path_files = [ os.path.join(self.avatar_dir, f) for f in avatar_files ]
         return sorted(full_path_files, key=lambda item: os.path.getmtime(item), reverse=True)
     
-    def get_avatar(self, jid, sha1hash=None):
+    def get_avatar(self, jid, sha1hash=None, raw=False):
         jid_md5 = crypto.get_md5(jid)        
         if sha1hash:
             path = os.path.join(self.avatar_dir, "%s_%s" % (jid_md5, sha1hash))            
             if os.path.exists(path):
-                return path_to_uri(path)
+                if raw:
+                    return path
+                else:
+                    return path_to_uri(path)
             return self.default_avatar
         else:    
             avatar_files = os.listdir(self.avatar_dir)
             for f in avatar_files:
                 if f.startswith(jid_md5):
-                    return path_to_uri(os.path.join(self.avatar_dir, f))
+                    path = os.path.join(self.avatar_dir, f)
+                    if raw:
+                        return path
+                    else:
+                        return path_to_uri(path)
             return self.default_avatar
             
     def avatar_filepath(self, jid, sha1hash, need_hash=False):
@@ -77,9 +84,12 @@ class AvatarManager(object):
         return get_avatar_dir()
 
     def save_avatar(self, jid, image_data):
-        before_avatar = self.get_avatar(jid)
+        before_avatar = self.get_avatar(jid, raw=True)
         if before_avatar != self.default_avatar:
-            os.remove(before_avatar)
+            try:
+                os.remove(before_avatar)
+            except Exception:    
+                logger.warning("Remove {0} file error".format(before_avatar))
 
         path = self.avatar_filepath(jid, image_data, need_hash=True)
         if os.path.exists(path):

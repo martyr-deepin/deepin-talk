@@ -26,7 +26,6 @@ import sys
 import traceback
 from PyQt5 import QtCore, QtWidgets, QtGui
 from dtalk.utils.xdg import get_qss
-from dtalk.utils.six import text_type
 from contextlib import contextmanager 
 
 
@@ -38,7 +37,7 @@ def loadStyleSheet():
     styleSheet = None
     with open(f) as fp:
         content = fp.read()
-        styleSheet = text_type(content, encoding='utf8')
+        styleSheet = content.decode("utf-8")
     if styleSheet is not None:    
         QtWidgets.QApplication.instance().setStyleSheet(styleSheet)
 
@@ -49,7 +48,7 @@ def disableAntialias(painter):
     painter.setRenderHint(QtGui.QPainter.Antialiasing, False)
     try:  
         yield  
-    except Exception, e:  
+    except Exception as e:  
         print('function cairo_disable_antialias got error: %s' % e)
         traceback.print_exc(file=sys.stdout)
     else:  

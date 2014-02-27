@@ -34,9 +34,8 @@ from dtalk.models import (Friend, Group, SendedMessage, ReceivedMessage,
                           common_db, UserHistory, check_common_db_inited, disable_auto_commit)
 
 from dtalk.controls.base import AbstractWrapperModel, peeweeWrapper
-from dtalk.controls.qobject import postGui, QObjectListModel, QPropertyObject
+from dtalk.controls.qobject import postGui, QPropertyObject, QInstanceModel
 from dtalk.cache import avatarManager
-
 
 import dtalk.cache.signals as cacheSignals
 import dtalk.xmpp.signals as xmppSignals
@@ -67,6 +66,8 @@ class FriendWrapper(QPropertyObject()):
         "groupName" : "",
         "displayName" : "",
         "avatar" : "",
+        "status" : "",
+        "show" : "",
     }
     
     def __init__(self, instance, parent=None):
@@ -84,11 +85,25 @@ class FriendWrapper(QPropertyObject()):
         self.displayName = controlUtils.getDisplayName(instance)
         
         cacheSignals.avatar_saved.connect(self._onAvatarSaved)
+        dbSignals.post_save.connect(self._onFriendPostSave, sender=Friend)
+        xmppSignals.roster_changed_status.connect(self._onRosterChangedStatus)
         
     @postGui()            
     def _onAvatarSaved(self, jid, path, *args, **kwargs):    
         if jid == self.jid:
             self.avatar = path
+            
+    @postGui()        
+    def _onFriendPostSave(self, instance, created, update_fields, *args, **kwargs):
+        if not created and instance.jid == self.jid:
+            for key in update_fields:
+                setattr(self, key, getattr(instance, key, ""))
+                
+    @postGui()            
+    def _onRosterChangedStatus(self, presence, *args, **kwargs):
+        if self.jid == presence['from'].bare:
+            self.status = presence['status']
+            self.show = presence['show']
 
     def updateAvatar(self):    
         self.avatar = avatarManager.get_avatar(self.jid)
@@ -150,32 +165,16 @@ class GroupModel(AbstractWrapperModel):
         friend_model = FriendModel(groupId=instance.id)
         setattr(instance, "friendModel", friend_model)
         
-class FriendModel(QObjectListModel):
-    instanceRole = QtCore.Qt.UserRole + 1
+class FriendModel(QInstanceModel):
         
-    _roles = {
-        instanceRole : "instance",
-    }
-        
-        
-    def __init__(self, parent=None, groupId=None):
+    def __init__(self, parent=None, groupId=None, initData=True):
         super(FriendModel, self).__init__(parent)
         self.groupId = groupId        
         
         self._initSignals()
-        self._initData()
         
-    def data(self, index, role):
-        if not index.isValid() or index.row() > self.size():
-            return QtCore.QVariant()
-        try:
-            item = self._data[index.row()]
-        except:    
-            return QtCore.QVariant()
-        
-        if role == self.instanceRole:
-            return item
-        return QtCore.QVariant()
+        if initData:
+            self._initData()
         
     def _initSignals(self):    
         dbSignals.post_save.connect(self.onFriendPostSave, sender=Friend)
@@ -185,7 +184,7 @@ class FriendModel(QObjectListModel):
         kwargs = dict(subscription="both", isSelf=False)
         if self.groupId is not None:
             kwargs["group"] = self.groupId
-        friends = map(lambda item: FriendWrapper(item), Friend.filter(**kwargs))
+        friends = list(map(lambda item: FriendWrapper(item), Friend.filter(**kwargs)))
         self.setAll(friends)
         
     @postGui()
@@ -199,8 +198,6 @@ class FriendModel(QObjectListModel):
         
         if created:
             self.append(obj)
-        else:    
-            self.replace(obj)
             
     @postGui()        
     def onFriendPostDelete(self, instance, *args, **kwargs):
@@ -219,14 +216,8 @@ class FriendModel(QObjectListModel):
         return instance.subscription == "both" and instance.isSelf == False and self.groupId == instance.group.id
 
             
-class MessageModel(QObjectListModel):
+class MessageModel(QInstanceModel):
     _jidInfoSignal = QtCore.pyqtSignal()
-    
-    instanceRole = QtCore.Qt.UserRole + 1
-    
-    _roles = {
-        instanceRole : "instance",
-    }
     
     def __init__(self, toJid, loadMessages=False, parent=None):
         super(MessageModel, self).__init__(parent)
@@ -239,18 +230,6 @@ class MessageModel(QObjectListModel):
     def _initSignals(self):    
         dbSignals.post_save.connect(self.onSendedMessage, sender=SendedMessage)
         dbSignals.post_save.connect(self.onUserinfoChanged, sender=Friend)
-        
-    def data(self, index, role):    
-        if not index.isValid() or index.row() > self.size():
-            return QtCore.QVariant()
-        try:
-            item = self._data[index.row()]
-        except:    
-            return QtCore.QVariant()
-        
-        if role == self.instanceRole:
-            return item
-        return QtCore.QVariant()
         
     def loadUnreadedMessages(self):
         qs = ReceivedMessage.select().where(ReceivedMessage.readed==False,

@@ -2,6 +2,7 @@ import QtQuick 2.1
 import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
 import "../Widgets"
+import "../SearchPage" as SearchPage
 
 
 Item {
@@ -45,7 +46,7 @@ Item {
         }
         Tab { title: "group" ; Item {}}
         Tab { title: "recent" ; Item {}}
-        Tab { title: "search" ; Item {}}
+        Tab { title: "search" ; SearchPage.SearchPage {}}
 		frameVisible: false
 		style: tabViewStyle
 	}

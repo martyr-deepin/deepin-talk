@@ -14,7 +14,7 @@
 # float, string, etc. So it's very like a normal python file, but it's has
 # some sections definition.
 
-# from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 
 import sys, os
 import re
@@ -162,6 +162,8 @@ def uni_prt(a, encoding='utf-8', beautiful=False, indent=0, convertors=None):
 
 def eval_value(value, globals, locals, encoding):
     txt = '#coding=%s\n%s' % (encoding, value)
+    if isinstance(txt, text_type):
+        txt = txt.encode("utf-8")
     result = eval(txt, dict(globals), dict(locals))
     
     #process {{format}}
@@ -433,7 +435,7 @@ class Ini(SortedDict):
                 
         self._encoding = encoding
         
-        f = StringIO(text)
+        f = StringIO(text_type(text, 'utf-8'))
         f.seek(begin)
         lineno = 0
         comments = []
@@ -512,7 +514,8 @@ class Ini(SortedDict):
                             else:
                                 try:
                                     v = eval_value(value, self.env(), self[sec_name], self._encoding)
-                                except Exception:
+                                except Exception as e:
+                                    print(e)
                                     print_exc()
                                     print_(dict(self))
                                     raise Exception("Converting value (%s) error in %s:%d:%s" % (value, filename or self._inifile, lineno, line))

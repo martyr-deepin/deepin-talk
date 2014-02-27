@@ -30,9 +30,11 @@ import dtalk.views.resources_rc
 import dtalk.gui.plugins
 from dtalk.controls.panel import Panel
 
+import os
 import logging
+
 logger = logging.getLogger(__name__)
-# logging.basicConfig(level = logging.DEBUG) # change to 'DEBUG' to see more
+# logging.basicConfig(level=logging.DEBUG, filename=os.path.join(os.path.expanduser("~"), "dtalk.log")) # change to 'DEBUG' to see more
 logging.basicConfig(level=logging.INFO) # change to 'DEBUG' to see more
 
 from dtalk.utils.xdg import _make_missing_dirs

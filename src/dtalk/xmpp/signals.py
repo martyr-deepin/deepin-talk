@@ -23,11 +23,14 @@
 
 from dtalk.dispatch import Signal
 
-user_roster_received = Signal(providing_args=[])
-user_roster_status_received = Signal(providing_args=[])
 session_disconnected = Signal(providing_args=[])
 auth_failed = Signal(providing_args=['jid', 'reason'])
 auth_successed = Signal(providing_args=["jid", 'password', 'remember', 'auto_login', 'status'])
 raise_excepted = Signal(providing_args=["exc_info"])
+user_roster_received = Signal(providing_args=[])
+user_roster_status_received = Signal(providing_args=[])
 roster_subscription_request = Signal(providing_args=['presence'])
+roster_got_online = Signal(providing_args=['presence'])
+roster_got_offline = Signal(providing_args=['presence'])
+roster_changed_status = Signal(providing_args=['presence'])
 

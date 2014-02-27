@@ -20,7 +20,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import copy
 from PyQt5 import QtCore
 from dtalk.utils import six
 from dtalk.controls.qobject import QObjectListModel, QPropertyMeta, postGui, ObjectWrapper
@@ -63,7 +62,7 @@ def get_instance_dict(instance, result=None, key_profix="", other_fields=None, l
     if result is None:
         result = dict()
         
-    keys = copy.deepcopy(instance._meta.fields.keys())
+    keys = list(instance.__dict__['_data'].keys())
     
     if other_fields is not None:
         keys.extend(list(other_fields))
@@ -144,7 +143,7 @@ class AbstractWrapperModel(QObjectListModel):
             self._data = list(map(self.wrapper_instance, self._data))
         
     def data(self, index, role):
-        if not index.isValid() or index.row() > self.size:
+        if not index.isValid() or index.row() > self.size():
             return QtCore.QVariant()
         try:
             item = self._data[index.row()]

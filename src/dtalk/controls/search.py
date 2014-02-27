@@ -20,4 +20,56 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from PyQt5 import QtCore
+from dtalk.controls.qobject import QPropertyObject, QInstanceModel
+from dtalk.controls.models import FriendWrapper
+from dtalk.controls import signals as cSignals
+from dtalk.models import Friend
 
+class SearchGroupWrapper(QPropertyObject()):
+    
+    __qtprops__ = { "title" : "", "model" : QtCore.QVariant() }
+    
+    def __init__(self, title, model, parent=None):
+        super(SearchGroupWrapper, self).__init__(parent)
+        self.title = title
+        self.model = model
+
+class SearchGroupModel(QInstanceModel):
+    
+    def __init__(self, parent=None):
+        super(SearchGroupModel, self).__init__(parent)
+        self.appendData("好友", SearchFriendModel(parent=self))
+        
+    def appendData(self, title, model):    
+        self.append(SearchGroupWrapper(title, model, parent=self))
+        
+        
+    @QtCore.pyqtSlot(str)    
+    def doSearch(self, text):
+        for item in self._data:
+            item.model.doSearch(text)
+            
+class SearchFriendModel(QInstanceModel):        
+    
+    def __init__(self, parent=None):
+        super(SearchFriendModel, self).__init__(parent)
+        
+    def doSearch(self, text):    
+        
+        self.clear()        
+        
+        if text == "":
+            return 
+        
+        qs = Friend.select().where(Friend.jid ** "%{0}%".format(text), Friend.isSelf == False)
+        friends = [ FriendWrapper(item, parent=self) for item in qs ]
+        self.setAll(friends)
+            
+    @QtCore.pyqtSlot(int)        
+    def doClicked(self, index):        
+        try:
+            instance = self.get(index)
+        except: pass    
+        else:
+            cSignals.show_message.send(sender=self, jid=instance.jid, loaded=False)

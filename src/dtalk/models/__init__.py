@@ -33,7 +33,6 @@ import logging
 import peewee as pw
 import traceback
 
-from dtalk.utils.xmpp import split_jid, get_email
 from dtalk.utils.contextdecorator import contextmanager
 from dtalk.utils.xdg import get_jid_db, get_config_path
 from dtalk.utils.threads import threaded
@@ -172,27 +171,6 @@ class Friend(BaseUserModel):
             obj = None
         return obj    
     
-    @classmethod
-    def create_or_update_roster(cls, roster):
-        with disable_auto_commit():
-            for item in roster:
-                data = dict()
-                data['jid'] = get_email(item.jid)
-                data['remark'] = item.name
-                data['subscription'] = item.subscription
-                data['approved'] = item.approved
-                if len(item.groups) >= 1:
-                    group_name = list(item.groups)[0]
-                else:
-                    group_name = DEFAULT_GROUP
-                data['group'] = Group.get_or_create(name=group_name)
-                try:
-                    obj = cls.get(jid=data['jid'])
-                except cls.DoesNotExist:
-                    cls.create(**data)
-                else:
-                    check_update_data(obj, data)
-                    
     @classmethod                
     def create_or_update_roster_sleek(cls, client_roster):
         with disable_auto_commit():
@@ -227,56 +205,6 @@ class Friend(BaseUserModel):
                 obj.nickname = nickname
                 obj.save(update_fields=["nickname"])
 
-class Resource(BaseUserModel):
-    friend = pw.ForeignKeyField(Friend, related_name='resources')
-    resource = pw.CharField(null=True)
-    show = pw.CharField(null=True)
-    status = pw.TextField(null=True)
-    priority = pw.IntegerField(default=0)
-
-    class Meta:
-        db_table = 'dtalk_resource'
-        
-    @classmethod    
-    def get_dummy_data(cls):    
-        return dict(resource="", show="unknown", status="", priority=-1000)
-        
-    @classmethod
-    def update_status(cls, stanza):
-        (jid, resource,) = split_jid(stanza.from_jid)
-        data = dict()
-        try:
-            u = Friend.get(jid=jid)
-        except Friend.DoesNotExist:
-            print('TODO: async')
-        else:
-            obj = cls.get_or_create(friend=u, resource=resource)
-            data['show'] = stanza.show
-            data['status'] = stanza.status
-            data['priority'] = stanza.priority
-            check_update_data(obj, data)
-
-    @classmethod
-    def update_presences(cls, presences):
-        with disable_auto_commit():
-            for stanza in presences:
-                cls.update_status(stanza)
-
-    @classmethod
-    def offline(cls, stanza):
-        (jid, resource,) = split_jid(stanza.from_jid)
-        try:
-            u = Friend.get(jid=jid)
-        except Friend.DoesNotExist:
-            print('TODO: DoesNotExist')
-        else:
-            try:
-                obj = cls.get(friend=u, resource=resource)
-            except cls.DoesNotExist:
-                print('TODO: offline')
-            else:
-                obj.delete_instance()
-
 class ReceivedMessage(BaseUserModel):        
     TYPE = "received"
     friend = pw.ForeignKeyField(Friend, related_name="sends")
@@ -287,16 +215,6 @@ class ReceivedMessage(BaseUserModel):
     class Meta:
         db_table = "dtalk_received_message"
         
-    @classmethod    
-    def received_message_from_stanza(cls, stanza):
-        jid = get_email(stanza.from_jid)
-        try:
-            obj = Friend.get(jid=jid)
-        except Friend.DoesNotExist:    
-            logger.info("-- have a message received but [{0}] not in your roster".format(jid))
-            return None
-        else:    
-            cls.create(friend=obj, body=stanza.body)
             
     @classmethod        
     def received_message_from_sleek(cls, msg):
@@ -359,7 +277,6 @@ class FriendNotice(BaseUserModel):
 def create_user_tables():
     Group.create_table()
     Friend.create_table()
-    Resource.create_table()
     ReceivedMessage.create_table()
     SendedMessage.create_table()
     FriendNotice.create_table()
@@ -387,3 +304,4 @@ def _add_to_roster_notice(presence, *args, **kwargs):
         content = presence['status']
     )
     FriendNotice.create(**params)
+    
