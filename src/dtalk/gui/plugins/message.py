@@ -21,7 +21,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 
 from PIL import Image
 from PyQt5 import QtCore, QtQuick, QtGui, QtWidgets
@@ -137,7 +137,7 @@ class DMessage(QtQuick.QQuickItem):
         fmt = textCursor.charFormat()
         if fmt.isImageFormat():
             ifmt = fmt.toImageFormat()
-            print ifmt.name()
+            print(ifmt.name())
             
     def mousePressEvent(self, event):        
         self.testCursor(event.x(), event.y())

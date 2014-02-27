@@ -20,6 +20,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
+
 import sys
 import traceback
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -48,7 +50,7 @@ def disableAntialias(painter):
     try:  
         yield  
     except Exception, e:  
-        print 'function cairo_disable_antialias got error: %s' % e  
+        print('function cairo_disable_antialias got error: %s' % e)
         traceback.print_exc(file=sys.stdout)
     else:  
         # Restore antialias.

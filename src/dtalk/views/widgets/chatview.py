@@ -20,6 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 from dtalk.gui.utils import setObjectTransparent
@@ -50,7 +51,7 @@ class MessageDelegate(QtWidgets.QStyledItemDelegate):
         
         
     def onCursorChanged(self, cursor):    
-        print cursor
+        print(cursor)
         
     def paint(self, painter, option, index):
         painter.setRenderHints(QtGui.QPainter.Antialiasing | QtGui.QPainter.SmoothPixmapTransform 
