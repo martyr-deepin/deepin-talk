@@ -35,9 +35,9 @@ platform = sys.platform
 if platform.startswith("linux"):
     from dtalk.keybinder.xutils import XlibBackend
     KeyBinderBackend = XlibBackend
-elif platform.startswith("win"):    
-    from dtalk.keybinder.win import Win32Backend
-    KeyBinderBackend = Win32Backend
+#elif platform.startswith("win"):    
+#    from dtalk.keybinder.win import Win32Backend
+#    KeyBinderBackend = Win32Backend
 else:    
     from dtalk.keybinder.dummy import DummyBackend
     KeyBinderBackend = DummyBackend

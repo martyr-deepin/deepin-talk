@@ -25,7 +25,7 @@ from __future__ import unicode_literals
 import logging
 from PyQt5 import QtCore
 import dtalk.models.signals as dbSignals
-from dtalk.models import ReceivedMessage, Friend
+from dtalk.models import ReceivedMessage, Friend, user_db
 
 import dtalk.utils.xdg as dtalkXdg
 from dtalk.controls.qobject import QPropertyObject
@@ -54,7 +54,7 @@ class CommonManager(QPropertyObject()):
         self._userHistoryModel = UserHistoryModel(self)
         self._searchGroupModel = SearchGroupModel(self)
         self._ownerInfo = None
-        dbSignals.db_init_finished.connect(self.on_db_init_finished)
+        dbSignals.db_init_finished.connect(self.on_db_init_finished, sender=user_db)
         dbSignals.post_save.connect(self.on_post_save, sender=Friend)
     
     @QtCore.pyqtSlot(str, result="QVariant")
