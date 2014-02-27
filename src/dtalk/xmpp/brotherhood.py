@@ -36,22 +36,38 @@ class Brotherhood(BasePlugin):
     def handle_disco_brother(self, iq):
         if iq["type"] == "get":
             print "handle disco brother get"
+
         elif iq["type"] == "result":
-            users = iq["disco_brother"]["users"]
             method = iq["disco_brother"]["method"]
             if method == "get_all_users":
+                users = iq["disco_brother"]["users"]
                 self.xmpp.event("get_all_users", users)
             elif method == "get_all_online_users":
+                users = iq["disco_brother"]["users"]
                 self.xmpp.event("get_all_online_users", users)
             elif method == "get_vhost_users":
+                users = iq["disco_brother"]["users"]
                 self.xmpp.event("get_vhost_users", users)
             elif method == "get_vhost_online_users":
+                users = iq["disco_brother"]["users"]
                 self.xmpp.event("get_vhost_online_users", users)
+            elif method == "get_hosts":
+                hosts = iq["disco_brother"]["hosts"]
+                self.xmpp.event("get_hosts", hosts)
             else:
                 print "unknown method %s" % method
+        else:
+            print "invalid iq type:%s" % iq
 
     def hello(self):
         print "Hello, World!"
+
+    def get_hosts(self, block=False, timeout=None, callback=None, **kwargs):
+        iq = self.xmpp.Iq()
+        iq["type"] = "get"
+        query = iq["disco_brother"]
+        query["method"] = "get_hosts"
+        return iq.send(block=block, timeout=timeout, callback=callback)
 
     def get_all_users(self, block=False, timeout=None, callback=None, **kwargs):
         iq = self.xmpp.Iq()
