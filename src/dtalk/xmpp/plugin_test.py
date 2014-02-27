@@ -19,16 +19,32 @@ class EchoBot(sleekxmpp.ClientXMPP):
         self.add_event_handler("session_start", self.start)
         self.add_event_handler("message", self.message)
         self.add_event_handler("get_all_users", self.get_all_users)
+        self.add_event_handler("get_all_online_users", self.get_all_online_users)
+        self.add_event_handler("get_vhost_users", self.get_vhost_users)
+        self.add_event_handler("get_vhost_online_users", self.get_vhost_online_users)
 
     def get_all_users(self, users):
-        print "get all users receive users"
+        print "result of get all users"
+        print users
+
+    def get_all_online_users(self, users):
+        print "result of get all online users"
+        print users
+
+    def get_vhost_users(self, users):
+        print "result of vhost users"
+        print users
+
+    def get_vhost_online_users(self, users):
+        print "result of vhost online users"
         print users
 
     def start(self, event):
         #self.send_presence()
         #self.get_roster()
         #self.plugin["Brotherhood"].hello()
-        self.plugin["Brotherhood"].get_all_users()
+        #self.plugin["Brotherhood"].get_all_users()
+        self.plugin["Brotherhood"].get_all_online_users()
         #self.plugin["Brotherhood"].get_vhost_users("talk.linuxdeepin.com")
 
     def message(self, msg):

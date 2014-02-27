@@ -38,8 +38,17 @@ class Brotherhood(BasePlugin):
             print "handle disco brother get"
         elif iq["type"] == "result":
             users = iq["disco_brother"]["users"]
-            print "send event for ", users
-            self.xmpp.event("get_all_users", users)
+            method = iq["disco_brother"]["method"]
+            if method == "get_all_users":
+                self.xmpp.event("get_all_users", users)
+            elif method == "get_all_online_users":
+                self.xmpp.event("get_all_online_users", users)
+            elif method == "get_vhost_users":
+                self.xmpp.event("get_vhost_users", users)
+            elif method == "get_vhost_online_users":
+                self.xmpp.event("get_vhost_online_users", users)
+            else:
+                print "unknown method %s" % method
 
     def hello(self):
         print "Hello, World!"
@@ -78,7 +87,7 @@ class DiscoBrother(ElementBase):
     name = "query"
     namespace = "deepin:iq:brotherhood"
     plugin_attrib = "disco_brother"
-    interfaces = set(("method", "host", "users"))
+    interfaces = set(("method", "hosts", "users"))
     sub_interfaces = set(("host", "user"))
 
     def setup(self, xml = None):
@@ -91,17 +100,24 @@ class DiscoBrother(ElementBase):
                 users.add(item.xml.attrib["jid"])
         return users
 
+    def get_hosts(self):
+        hosts = set()
+        for item in self["substanzas"]:
+            if isinstance(item, DiscoHost):
+                hosts.add(item.xml.attrib["server"])
+        return hosts
+
 class DiscoHost(ElementBase):
     name = "host"
     namespace = "deepin:iq:brotherhood"
     plugin_attrib = "disco_host"
-    interfaces = set()
+    interfaces = set("server")
 
 class DiscoUser(ElementBase):
     name = "user"
     namespace = "deepin:iq:brotherhood"
     plugin_attrib = "disco_user"
-    interfaces = set()
+    interfaces = set("jid")
 
 register_stanza_plugin(DiscoBrother, DiscoHost, iterable = True)
 register_stanza_plugin(DiscoBrother, DiscoUser, iterable = True)
