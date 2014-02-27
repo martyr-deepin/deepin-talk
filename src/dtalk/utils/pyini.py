@@ -14,6 +14,8 @@
 # float, string, etc. So it's very like a normal python file, but it's has
 # some sections definition.
 
+from __future__ import unicode_literals
+
 import sys, os
 import re
 import codecs
@@ -47,7 +49,7 @@ except:
     defaultencoding = 'UTF-8'
 
 r_encoding = re.compile(r'\s*coding\s*[=:]\s*([-\w.]+)')
-r_var = re.compile(ur'(?<!\{)\{\{([^\{].*?)(?<!\})\}\}(?!\})', re.U)
+r_var = re.compile(r'(?<!\{)\{\{([^\{].*?)(?<!\})\}\}(?!\})', re.U)
 __default_env__ = {}
 
 def set_env(env=None):
