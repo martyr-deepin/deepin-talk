@@ -14,20 +14,19 @@
 # float, string, etc. So it's very like a normal python file, but it's has
 # some sections definition.
 
-from __future__ import unicode_literals
+# from __future__ import unicode_literals
 
 import sys, os
 import re
 import codecs
-import StringIO
 import locale
 import copy
 import tokenize
 import token
-from sorteddict import SortedDict
+from dtalk.utils.sorteddict import SortedDict
 from traceback import print_exc
 
-from dtalk.utils.six import print_
+from dtalk.utils.six import print_, StringIO
 
 __all__ = ['SortedDict', 'Section', 'Ini', 'uni_prt']
 
@@ -366,7 +365,7 @@ class Section(SortedDict):
             raise AttributeError(k)
     
     def __str__(self):     
-        buf = StringIO.StringIO()
+        buf = StringIO()
         self.dumps(buf)
         return buf.getvalue()
     
@@ -434,7 +433,7 @@ class Ini(SortedDict):
                 
         self._encoding = encoding
         
-        f = StringIO.StringIO(text)
+        f = StringIO(text)
         f.seek(begin)
         lineno = 0
         comments = []
@@ -591,7 +590,7 @@ class Ini(SortedDict):
         return section
     
     def __str__(self):     
-        buf = StringIO.StringIO()
+        buf = StringIO()
         self.save(buf)
         return buf.getvalue()
     
