@@ -27,6 +27,7 @@ import traceback
 from PyQt5 import QtCore, QtWidgets, QtGui
 from dtalk.utils.xdg import get_qss
 from contextlib import contextmanager 
+from dtalk.utils.six import text_type
 
 
 def setObjectTransparent(obj):
@@ -36,8 +37,9 @@ def loadStyleSheet():
     f = get_qss("dtalk.css")
     styleSheet = None
     with open(f) as fp:
-        content = fp.read()
-        styleSheet = content.decode("utf-8")
+        styleSheet = fp.read()
+        if not isinstance(styleSheet, text_type):
+            styleSheet = styleSheet.decode("utf-8")
     if styleSheet is not None:    
         QtWidgets.QApplication.instance().setStyleSheet(styleSheet)
 

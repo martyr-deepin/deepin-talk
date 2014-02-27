@@ -500,7 +500,7 @@ class Ini(SortedDict):
                         f.seek(lastpos+end)
                         try:
                             value, iden_existed = self.__read_line(f)
-                        except Exception:
+                        except Exception as e:
                             print_exc()
                             raise Exception("Parsing ini file error in %s:%d:%s" % (filename or self._inifile, lineno, line))
                         if self._lazy:
@@ -559,7 +559,7 @@ class Ini(SortedDict):
         time = 0
         iden_existed = False
         while 1:
-            v = g.next()
+            v = next(g)
             tokentype, t, start, end, line = v
             if tokentype == 54:
                 continue
