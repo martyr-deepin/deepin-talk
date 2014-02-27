@@ -415,7 +415,7 @@ class Ini(SortedDict):
         else:
             text = fobj.read()
             
-        text = text + '\n'
+        text = text + b'\n'
         begin = 0
         if text.startswith(codecs.BOM_UTF8):
             begin = 3
