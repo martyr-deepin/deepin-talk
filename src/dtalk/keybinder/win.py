@@ -180,7 +180,7 @@ class Win32Backend(BaseBackend):
             
         self._check_hotkey()    
         
-        return True
+        return self._identifier is None
             
     def _on_key_up(self, event):    
         
