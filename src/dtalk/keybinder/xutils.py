@@ -80,7 +80,7 @@ def check_valid_event(reply):
         return 
     if reply.client_swapped:
         return
-    if not len(reply.data) or ord(reply.data[0]) < 2:
+    if not len(reply.data) or ord(str(reply.data[0])) < 2:
         return
     
 def parse_keystring(keystring):
