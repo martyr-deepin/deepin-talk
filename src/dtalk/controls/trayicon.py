@@ -64,7 +64,7 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
         mouseY = int(geometry.y())
         x = mouseX - int(width / 2)
         if mouseY > int(screenSize.height() / 2):
-            y = mouseY - height - offset 
+            y = mouseY - height 
         else:    
             y = mouseY + offset
         
