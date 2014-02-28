@@ -181,6 +181,8 @@ class Win32Backend(BaseBackend):
             self._key_downs.append(event.KeyID)        
             
         self._check_hotkey()    
+        
+        return True
             
     def _on_key_up(self, event):    
         
@@ -192,10 +194,14 @@ class Win32Backend(BaseBackend):
             self._key_downs.remove(event.KeyID)
         except: pass    
         
+        return True
+        
     def _on_mouse_move(self, event):
         p = event.Position
         if len(p) >= 2:
             self.emitMouseMoved(int(p[0]), int(p[1]))
+            
+        return True    
     
     def _check_hotkey(self):
         removed_keys = []
