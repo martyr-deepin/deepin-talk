@@ -4,7 +4,7 @@ import DTalk 1.0
 
 DTextArea {
     id: messageBox
-    textFormat: TextEdit.RichText
+    /* textFormat: TextEdit.RichText */
     property int tempType: 0
     focus: true
     /* canPaste: false */

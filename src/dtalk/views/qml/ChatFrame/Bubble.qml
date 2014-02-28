@@ -39,7 +39,7 @@ Item {
                 color: container.type == "received" ? Qt.rgba(0.9, 0.9, 0.9, 1.0) : Qt.rgba(82/255.0, 52/255.0, 165/255.0, 0.9)
                 wrapMode: Text.Wrap
                 /* verticalAlignment: Text.AlignVCenter */
-                textFormat: Text.RichText
+                textFormat: Text.AutoText
                 selectByMouse: true
                 selectByKeyboard: true
                 readOnly: true
