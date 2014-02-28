@@ -23,6 +23,7 @@
 import sleekxmpp    
 import logging
 
+from functools import partial
 # from sleekxmpp.exceptions import IqError, IqTimeout
 from dtalk.models import signals as db_signals
 from dtalk.models import SendedMessage, ReceivedMessage, Friend
@@ -86,8 +87,9 @@ class BaseRoster(object):
         jids = list(self.client_roster.keys())
         jids.insert(0, self.boundjid.bare)
         for jid in jids:
-            if not avatarManager.has_avatar(jid):
-                self.request_vcard(jid)
+            # if not avatarManager.has_avatar(jid):
+            save_photo_flag = not avatarManager.has_avatar(jid)
+            self.request_vcard(jid, save_photo_flag)
                 
     def _on_db_init_finished(self, *args, **kwargs):            
         self.save_rosters()
@@ -121,9 +123,9 @@ class BaseVCard(object):
     def __init__(self):
         self.add_event_handler("vcard_avatar_update", self._on_vcard_avatar)        
         
-    def request_vcard(self, jid):
+    def request_vcard(self, jid, save_photo_flag=True):
         logger.debug("Received vCard avatar update from {0}. Asking for vcard".format(jid))
-        self.plugin['xep_0054'].get_vcard(jid, block=False, callback=self._on_vcard_get)
+        self.plugin['xep_0054'].get_vcard(jid, block=False, callback=partial(self._on_vcard_get, save_photo_flag=save_photo_flag))
         
     def _on_vcard_avatar(self, pres):    
         data = pres['vcard_temp_update']['photo']
@@ -133,11 +135,17 @@ class BaseVCard(object):
         if not avatarManager.check_avatar(jid, data):
             self.request_vcard(jid)
         
-    def _on_vcard_get(self, stanza):    
-        vcard_temp = stanza.get("vcard_temp")
+    def _on_vcard_get(self, stanza, save_photo_flag=True):    
         jid = stanza.get_from().bare
+        vcard_temp = stanza.get("vcard_temp")
         logger.debug("Received vCard from {0}".format(jid))
         
+        if save_photo_flag:
+            self._save_photo(jid, vcard_temp)
+        self._save_display_name(jid, vcard_temp)
+        
+        
+    def _save_photo(self, jid, vcard_temp):    
         photo = vcard_temp['PHOTO']
         if not photo:
             return
@@ -145,6 +153,15 @@ class BaseVCard(object):
         if not photo_bin:
             return
         avatarManager.save_avatar(jid, photo_bin)
+        
+    def _save_display_name(self, jid, vcard_temp):    
+        fn = vcard_temp['FN']
+        nickname = vcard_temp['NICKNAME']
+        if fn:
+            Friend.update_nickname(jid, fn)
+        elif nickname:    
+            Friend.update_nickname(jid, nickname)
+        
         
 class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):    
     
