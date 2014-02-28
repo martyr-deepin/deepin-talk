@@ -20,9 +20,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5 import QtCore
+from __future__ import unicode_literals
+
+from PyQt5 import QtCore, QtGui
 from dtalk.views.base import BaseView
 from dtalk.utils.xdg import get_qml
+from dtalk.cache.avatar import avatarManager
 
 class ChatWindow(BaseView):
     requestClose = QtCore.pyqtSignal()
@@ -34,6 +37,8 @@ class ChatWindow(BaseView):
         self.jid = jid
         self.setContextProperty("messageModel", self.model)
         self.setSource(QtCore.QUrl.fromLocalFile(get_qml('ChatFrame','ChatWindow.qml')))
+        self.setIcon(QtGui.QIcon(avatarManager.get_avatar(jid, raw=True)))
+        self.setTitle("和{0}聊天中".format(model.jidInfo.displayName))
         
     @QtCore.pyqtSlot()    
     def closeWindow(self):

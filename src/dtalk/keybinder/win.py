@@ -20,8 +20,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import ctypes
-import pythoncom
 import pyHook
 
 
@@ -230,7 +228,8 @@ class Win32Backend(BaseBackend):
         return True        
                     
     def response(self):
-        pythoncom.PumpMessages()
+        # pythoncom.PumpMessages()
+        pass
     
     def parse_key(self, key):
         keys = key.split("+")
@@ -250,4 +249,5 @@ class Win32Backend(BaseBackend):
         return key
     
     def stop(self):
-        ctypes.windll.user32.PostQuitMessage(0)
+        # ctypes.windll.user32.PostQuitMessage(0)
+        pass

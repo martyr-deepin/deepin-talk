@@ -32,6 +32,9 @@
 # Same time rendering thread was drawing scene with opengl. 
 # Opengl driver (mesa) is using Xlib for buffer management. Result is assert failure in libxcb in different threads. 
 # 
+
+from __future__ import unicode_literals
+
 import os
 from PyQt5 import QtCore
 if os.name == 'posix':
@@ -61,6 +64,7 @@ class Panel(BaseView):
         self.setMinimumSize(QtCore.QSize(336, 780))        
         QtWidgets.qApp.focusWindowChanged.connect(self.onFocusWindowChanged)
         self.setIcon(QtGui.QIcon(":/images/common/logo.png"))
+        self.setTitle("Deepin Talk")
         
         cSignals.raise_window.connect(self.requestRaiseWindow)
         

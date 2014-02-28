@@ -239,6 +239,8 @@ class SendedMessage(BaseUserModel):
     
     @classmethod    
     def send_message(cls, jid, body):    
+        if not isinstance(body, six.text_type):
+            body = body.decode("utf-8")
         try:
             obj = Friend.get(jid=jid)
         except Friend.DoesNotExist:    
