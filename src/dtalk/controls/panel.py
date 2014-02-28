@@ -114,7 +114,8 @@ class Panel(BaseView):
         return super(Panel, self).mousePressEvent(event)
         
     def requestRaiseWindow(self, *args, **kwargs):
-        if not self.isActive():
+        if self.windowState() == QtCore.Qt.WindowMinimized:
+            self.show()
             self.requestActivate()
         else:    
             self.doMinimized()
