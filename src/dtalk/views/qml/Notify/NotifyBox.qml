@@ -12,6 +12,15 @@ Window {
     flags: Qt.FramelessWindowHint | Qt.Popup
 	color: "transparent"
     
+    function updatePosition() {
+        win.x = trayIcon.getPos(width, height).x
+        win.y = trayIcon.getPos(width, height).y
+    }
+    
+    onVisibleChangled: {
+        updatePosition()
+    }
+    
     DRectangle {
         id: container
         width: 230 + container.blurWidth * 2
