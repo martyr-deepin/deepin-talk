@@ -17,7 +17,7 @@ Window {
         win.y = trayIcon.getPos(width, height).y
     }
     
-    onVisibleChangled: {
+    onVisibleChanged: {
         updatePosition()
     }
     
