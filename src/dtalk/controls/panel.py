@@ -65,6 +65,7 @@ class Panel(BaseView):
         QtWidgets.qApp.focusWindowChanged.connect(self.onFocusWindowChanged)
         self.setIcon(QtGui.QIcon(":/images/common/logo.png"))
         self.setTitle("Deepin Talk")
+        QtWidgets.qApp.setApplicationName("Deepin Talk")
         
         cSignals.raise_window.connect(self.requestRaiseWindow)
         
@@ -90,6 +91,7 @@ class Panel(BaseView):
         self.trayIcon.show()
 
     def initKeybinder(self):    
+        keyBinder.bind("Ctrl+Alt+P", self.requestRaiseWindow)
         keyBinder.start()
         
     @QtCore.pyqtSlot()    

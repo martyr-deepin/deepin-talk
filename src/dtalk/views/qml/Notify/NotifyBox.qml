@@ -65,7 +65,7 @@ Window {
                 focus: true
                 
                 Connections {
-                    target: model
+                    target: notifyView.model
                     onCountChanged: updatePosition()
                 }
             }
