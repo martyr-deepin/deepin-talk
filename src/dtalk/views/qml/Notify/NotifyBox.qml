@@ -5,8 +5,8 @@ import QtQuick.Window 2.1
 Window {
     id: win
     width: container.width; height: container.height
-    x: trayIcon.getPos().x - width / 2
-    y: trayIcon.getPos().y + 12
+    x: trayIcon.getPos(width, height).x
+    y: trayIcon.getPos(width, height).y
     visible: (trayIcon.hovered || mouseArea.containsMouse) && notifyView.model.count > 0
     /* visible: true */
     flags: Qt.FramelessWindowHint | Qt.Popup

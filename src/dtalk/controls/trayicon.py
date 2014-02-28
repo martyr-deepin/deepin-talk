@@ -55,12 +55,20 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
         if reason == QtWidgets.QSystemTrayIcon.Trigger:
             cSignal.raise_window.send(sender=self)
         
-    @QtCore.pyqtSlot(result="QVariant")        
-    def getPos(self):        
+    @QtCore.pyqtSlot(int, int, result="QVariant")        
+    def getPos(self, width, height):        
+        offset = 12
+        screenSize = QtWidgets.QApplication.desktop().geometry().size()
         geometry = self.geometry()
         mouseX = int(geometry.x() + geometry.width() / 2)
         mouseY = int(geometry.y())
-        return QtCore.QPoint(mouseX, mouseY)
+        x = mouseX - int(width / 2)
+        if mouseY > int(screenSize.height() / 2):
+            y = mouseY - height - offset 
+        else:    
+            y = mouseY + offset
+        
+        return QtCore.QPoint(x, y)
     
     def getNormalGeometry(self):
         geometry = self.geometry()
