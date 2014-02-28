@@ -63,6 +63,11 @@ Window {
                 delegate: NotifyDelegate {}
                 model: controlManager.getNotifyModel()
                 focus: true
+                
+                Connections {
+                    target: model
+                    onCountChanged: updatePosition()
+                }
             }
         }
     }
