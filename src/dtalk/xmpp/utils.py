@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2011 ~ 2014 Deepin, Inc.
-#               2011 ~ 2014 Hou ShaoHui
+#               2011 ~ 2014 lovesnow
 # 
-# Author:     Hou ShaoHui <houshao55@gmail.com>
-# Maintainer: Hou ShaoHui <houshao55@gmail.com>
+# Author:     lovesnow <houshao55@gmail.com>
+# Maintainer: lovesnow <houshao55@gmail.com>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,16 +20,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-def getFriend(obj):
-    if hasattr(obj, "friend"):
-        return obj.friend
-    return obj
 
-def getDisplayName(obj):
-    instance = getFriend(obj)
-    if instance.remark:
-        return instance.remark
-    if instance.nickname:
-        return instance.nickname
-    return instance.jid
-    
+def get_vcard_nickname(vcard_temp):
+    fn = vcard_temp['FN']
+    nickname = vcard_temp['NICKNAME']
+    return fn or nickname or None
+ 

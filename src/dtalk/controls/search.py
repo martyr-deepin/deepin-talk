@@ -21,10 +21,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from dtalk.controls.qobject import QPropertyObject, QInstanceModel
+
+from sleekxmpp.jid import  _parse_jid, InvalidJID
+from dtalk.controls.qobject import QPropertyObject, QInstanceModel, postGui
 from dtalk.controls.models import FriendWrapper
 from dtalk.controls import signals as cSignals
 from dtalk.models import Friend
+from dtalk.xmpp.base import xmppClient
+from dtalk.xmpp import signals as xmppSignals
+from dtalk.xmpp import utils as xmppUtils
+from dtalk.utils.threads import threaded
+from dtalk.utils.misc import Storage
 
 class SearchGroupWrapper(QPropertyObject()):
     
@@ -39,21 +46,21 @@ class SearchGroupModel(QInstanceModel):
     
     def __init__(self, parent=None):
         super(SearchGroupModel, self).__init__(parent)
-        self.appendData("好友", SearchFriendModel(parent=self))
+        self.appendData("好友", LocalFriendModel(parent=self))
+        self.appendData("网络", SearchFriendModel(parent=self))
         
     def appendData(self, title, model):    
         self.append(SearchGroupWrapper(title, model, parent=self))
-        
         
     @QtCore.pyqtSlot(str)    
     def doSearch(self, text):
         for item in self._data:
             item.model.doSearch(text)
             
-class SearchFriendModel(QInstanceModel):        
+class LocalFriendModel(QInstanceModel):        
     
     def __init__(self, parent=None):
-        super(SearchFriendModel, self).__init__(parent)
+        super(LocalFriendModel, self).__init__(parent)
         
     def doSearch(self, text):    
         
@@ -66,6 +73,61 @@ class SearchFriendModel(QInstanceModel):
         friends = [ FriendWrapper(item, parent=self) for item in qs ]
         self.setAll(friends)
             
+    @QtCore.pyqtSlot(int)        
+    def doClicked(self, index):        
+        try:
+            instance = self.get(index)
+        except: pass    
+        else:
+            cSignals.show_message.send(sender=self, jid=instance.jid, loaded=False)
+            
+            
+class SearchFriendModel(QInstanceModel):            
+    
+    def __init__(self, parent=None):
+        super(SearchFriendModel, self).__init__(parent)
+        xmppSignals.roster_got_vcard.connect(self._onRosterGotVcard)
+        self._jid = None
+        
+    @postGui()    
+    def _onRosterGotVcard(self, jid, vcard_temp, *args, **kwargs):    
+        if self._jid != jid:
+            return
+        
+        s = Storage()
+        s['nickname'] = xmppUtils.get_vcard_nickname(vcard_temp)
+        s['remark'] = ""
+        s['jid'] = jid
+        
+        self.append(FriendWrapper(s, parent=self))
+        
+    def doSearch(self, text):    
+                
+        self.clear()        
+        
+        if text == "":
+            self._jid = ""
+            return 
+        
+        if "@" not in text:
+            jid = "{0}@{1}".format(text, xmppClient.boundjid.domain)
+        else:    
+            jid = text
+            
+        try:    
+            _parse_jid(jid)
+        except InvalidJID:     
+            return 
+        
+        self._jid = jid
+        
+        
+        self.asyncRequestVCard(self._jid)
+        
+    @threaded 
+    def asyncRequestVCard(self, *args, **kwargs):
+        xmppClient.request_vcard(*args, **kwargs)
+        
     @QtCore.pyqtSlot(int)        
     def doClicked(self, index):        
         try:

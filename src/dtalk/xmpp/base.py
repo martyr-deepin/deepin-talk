@@ -28,6 +28,7 @@ from functools import partial
 from dtalk.models import signals as db_signals
 from dtalk.models import SendedMessage, ReceivedMessage, Friend
 from dtalk.xmpp import signals as xmpp_signals
+from dtalk.xmpp import utils as xmpp_utils
 
 from dtalk.models import init_user_db, check_user_db_inited
 import dtalk.utils.xdg
@@ -156,11 +157,8 @@ class BaseVCard(object):
         avatarManager.save_avatar(jid, photo_bin)
         
     def _save_display_name(self, jid, vcard_temp):    
-        fn = vcard_temp['FN']
-        nickname = vcard_temp['NICKNAME']
-        if fn:
-            Friend.update_nickname(jid, fn)
-        elif nickname:    
+        nickname = xmpp_utils.get_vcard_nickname(vcard_temp)
+        if nickname is not None:
             Friend.update_nickname(jid, nickname)
         
         
@@ -256,5 +254,10 @@ class AsyncClient(object):
     @property    
     def is_component(self):
         return bool(self.xmpp)
-        
+    
+    def __getattr__(self, name):
+        if self.is_component:
+            return getattr(self.xmpp, name)
+        raise AttributeError
+            
 xmppClient = AsyncClient()        
