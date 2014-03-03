@@ -60,7 +60,7 @@ class EchoBot(sleekxmpp.ClientXMPP):
 
 
 if __name__ == '__main__':
-    xmpp = EchoBot("swt@talk.linuxdeepin.com", "swt")
+    xmpp = EchoBot("test@im.linuxdeepin.com", "sinfei")
     xmpp.register_plugin('xep_0030') # Service Discovery
     xmpp.register_plugin('xep_0004') # Data Forms
     xmpp.register_plugin('xep_0060') # PubSub

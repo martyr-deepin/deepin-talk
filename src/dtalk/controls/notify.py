@@ -46,6 +46,9 @@ class BaseNotifyObject(QPropertyObject()):
     
     def addInstance(self, instance):
         self.total += 1
+        
+    def __hash__(self):    
+        return hash(str(self.type_) + self.jid)
             
 class MessageNotifyObject(BaseNotifyObject):    
     

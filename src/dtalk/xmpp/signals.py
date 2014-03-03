@@ -33,4 +33,5 @@ roster_subscription_request = Signal(providing_args=['presence'])
 roster_got_online = Signal(providing_args=['presence'])
 roster_got_offline = Signal(providing_args=['presence'])
 roster_changed_status = Signal(providing_args=['presence'])
+roster_got_vcard = Signal(providing_args=['jid', 'vcard_temp'])
 

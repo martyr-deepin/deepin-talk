@@ -234,7 +234,7 @@ class MessageModel(QInstanceModel):
     def loadUnreadedMessages(self):
         qs = ReceivedMessage.select().where(ReceivedMessage.readed==False,
                                             ReceivedMessage.friend==Friend.get(jid=self._toJid))
-        objs = map(lambda item: MessageWrapper(item), qs)
+        objs = list(map(lambda item: MessageWrapper(item), qs))
         self.setAll(objs)
         with disable_auto_commit():
             for ins in qs:

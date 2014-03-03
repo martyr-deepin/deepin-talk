@@ -8,7 +8,7 @@
 # Maintainer: Long Wei <yilang2007lw@gmail.com>
 
 from sleekxmpp import Iq
-from sleekxmpp.xmlstream import ElementBase, ET, register_stanza_plugin
+from sleekxmpp.xmlstream import ElementBase, register_stanza_plugin
 from sleekxmpp.plugins import BasePlugin
 from sleekxmpp.xmlstream.handler import Callback
 from sleekxmpp.xmlstream.matcher import StanzaPath

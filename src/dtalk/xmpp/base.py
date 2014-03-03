@@ -144,6 +144,7 @@ class BaseVCard(object):
             self._save_photo(jid, vcard_temp)
         self._save_display_name(jid, vcard_temp)
         
+        xmpp_signals.roster_got_vcard.send(sender=self, jid=jid, vcard_temp=vcard_temp)
         
     def _save_photo(self, jid, vcard_temp):    
         photo = vcard_temp['PHOTO']
@@ -173,7 +174,7 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
         self.register_plugin("xep_0004") # Data Forms
         self.register_plugin("xep_0030") # Service Discovery
         self.register_plugin("xep_0054") # vcard-temp
-        self.register_plugin("xep_0153")
+        self.register_plugin("xep_0153") # presence vcard_temp update
         self.register_plugin("xep_0060") # pubsub
         
         BaseMessage.__init__(self)
