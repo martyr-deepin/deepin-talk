@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2014 Deepin, Inc.
+#               2014 Long Wei
+# 
+# Author:     Long Wei <yilang2007lw@gmail.com>
+# Maintainer: Long Wei <yilang2007lw@gmail.com>
 
 import sys
 import logging
