@@ -22,8 +22,7 @@
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from dtalk.gui.utils import disableAntialias, setObjectTransparent
-from dtalk.gui.draw import drawRectWidthCorner
-        
+
 class DWindow(QtWidgets.QWidget):        
     
     def __init__(self, parent=None):

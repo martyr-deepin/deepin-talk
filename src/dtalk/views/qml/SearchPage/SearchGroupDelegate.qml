@@ -13,6 +13,9 @@ Component {
             text: instance.title
         }
         
+        LocalFriendDelegate { id: localFriendDelegate }
+        RemoteFriendDelegate { id: remoteFriendDelegate }
+        
         ListView {
             id: friendView
             anchors.top: titleText.bottom
@@ -22,7 +25,7 @@ Component {
             anchors.topMargin: 10
             model: instance.model
             clip: true
-            delegate: SearchFriendDelegate {}
+            delegate: instance.type_ == "local" ? localFriendDelegate : remoteFriendDelegate
         }
         
     }

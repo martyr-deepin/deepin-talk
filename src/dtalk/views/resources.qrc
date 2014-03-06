@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="/">
+    <file>images/common/hi.png</file>
+    <file>images/common/detail.png</file>
+    <file>images/common/add_friend.png</file>
+    <file>images/common/back.png</file>
     <file>images/chat/sended.png</file>
     <file>images/chat/received.png</file>
     <file>images/button/window_unmax_press.png</file>

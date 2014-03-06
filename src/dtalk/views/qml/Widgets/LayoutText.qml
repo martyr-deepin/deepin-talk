@@ -12,6 +12,7 @@ Text {
     property real dynamicWidth: 0
     property real dynamicHeight: 0
  
+    elide: Text.ElideRight
  
     function updateWidth(){
  
@@ -48,6 +49,7 @@ Text {
         text: textItem.text
         font: textItem.font
         textFormat: textItem.textFormat
+        elide: textItem.elide
         opacity: 0
  
         // this has to be called here, because textItem sends them before the workaround notices it,

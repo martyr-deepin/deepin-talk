@@ -45,7 +45,7 @@ FocusScope {
     Image {
         id: clear
         anchors { right: parent.right; rightMargin: 8; verticalCenter: parent.verticalCenter }
-        source: "/home/evilbeast/skypefiles/返回.png"
+        source: "qrc:/images/common/back.png"
         /* opacity: 0 */
 
         MouseArea { 

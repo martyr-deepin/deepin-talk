@@ -33,24 +33,26 @@ from dtalk.xmpp import utils as xmppUtils
 from dtalk.utils.threads import threaded
 from dtalk.utils.misc import Storage
 
+
 class SearchGroupWrapper(QPropertyObject()):
     
-    __qtprops__ = { "title" : "", "model" : QtCore.QVariant() }
+    __qtprops__ = { "title" : "", "model" : QtCore.QVariant(), "type_" : "" }
     
-    def __init__(self, title, model, parent=None):
+    def __init__(self, title, model, type_, parent=None):
         super(SearchGroupWrapper, self).__init__(parent)
         self.title = title
         self.model = model
+        self.type_ = type_
 
 class SearchGroupModel(QInstanceModel):
     
     def __init__(self, parent=None):
         super(SearchGroupModel, self).__init__(parent)
-        self.appendData("好友", LocalFriendModel(parent=self))
-        self.appendData("网络", SearchFriendModel(parent=self))
+        self.appendData("好友", LocalFriendModel(parent=self), "local")
+        self.appendData("网络", RemoteFriendModel(parent=self), "remote")
         
-    def appendData(self, title, model):    
-        self.append(SearchGroupWrapper(title, model, parent=self))
+    def appendData(self, title, model, type_):    
+        self.append(SearchGroupWrapper(title, model, type_, parent=self))
         
     @QtCore.pyqtSlot(str)    
     def doSearch(self, text):
@@ -82,10 +84,10 @@ class LocalFriendModel(QInstanceModel):
             cSignals.show_message.send(sender=self, jid=instance.jid, loaded=False)
             
             
-class SearchFriendModel(QInstanceModel):            
+class RemoteFriendModel(QInstanceModel):            
     
     def __init__(self, parent=None):
-        super(SearchFriendModel, self).__init__(parent)
+        super(RemoteFriendModel, self).__init__(parent)
         xmppSignals.roster_got_vcard.connect(self._onRosterGotVcard)
         self._jid = None
         
@@ -135,3 +137,15 @@ class SearchFriendModel(QInstanceModel):
         except: pass    
         else:
             cSignals.show_message.send(sender=self, jid=instance.jid, loaded=False)
+            
+    @QtCore.pyqtSlot(int)        
+    def doAddClicked(self, index):
+        try:
+            instance = self.get(index)
+        except: pass    
+        else:
+            cSignals.open_add_friend_dialog.send(sender=self, jid=instance.jid)
+
+
+
+
