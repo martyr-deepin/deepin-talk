@@ -10,6 +10,8 @@ Item {
 	property real rectRadius: 5
 	property real sideWidth: blurWidth + rectRadius
 	property rect vaildRect: Qt.rect(sideWidth, sideWidth, width - sideWidth * 2, height - sideWidth * 2)
+    property bool visibleBackgroundImage: true
+    property alias backgoundColor: rect.color
 	
     RectangularGlow {
         id: effect
@@ -44,6 +46,7 @@ Item {
 			Image {
 				anchors.fill: parent
 				source: "qrc:/images/common/bg.png"
+                visible: visibleBackgroundImage
 			}
 			
 			/* Rectangle { */

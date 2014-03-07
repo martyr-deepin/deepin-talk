@@ -132,11 +132,7 @@ class RemoteFriendModel(QInstanceModel):
         
     @QtCore.pyqtSlot(int)        
     def doClicked(self, index):        
-        try:
-            instance = self.get(index)
-        except: pass    
-        else:
-            cSignals.show_message.send(sender=self, jid=instance.jid, loaded=False)
+        pass
             
     @QtCore.pyqtSlot(int)        
     def doAddClicked(self, index):
@@ -144,7 +140,7 @@ class RemoteFriendModel(QInstanceModel):
             instance = self.get(index)
         except: pass    
         else:
-            cSignals.open_add_friend_dialog.send(sender=self, jid=instance.jid)
+            cSignals.open_add_friend_dialog.send(sender=self, friend=instance)
 
 
 

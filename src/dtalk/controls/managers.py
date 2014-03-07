@@ -33,6 +33,7 @@ from dtalk.controls.models import GroupModel, MessageModel, UserHistoryModel, ge
 from dtalk.controls.search import SearchGroupModel
 from dtalk.controls import signals as cSignals
 from dtalk.views.chat import ChatWindow
+from dtalk.views.dialog import AddFriendDialog
 
 from dtalk.controls.qobject import postGui
 from dtalk.controls.notify import NotifyModel
@@ -138,6 +139,15 @@ class ControlManager(QPropertyObject()):
         self.notifyModel = NotifyModel(self)
         dbSignals.post_save.connect(self.on_received_message, sender=ReceivedMessage)        
         cSignals.show_message.connect(self.onNitfiyMessageClicked)
+        cSignals.open_add_friend_dialog.connect(self.openAddFriendDialog)
+        
+    def openAddFriendDialog(self, friend, *args, **kwargs):
+        if not hasattr(self, "_addFriendDialog"):
+            self._addFriendDialog = AddFriendDialog()
+            self._addFriendDialog.setContextProperty("controlManager", controlManager)
+        self._addFriendDialog.setFriendInstance(friend)    
+        self._addFriendDialog.showIt()
+
         
     def onNitfiyMessageClicked(self, jid, loaded, *args, **kwargs):    
        self.showChatWindow(jid, loadMessages=loaded)
@@ -172,6 +182,11 @@ class ControlManager(QPropertyObject()):
     @QtCore.pyqtSlot(result="QVariant")            
     def getNotifyModel(self):
         return self.notifyModel
+    
+    @QtCore.pyqtSlot(str, str)
+    def requestAddFriend(self, jid, message):
+        print jid, message
+        self._addFriendDialog.hide()
     
     def onChatWindowClose(self):
         w = self.sender()

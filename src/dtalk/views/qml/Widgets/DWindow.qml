@@ -5,6 +5,13 @@ DShadow {
 	id: rootWindow
     signal closed
     default property alias content: container.children
+    property alias titlebarLeftItem: titlebar.leftItem
+    property alias titlebarButtons: titlebar.buttons
+    property alias titlebarMenu: titlebar.menu
+    property alias titlebarMin: titlebar.min
+    property alias titlebarMax: titlebar.max
+    property alias titlebarClose: titlebar.close
+    property int titlebarHeight: Common.titlebarHeight
     
 	Item {
 		anchors.margins: rootWindow.sideWidth + 1
@@ -12,7 +19,7 @@ DShadow {
 		
 		Titlebar {
 			id: titlebar
-			width: parent.width; height: Common.titlebarHeight
+			width: parent.width; height: titlebarHeight
 			anchors.top: parent.top
             
 			DragArea {

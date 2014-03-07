@@ -1,4 +1,4 @@
-var titlebarHeight = 30
+var titlebarHeight = 26
 
 function findParent(obj) {
 	var objParent = obj.parent

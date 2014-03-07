@@ -58,4 +58,8 @@ class BaseView(QtQuick.QQuickView):
         y = (screenSize.height() - self.height()) /2
         self.setPosition(x, y)
         self.show()
+        
+    def showIt(self):    
+        self.showCenter()
+        self.requestActivate()
 
