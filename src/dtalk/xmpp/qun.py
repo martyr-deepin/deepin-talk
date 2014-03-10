@@ -40,11 +40,15 @@ class QunPlugin(BasePlugin):
                 users = iq["qun_query"]["qun_qun"]["users"]
                 self.xmpp.event("get_qun_users", users)
             elif method == "join_qun":
-                print iq["qun_query"]["qun_qun"]
                 self.xmpp.event("join_qun", true)
             elif method == "levae_qun":
-                print iq["qun_query"]["qun_qun"]
                 self.xmpp.event("leave_qun", true)
+            elif method == "delete_qun_user":
+                self.xmpp.event("delete_qun_user", user)
+            elif method == "create_qun":
+                self.xmpp.event("create_qun", true)
+            elif method == "destroy_qun":
+                self.xmpp.event("destroy_qun", true)
         else:
             pass
 
@@ -91,26 +95,58 @@ class QunPlugin(BasePlugin):
         query = iq["qun_query"]
         query["method"] = "delete_qun_user"
         query["qun_qun"]["qid"] = str(qid)
-        query["qun_qun"]["qun_user"] = str(user)
+        query["qun_qun"]["user"] = str(user)
         return iq.send(block=block, timeout=timeout, callback=callback)
 
     def update_qun_info(self, qid, info):
         pass
 
-    def create_qun(self, qname):
-        pass
+    def create_qun(self, qname, block=False, timeout=None, callback=None, **kwargs):
+        iq = self.xmpp.Iq()
+        iq["type"] = "set"
+        query = iq["qun_query"]
+        query["method"] = "create_qun"
+        query["qun_qun"]["qname"] = qname
+        print iq
+        return iq.send(block=block, timeout=timeout, callback=callback)
 
-    def destroy_qun(self, qid):
-        pass
+    def destroy_qun(self, qid, block=False, timeout=None, callback=None, **kwargs):
+        iq = self.xmpp.Iq()
+        iq["type"] = "set"
+        query = iq["qun_query"]
+        query["method"] = "destroy_qun"
+        query["qun_qun"]["qid"] = str(qid)
+        return iq.send(block=block, timeout=timeout, callback=callback)
 
-    def transfer_qun(self, qid, jid):
-        pass
+    def transfer_qun(self, qid, jid, block=False, timeout=None, callback=None, **kwargs):
+        iq = self.xmpp.Iq()
+        iq["type"] = "set"
+        query = iq["qun_query"]
+        query["method"] = "transfer_qun"
+        query["qun_qun"]["qid"] = str(qid)
+        query["qun_qun"]["transfer"] = str(jid)
+        print iq
+        return iq.send(block=block, timeout=timeout, callback=callback)
 
-    def set_qun_admin(self, qid, jid):
-        pass
+    def set_admin(self, qid, jid, block=False, timeout=None, callback=None, **kwargs):
+        iq = self.xmpp.Iq()
+        iq["type"] = "set"
+        query = iq["qun_query"]
+        query["method"] = "set_admin"
+        query["qun_qun"]["qid"] = str(qid)
+        query["qun_qun"]["user"] = str(jid)
+        print iq
+        return iq.send(block=block, timeout=timeout, callback=callback)
 
-    def unset_qun_admin(self, qid, jid):
-        pass
+    def unset_admin(self, qid, jid, block=False, timeout=False, callback=None, **kwargs):
+        iq = self.xmpp.Iq()
+        iq["type"] = "set"
+        query = iq["qun_query"]
+        query["method"] = "unset_admin"
+        query["qun_qun"]["qid"] = str(qid)
+        query["qun_qun"]["user"] = str(jid)
+        print iq
+        return iq.send(block=block, timeout=timeout, callback=callback)
 
 class QueryElement(ElementBase):
     name = "query"
@@ -133,7 +169,7 @@ class QunElement(ElementBase):
     name = "qun"
     namespace = "deepin:iq:qun"
     plugin_attrib = "qun_qun"
-    interfaces = set(("users", "qid"))
+    interfaces = set(("users", "qid", "user", "qname", "transfer"))
     sub_interfaces = set(("user",))
     
     def get_users(self):
@@ -144,6 +180,13 @@ class QunElement(ElementBase):
                 jid = item.xml.text
                 users.add((jid, role))
         return users
+
+class UserElement(ElementBase):
+    name = "user"
+    namespace = "deepin:iq:qun"
+    plugin_attrib = "qun_user"
+    interfaces = set(("role",))
+    sub_interfaces = set()
 
 class SuccessElement(ElementBase):
     name = "succeed"
@@ -159,18 +202,12 @@ class FailureElement(ElementBase):
     interfaces = set()
     sub_interfaces = set(("detail",))
 
-class DetailElement(Element):
+class DetailElement(ElementBase):
     name = "failed"
     namespace = "deepin:iq:qun"
     plugin_attrib = "qun_detail"
     interfaces = set()
     sub_interfaces = set()
-
-class UserElement(ElementBase):
-    name = "user"
-    namespace = "deepin:iq:qun"
-    plugin_attrib = "qun_user"
-    interfaces = set(("role",))
 
 register_stanza_plugin(QueryElement, QunElement, iterable = True)
 register_stanza_plugin(QunElement, UserElement, iterable = True)

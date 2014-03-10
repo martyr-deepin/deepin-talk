@@ -29,13 +29,20 @@ class EchoBot(sleekxmpp.ClientXMPP):
         self.add_event_handler("get_qun_users", self.handle_get_qun_users)
         self.add_event_handler("join_qun", self.handle_join_qun)
         self.add_event_handler("leave_qun", self.handle_leave_qun)
-
+        self.add_event_handler("delete_qun_user", self.handle_delete_qun_user)
+        self.add_event_handler("create_qun", self.handle_create_qun)
 
     def start(self, event):
         #self.plugin["QunPlugin"].get_qun_list()
         #self.plugin["QunPlugin"].get_qun_users(2)
         #self.plugin["QunPlugin"].join_qun(4)
-        self.plugin["QunPlugin"].leave_qun(4)
+        #self.plugin["QunPlugin"].leave_qun(4)
+        #self.plugin["QunPlugin"].delete_qun_user(2, "longwei@talk.linuxdeepin.com")
+        #self.plugin["QunPlugin"].create_qun("super qun")
+        #self.plugin["QunPlugin"].destroy_qun(7)
+        #self.plugin["QunPlugin"].transfer_qun(7, "longwei@talk.linuxdeepin.com")
+        #self.plugin["QunPlugin"].set_admin(6, "longwei@talk.linuxdeepin.com")
+        self.plugin["QunPlugin"].unset_admin(6, "longwei@talk.linuxdeepin.com")
 
     def message(self, msg):
         if msg['type'] in ('chat', 'normal'):
@@ -55,6 +62,14 @@ class EchoBot(sleekxmpp.ClientXMPP):
 
     def handle_leave_qun(self, result):
         print "result of leave qun"
+        print result
+
+    def handle_delete_qun_user(self, result):
+        print "result of delete qun user"
+        print result
+
+    def handle_create_qun(self, result):
+        print "result of create qun"
         print result
 
 if __name__ == '__main__':
