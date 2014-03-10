@@ -29,6 +29,7 @@ class EchoBot(sleekxmpp.ClientXMPP):
         self.add_event_handler("get_all_online_users", self.get_all_online_users)
         self.add_event_handler("get_vhost_users", self.get_vhost_users)
         self.add_event_handler("get_vhost_online_users", self.get_vhost_online_users)
+        self.add_event_handler("is_user_registered", self.is_user_registered)
 
     def get_hosts(self, hosts):
         print "result of get hosts"
@@ -50,6 +51,10 @@ class EchoBot(sleekxmpp.ClientXMPP):
         print "result of vhost online users"
         print users
 
+    def is_user_registered(self, registered):
+        print "result of is user registered"
+        print registered
+
     def start(self, event):
         #self.send_presence()
         #self.get_roster()
@@ -58,7 +63,8 @@ class EchoBot(sleekxmpp.ClientXMPP):
         #self.plugin["Brotherhood"].get_all_users()
         #self.plugin["Brotherhood"].get_all_online_users()
         #self.plugin["Brotherhood"].get_vhost_users("talk.linuxdeepin.com")
-        self.plugin["Brotherhood"].get_vhost_online_users("talk.linuxdeepin.com")
+        #self.plugin["Brotherhood"].get_vhost_online_users("talk.linuxdeepin.com")
+        self.plugin["Brotherhood"].is_user_registered("yks@talk.linuxdeeepin.com")
 
     def message(self, msg):
         if msg['type'] in ('chat', 'normal'):
@@ -66,7 +72,8 @@ class EchoBot(sleekxmpp.ClientXMPP):
 
 
 if __name__ == '__main__':
-    xmpp = EchoBot("test@im.linuxdeepin.com", "sinfei")
+    #xmpp = EchoBot("test@im.linuxdeepin.com", "sinfei")
+    xmpp = EchoBot("test@talk.linuxdeepin.com", "test")
     xmpp.register_plugin('xep_0030') # Service Discovery
     xmpp.register_plugin('xep_0004') # Data Forms
     xmpp.register_plugin('xep_0060') # PubSub

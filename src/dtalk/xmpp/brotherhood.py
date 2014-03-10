@@ -99,6 +99,16 @@ class Brotherhood(BasePlugin):
         query["disco_host"]["server"] = host
         return iq.send(block=block, timeout=timeout, callback=callback)
 
+    def is_user_registered(self, jid, block=False, timeout=None, callback=None, **kwargs):
+        iq = self.xmpp.Iq()
+        iq["type"] = "get"
+        query = iq["disco_brother"]
+        query["method"] = "is_user_registered"
+        query["disco_user"]["jid"] = jid
+        print "iq"
+        print iq
+        return iq.send(block=block, timeout=timeout, callback=callback)
+
 class DiscoBrother(ElementBase):
     name = "query"
     namespace = "deepin:iq:brotherhood"
