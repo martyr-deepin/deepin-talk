@@ -64,7 +64,7 @@ class EchoBot(sleekxmpp.ClientXMPP):
         #self.plugin["Brotherhood"].get_all_online_users()
         #self.plugin["Brotherhood"].get_vhost_users("talk.linuxdeepin.com")
         #self.plugin["Brotherhood"].get_vhost_online_users("talk.linuxdeepin.com")
-        self.plugin["Brotherhood"].is_user_registered("yks@talk.linuxdeeepin.com")
+        self.plugin["Brotherhood"].is_user_registered("yks@talk.linuxdeepin.com")
 
     def message(self, msg):
         if msg['type'] in ('chat', 'normal'):
