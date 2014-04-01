@@ -100,7 +100,6 @@ class RemoteFriendModel(QInstanceModel):
         s['nickname'] = xmppUtils.get_vcard_nickname(vcard_temp)
         s['remark'] = ""
         s['jid'] = jid
-        
         self.append(FriendWrapper(s, parent=self))
         
     def doSearch(self, text):    
@@ -123,8 +122,10 @@ class RemoteFriendModel(QInstanceModel):
         
         self._jid = jid
         
-        
-        self.asyncRequestVCard(self._jid)
+        try:
+            Friend.get(jid=self._jid)
+        except Friend.DoesNotExist:    
+            self.asyncRequestVCard(self._jid)
         
     @threaded 
     def asyncRequestVCard(self, *args, **kwargs):

@@ -185,7 +185,7 @@ class ControlManager(QPropertyObject()):
     
     @QtCore.pyqtSlot(str, str)
     def requestAddFriend(self, jid, message):
-        print jid, message
+        xmppClient.request_add_friend(jid, message)
         self._addFriendDialog.hide()
     
     def onChatWindowClose(self):

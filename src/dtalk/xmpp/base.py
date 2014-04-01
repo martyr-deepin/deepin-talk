@@ -29,6 +29,7 @@ from dtalk.models import signals as db_signals
 from dtalk.models import SendedMessage, ReceivedMessage, Friend
 from dtalk.xmpp import signals as xmpp_signals
 from dtalk.xmpp import utils as xmpp_utils
+from dtalk.utils.threads import threaded
 
 from dtalk.models import init_user_db, check_user_db_inited
 import dtalk.utils.xdg
@@ -62,6 +63,17 @@ class BaseRoster(object):
         self.add_event_handler("got_online", self._on_roster_got_online)
         self.add_event_handler("got_offline", self._on_roster_got_online)
         self.add_event_handler("changed_status", self._on_roster_changed_status)
+        
+    @threaded
+    def request_add_friend(self, jid, status):    
+        jid_item = self.client_roster[jid]
+        p = jid_item.xmpp.Presence()
+        p['to'] = jid_item.jid
+        p['type'] = 'subscribe'
+        p['from'] = jid_item.owner
+        jid_item['pending_out'] = True
+        jid_item.save()
+        p.send()
         
     def request_roster(self):
         self.get_roster()
@@ -174,6 +186,7 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
         self.register_plugin("xep_0054") # vcard-temp
         self.register_plugin("xep_0153") # presence vcard_temp update
         self.register_plugin("xep_0060") # pubsub
+        self.register_plugin("Brotherhood", module="dtalk.xmpp.brotherhood")
         
         BaseMessage.__init__(self)
         BaseRoster.__init__(self)
@@ -228,7 +241,7 @@ class BaseClient(sleekxmpp.ClientXMPP, BaseMessage, BaseRoster, BaseVCard):
     def action_logout(self):        
         self.disconnect()
         
-from dtalk.utils.threads import threaded
+
 
 class AsyncClient(object):        
     
