@@ -54,8 +54,8 @@ class Brotherhood(BasePlugin):
             elif method == "get_hosts":
                 hosts = iq["disco_brother"]["hosts"]
                 self.xmpp.event("get_hosts", hosts)
-            elif method == "is_user_exists":
-                self.xmpp.event("is_user_exists", iq)
+            elif method == "is_user_registered":
+                self.xmpp.event("is_user_registered", iq)
             else:
                 print "unknown method %s" % method
         else:
