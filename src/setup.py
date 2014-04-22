@@ -27,6 +27,7 @@ setup(
 	      'dtalk.xmpp',
     ],
     package_data={
+	      'dtalk.conf': ['dtalk/conf/default_settings.ini'],
 	      'dtalk.views.expression': ['dtalk/views/expression/QQexpression/*.gif'],
 	      'dtalk.views': [
 			'dtalk/views/images/*/*.png',
@@ -44,5 +45,5 @@ setup(
         'Programming Language :: Python',
 	'Topic :: Communications :: Chat',
     ],
-    scripts = ['dtalk.py'],
+    py_modules = ['dtalk'],
 )
