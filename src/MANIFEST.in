@@ -1,0 +1,7 @@
+include dtalk/views/conf/default_settings.ini
+include dtalk/views/expression/QQexpression/*.gif
+include dtalk/views/images/*/*.png
+include dtalk/views/qml/*.qml
+include dtalk/views/qml/*/*.qml
+include dtalk/views/qml/scripts/*.js
+include dtalk/views/qss/dtalk.css
